@@ -11,7 +11,7 @@ namespace Guribo.Scripts
     {
         private static bool _interactiveMode = true;
 #if UNITY_EDITOR
-        public class FileModificationWarning : UnityEditor.AssetModificationProcessor
+        public class AutoValidator : UnityEditor.AssetModificationProcessor
         {
             static string[] OnWillSaveAssets(string[] paths)
             {
@@ -33,7 +33,6 @@ namespace Guribo.Scripts
                 return paths;
             }
         }
-#endif
 
         /// <summary>
         /// checks all UdonBehaviours in the scene for unset public variables. Displays a dialog to skip or show the error.
@@ -41,7 +40,7 @@ namespace Guribo.Scripts
         [MenuItem("Guribo/UDON/Validate UdonBehaviour References")]
         public static void ValidateUdonBehaviours()
         {
-#if UNITY_EDITOR
+
 
             int errorCount = 0;
             var udonBehaviours = FindObjectsOfType<UdonBehaviour>();
@@ -122,7 +121,8 @@ namespace Guribo.Scripts
             {
                 EditorUtility.DisplayDialog("Conclusion", conclusion, "Ok");
             }
-#endif
+
         }
+#endif
     }
 }
