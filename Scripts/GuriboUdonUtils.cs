@@ -73,14 +73,10 @@ namespace Guribo.UdonUtils.Scripts
                     continue;
                 }
 
+                var symbolNames = udonBehaviour.GetExportedSymbolNames();
                 var publicVariables = udonBehaviour.publicVariables;
-                var variableSymbols = publicVariables?.VariableSymbols;
-                if (variableSymbols == null)
-                {
-                    continue;
-                }
 
-                foreach (var symbols in variableSymbols)
+                foreach (var symbols in symbolNames)
                 {
                     if (!publicVariables.TryGetVariableValue(symbols, out var variableValue) ||
                         variableValue == null)
