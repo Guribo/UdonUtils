@@ -1,11 +1,12 @@
 ﻿using System;
-#if UNITY_EDITOR
 using UnityEditor;
-#endif
 using UnityEngine;
 using VRC.Udon;
 
-namespace Guribo.Scripts
+#if UNITY_EDITOR
+#endif
+
+namespace Guribo.UdonUtils.Scripts
 {
     public class GuriboUdonUtils : MonoBehaviour
     {
@@ -13,7 +14,7 @@ namespace Guribo.Scripts
 #if UNITY_EDITOR
         public class AutoValidator : UnityEditor.AssetModificationProcessor
         {
-            static string[] OnWillSaveAssets(string[] paths)
+            private static string[] OnWillSaveAssets(string[] paths)
             {
                 // disable interactive mode
                 _interactiveMode = false;
@@ -35,14 +36,12 @@ namespace Guribo.Scripts
         }
 
         /// <summary>
-        /// checks all UdonBehaviours in the scene for unset public variables. Displays a dialog to skip or show the error.
+        ///     checks all UdonBehaviours in the scene for unset public variables. Displays a dialog to skip or show the error.
         /// </summary>
         [MenuItem("Guribo/UDON/Validate UdonBehaviour References")]
         public static void ValidateUdonBehaviours()
         {
-
-
-            int errorCount = 0;
+            var errorCount = 0;
             var udonBehaviours = FindObjectsOfType<UdonBehaviour>();
             if (udonBehaviours.Length == 0)
             {
@@ -56,8 +55,8 @@ namespace Guribo.Scripts
 
             foreach (var udonBehaviour in udonBehaviours)
             {
-                var udonBehaviourProgramSource = udonBehaviour.programSource;
-                if (udonBehaviourProgramSource == null)
+                var programSource = udonBehaviour.programSource;
+                if (programSource == null)
                 {
                     Debug.LogWarning("UdonBehaviour on " + udonBehaviour.gameObject.name +
                                      " has no Udon program attached", udonBehaviour);
@@ -74,22 +73,23 @@ namespace Guribo.Scripts
                     continue;
                 }
 
-                var udonBehaviourPublicVariables = udonBehaviour.publicVariables;
-                if (udonBehaviourPublicVariables == null) continue;
-
-                var variableSymbols = udonBehaviourPublicVariables.VariableSymbols;
-                if (variableSymbols == null) continue;
+                var publicVariables = udonBehaviour.publicVariables;
+                var variableSymbols = publicVariables?.VariableSymbols;
+                if (variableSymbols == null)
+                {
+                    continue;
+                }
 
                 foreach (var symbols in variableSymbols)
                 {
-                    if (!udonBehaviourPublicVariables.TryGetVariableValue(symbols, out var variableValue) ||
+                    if (!publicVariables.TryGetVariableValue(symbols, out var variableValue) ||
                         variableValue == null)
                     {
                         Debug.LogWarning(symbols + " is not set", udonBehaviour);
                         if (_interactiveMode && EditorUtility.DisplayDialog("Empty public variable found",
                             "A public variable called '" + symbols +
                             "' is not set on the UdonBehaviour with the program '" +
-                            udonBehaviourProgramSource.name + "'. You may want to fix this.", "Show me", "Skip"))
+                            programSource.name + "'. You may want to fix this.", "Show me", "Skip"))
                         {
                             Selection.SetActiveObjectWithContext(udonBehaviour.gameObject, udonBehaviour);
                             EditorGUIUtility.PingObject(udonBehaviour.gameObject);
@@ -121,7 +121,6 @@ namespace Guribo.Scripts
             {
                 EditorUtility.DisplayDialog("Conclusion", conclusion, "Ok");
             }
-
         }
 #endif
     }
