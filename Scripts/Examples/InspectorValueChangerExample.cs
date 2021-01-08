@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEngine;
 using VRC.Udon;
 
@@ -39,3 +40,4 @@ namespace Guribo.UdonUtils.Scripts.Examples
         }
     }
 }
+#endif

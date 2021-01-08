@@ -73,17 +73,15 @@ namespace Guribo.UdonUtils.Scripts
                     continue;
                 }
 
-                var symbolNames = udonBehaviour.GetExportedSymbolNames();
-                var publicVariables = udonBehaviour.publicVariables;
-
-                foreach (var symbols in symbolNames)
+                var symbolNames = udonBehaviour.GetInspectorVariableNames();
+                foreach (var symbolName in symbolNames)
                 {
-                    if (!publicVariables.TryGetVariableValue(symbols, out var variableValue) ||
-                        variableValue == null)
+                    if (udonBehaviour.IsInspectorVariableNull(symbolName, out var variableType))
                     {
-                        Debug.LogWarning(symbols + " is not set", udonBehaviour);
+                        Debug.LogWarning($"{udonBehaviour}.{symbolName} is null [{variableType}]", udonBehaviour);
+
                         if (_interactiveMode && EditorUtility.DisplayDialog("Empty public variable found",
-                            "A public variable called '" + symbols +
+                            "A public variable called '" + symbolName +
                             "' is not set on the UdonBehaviour with the program '" +
                             programSource.name + "'. You may want to fix this.", "Show me", "Skip"))
                         {
