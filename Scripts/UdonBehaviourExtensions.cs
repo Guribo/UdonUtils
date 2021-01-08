@@ -12,13 +12,26 @@ using Object = UnityEngine.Object;
 
 namespace Guribo.UdonUtils.Scripts
 {
+    /// <summary>
+    /// contains functions to access and modify UdonBehaviour variables in Edit mode
+    /// </summary>
     public static class UdonBehaviourExtensions
     {
         #region public
 
         #region GetVariable
 
-        public static object GetInspectorVariableDefaultValue(this UdonBehaviour udonBehaviour, string symbolName,
+        /// <summary>
+        ///     read the default value of a variable that is visible in the UdonBehaviour inspector
+        /// </summary>
+        /// <param name="udonBehaviour"></param>
+        /// <param name="symbolName">name of the variable visible in the inspector on the UdonBehaviour</param>
+        /// <param name="variableType">type of the value, can potentially be null!</param>
+        /// <returns>the default value</returns>
+        /// <exception cref="ArgumentException">if udonBehaviour is invalid</exception>
+        /// <exception cref="Exception">e.g. if the symbolName doesn't exist</exception>
+        public static object GetInspectorVariableDefaultValue(this UdonBehaviour udonBehaviour,
+            string symbolName,
             out Type variableType)
         {
             if (!udonBehaviour)
@@ -57,14 +70,15 @@ namespace Guribo.UdonUtils.Scripts
         }
 
         /// <summary>
+        ///     read the value of a variable that is visible in the UdonBehaviour inspector
         /// </summary>
         /// <param name="udonBehaviour"></param>
-        /// <param name="symbolName"></param>
-        /// <param name="variableValue"></param>
-        /// <param name="variableType"></param>
-        /// <returns>True if the value was read and it is not a default value, false if it is the default value</returns>
-        /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="Exception"></exception>
+        /// <param name="symbolName">name of the variable visible in the inspector on the UdonBehaviour</param>
+        /// <param name="variableValue">the current value or the default value if it has not been changed</param>
+        /// <param name="variableType">type of the value, can potentially be null!</param>
+        /// <returns>True if the value was read and it is not the default value, false if it is the default value</returns>
+        /// <exception cref="ArgumentException">if udonBehaviour is invalid</exception>
+        /// <exception cref="Exception">e.g. if the symbolName doesn't exist</exception>
         public static bool GetInspectorVariable(this UdonBehaviour udonBehaviour, string symbolName,
             out object variableValue, out Type variableType)
         {
@@ -125,8 +139,10 @@ namespace Guribo.UdonUtils.Scripts
         ///     C# script while in Edit mode
         /// </summary>
         /// <param name="udonBehaviour"></param>
-        /// <param name="symbolName"></param>
+        /// <param name="symbolName">name of the variable visible in the inspector on the UdonBehaviour</param>
         /// <param name="newValue"></param>
+        /// <exception cref="ArgumentException">if udonBehaviour is invalid</exception>
+        /// <exception cref="Exception">e.g. if the symbolName doesn't exist</exception>
         public static void SetInspectorVariable(this UdonBehaviour udonBehaviour, string symbolName, object newValue)
         {
             if (!udonBehaviour)
@@ -160,10 +176,7 @@ namespace Guribo.UdonUtils.Scripts
             var foundValue = publicVariables.TryGetVariableValue(symbolName, out var variableValue);
             var foundType = publicVariables.TryGetVariableType(symbolName, out var variableType);
 
-            // Remove this variable from the publicVariable list since UdonBehaviours set all null GameObjects, UdonBehaviours, and Transforms to the current behavior's equivalent object regardless of if it's marked as a `null` heap variable or `this`
-            // This default behavior is not the same as Unity, where the references are just left null. And more importantly, it assumes that the user has interacted with the inspector on that object at some point which cannot be guaranteed. 
-            // Specifically, if the user adds some public variable to a class, and multiple objects in the scene reference the program asset, 
-            //   the user will need to go through each of the objects' inspectors to make sure each UdonBehavior has its `publicVariables` variable populated by the inspector
+            // copied from Merlin's code, see UdonSharpProgramAsset.cs for reference
             if (foundValue
                 && foundType
                 && variableValue.IsUnityObjectNull()
@@ -182,6 +195,13 @@ namespace Guribo.UdonUtils.Scripts
             }
         }
 
+        /// <summary>
+        ///     resets a value to the prefab or original script value
+        /// </summary>
+        /// <param name="udonBehaviour"></param>
+        /// <param name="symbolName">name of the variable visible in the inspector on the UdonBehaviour</param>
+        /// <exception cref="ArgumentException">if udonBehaviour is invalid</exception>
+        /// <exception cref="Exception">e.g. if the symbolName doesn't exist</exception>
         public static void ResetInspectorVariable(this UdonBehaviour udonBehaviour, string symbolName)
         {
             if (!udonBehaviour)
@@ -208,6 +228,12 @@ namespace Guribo.UdonUtils.Scripts
         #endregion
 
 
+        /// <summary>
+        ///     returns a List if names of the variables visible in the inspector on the UdonBehaviour
+        /// </summary>
+        /// <param name="udonBehaviour"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">if udonBehaviour is invalid</exception>
         public static List<string> GetInspectorVariableNames(this UdonBehaviour udonBehaviour)
         {
             if (!udonBehaviour)
@@ -226,8 +252,16 @@ namespace Guribo.UdonUtils.Scripts
             }
         }
 
-
-        public static bool IsInspectorVariableNull(this UdonBehaviour udonBehaviour, string symbolName,
+        /// <summary>
+        ///     checks whether the current value of a variable is null (not nullable types return false)
+        /// </summary>
+        /// <param name="udonBehaviour"></param>
+        /// <param name="symbolName"></param>
+        /// <param name="variableType"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">if udonBehaviour is invalid</exception>
+        public static bool IsInspectorVariableNull(this UdonBehaviour udonBehaviour,
+            string symbolName,
             out Type variableType)
         {
             udonBehaviour.GetInspectorVariable(symbolName, out var variableValue, out variableType);

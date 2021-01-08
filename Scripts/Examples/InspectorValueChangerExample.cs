@@ -8,7 +8,6 @@ namespace Guribo.UdonUtils.Scripts.Examples
     {
         public UdonBehaviour editorTestingBehaviour;
 
-
         [ContextMenu("TrySetVariables")]
         public void TrySetVariables()
         {
