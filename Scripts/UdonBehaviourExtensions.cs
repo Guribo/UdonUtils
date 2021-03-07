@@ -39,10 +39,10 @@ namespace Guribo.UdonUtils.Scripts
                 throw new ArgumentException("Invalid UdonBehaviour");
             }
 
-            if (Application.IsPlaying(udonBehaviour))
-            {
-                throw new Exception("Only edit mode is supported");
-            }
+            // if (Application.IsPlaying(udonBehaviour))
+            // {
+            //     throw new Exception("Only edit mode is supported");
+            // }
 
             var programAsset = (UdonSharpProgramAsset) udonBehaviour.programSource;
             if (!programAsset)
@@ -87,10 +87,10 @@ namespace Guribo.UdonUtils.Scripts
                 throw new ArgumentException("Invalid UdonBehaviour");
             }
 
-            if (Application.IsPlaying(udonBehaviour))
-            {
-                throw new Exception("Only edit mode is supported");
-            }
+            // if (Application.IsPlaying(udonBehaviour))
+            // {
+            //     throw new Exception("Only edit mode is supported");
+            // }
 
             var programAsset = (UdonSharpProgramAsset) udonBehaviour.programSource;
             if (!programAsset)
@@ -150,10 +150,10 @@ namespace Guribo.UdonUtils.Scripts
                 throw new ArgumentException("Invalid UdonBehaviour");
             }
 
-            if (Application.IsPlaying(udonBehaviour))
-            {
-                throw new Exception("Only edit mode is supported");
-            }
+            // if (Application.IsPlaying(udonBehaviour))
+            // {
+            //     throw new Exception("Only edit mode is supported");
+            // }
 
             var publicVariables = udonBehaviour.publicVariables;
             if (publicVariables == null)
@@ -209,10 +209,10 @@ namespace Guribo.UdonUtils.Scripts
                 throw new ArgumentException("Invalid UdonBehaviour");
             }
 
-            if (Application.IsPlaying(udonBehaviour))
-            {
-                throw new Exception("Only edit mode is supported");
-            }
+            // if (Application.IsPlaying(udonBehaviour))
+            // {
+            //     throw new Exception("Only edit mode is supported");
+            // }
 
             var programAsset = (UdonSharpProgramAsset) udonBehaviour.programSource;
             if (!programAsset)
