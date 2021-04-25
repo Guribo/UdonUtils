@@ -1,13 +1,22 @@
-﻿using UdonSharp;
+﻿using System;
+using UdonSharp;
 using UnityEngine;
+using VRC.SDKBase;
 
 namespace Guribo.UdonUtils.Scripts.Testing
 {
+    /// <summary>
+    /// Component which implements the base of a test case, includes preparation, execution and cleanup methods
+    /// to be copied to new test scripts and filled for each individual test case.
+    /// 
+    /// Behaviour sync mode can be changed depending on the test performed, default is no variable sync
+    /// </summary>
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     public class TestTemplate : UdonSharpBehaviour
     {
         #region DO NOT EDIT
 
-        [HideInInspector] public TestController testController;
+        [NonSerialized] public TestController testController;
 
         public void Initialize()
         {
@@ -75,6 +84,26 @@ namespace Guribo.UdonUtils.Scripts.Testing
             // whenever the test is cleaned up call TestController.TestCleanedUp,
             // can be later in update or whenever but MUST be called at some point
             testController.TestCleanedUp(true);
+        }
+        
+        private bool Assert(bool condition, string message)
+        {
+            if (!condition)
+            {
+                if (Utilities.IsValid(this))
+                {
+                    Debug.LogError("[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Assertion failed : '" + GetType() + " : " + message + "'", this);
+                }
+                else
+                {
+                    Debug.LogError("[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Assertion failed :  'UNKNOWN TYPE: " + message + "'");
+                }
+
+                return false;
+            }
+
+            Debug.Assert(condition, message);
+            return true;
         }
 
         #endregion

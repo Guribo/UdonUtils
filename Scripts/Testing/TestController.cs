@@ -4,6 +4,7 @@ using VRC.SDKBase;
 
 namespace Guribo.UdonUtils.Scripts.Testing
 {
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     public class TestController : UdonSharpBehaviour
     {
         private const string LogPrefix = "[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>]";
@@ -19,8 +20,15 @@ namespace Guribo.UdonUtils.Scripts.Testing
 
         private bool _pendingNextStep;
 
+        public bool startOnPlayerJoin = false;
+
         public override void OnPlayerJoined(VRCPlayerApi player)
         {
+            if (!startOnPlayerJoin)
+            {
+                return;
+            }
+            
             if (Networking.LocalPlayer == player)
             {
                 // start the tests
