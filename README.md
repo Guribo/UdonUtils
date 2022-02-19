@@ -1,10 +1,10 @@
-# Guribo Udon Utils
+# Udon Utilitiess
 
 Scripts that make developing with UDON for VRChat safer and more fun :)
 
 # Requirements
 
- - [UdonSharp](https://github.com/MerlinVR/UdonSharp#requirements) as described by [Merlin](https://github.com/MerlinVR)
+ - [UdonSharp](https://github.com/vrchat-community/UdonSharp#requirements) as described by [Merlin](https://github.com/MerlinVR)
 
 ## Features
 
