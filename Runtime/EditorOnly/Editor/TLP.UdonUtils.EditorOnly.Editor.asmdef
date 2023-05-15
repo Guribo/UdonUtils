@@ -1,0 +1,17 @@
+{
+    "name": "TLP.UdonUtils.EditorOnly.Editor",
+    "references": [
+        "GUID:857706de0c98e764a98184ca1256e344"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,10 +1,12 @@
-# Udon Utilitiess
+# Udon Utils
 
-Scripts that make developing with UDON for VRChat safer and more fun :)
+[![Total downloads](https://img.shields.io/github/downloads/Guribo/UdonUtils/total?style=flat-square&logo=appveyor)](https://github.com/Guribo/UdonUtils/releases)
+
+Editor scripts, common UdonBehaviours and templates for developing Udon/UdonSharp based VRChat worlds, code and tests.
 
 # Requirements
 
- - [UdonSharp](https://github.com/vrchat-community/UdonSharp#requirements) as described by [Merlin](https://github.com/MerlinVR)
+ - [UdonSharp](https://github.com/vrchat-community/UdonSharp.git) (See README)
 
 ## Features
 
@@ -34,7 +36,7 @@ In case all errors get skipped a conclusion will be presented:
 ![Conclusion on Skipping](README/conclusion.png)
 
 ### Editor Scripting
-> [Example script](Scripts/Examples/InspectorValueChangerExample.cs)
+> [Example script](Editor/Examples/InspectorValueChangerEditor.cs)
 ````c#
 public UdonBehaviour editorTestingBehaviour;
 
@@ -52,4 +54,3 @@ public void TrySetVariables()
 
 ![Conclusion on Skipping](README/inspectorValueChangerExample.gif)  
 *Example scene and scripts are included*
-
