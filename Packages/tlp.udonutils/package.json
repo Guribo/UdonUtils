@@ -1,0 +1,15 @@
+{
+  "name": "tlp.udonutils",
+  "displayName": "TLP UdonUtils",
+  "version": "1.0.0",
+  "description": "Prefabs and potentially helpful examples for working with Udon/UdonSharp for VRChat Worlds.",
+  "gitDependencies": {},
+  "author": {
+    "name": "Guribo",
+    "url": "https://github.com/Guribo"
+  },
+  "vpmDependencies": {
+    "com.vrchat.udonsharp": "^1.1.x"
+  },
+  "unity": "2019.4"
+}
