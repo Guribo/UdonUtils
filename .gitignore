@@ -1,2 +1,9 @@
-/Releases/
-/Releases.meta
+/*
+!.git
+!.github
+!.gitignore
+!LICENSE
+!README.md
+!Packages/
+Packages/*
+!Packages/tlp.udonutils/*
