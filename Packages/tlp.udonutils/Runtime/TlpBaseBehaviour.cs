@@ -99,12 +99,28 @@ namespace TLP.UdonUtils
 #endif
             if (PendingSerializations < 1)
             {
+                #region TLP_DEBUG
+
+#if TLP_DEBUG
+                DebugLog("Nothing to do");
+#endif
+
+                #endregion
+
                 return;
             }
 
             if (!Networking.IsOwner(gameObject))
             {
                 PendingSerializations = 0;
+
+                #region TLP_DEBUG
+
+#if TLP_DEBUG
+                DebugLog("Not owner");
+#endif
+
+                #endregion
                 return;
             }
 

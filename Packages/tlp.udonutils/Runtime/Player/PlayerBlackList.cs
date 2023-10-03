@@ -734,13 +734,7 @@ namespace TLP.UdonUtils.Player
         {
             base.OnStringLoadError(result);
 
-            #region TLP_DEBUG
-
-#if TLP_DEBUG
-            DebugLog($"{nameof(OnStringLoadError)} {result.Url} {result.Error}");
-#endif
-
-            #endregion
+            Error($"{nameof(OnStringLoadError)} {result.Url} {result.Error}");
 
             if (result.Url.ToString() == OptionalWhiteListUrl.ToString()
                 && !string.IsNullOrEmpty(OptionalWhiteListUrl.ToString())

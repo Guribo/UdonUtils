@@ -1,9 +1,11 @@
 using TLP.UdonUtils.Common;
+using TLP.UdonUtils.Extensions;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Components;
 using VRC.SDKBase;
 using VRC.Udon;
+using VRCStation = VRC.SDKBase.VRCStation;
 
 namespace TLP.UdonUtils.Sync
 {
@@ -98,7 +100,7 @@ namespace TLP.UdonUtils.Sync
                 // make sure to not overload the network by only taking ownership of objects that have synced components
                 if (Utilities.IsValid(childGo.GetComponent(typeof(UdonBehaviour)))
                     || Utilities.IsValid(childGo.GetComponent(typeof(UdonSharpBehaviour)))
-                    || Utilities.IsValid(childGo.GetComponent(typeof(VRC.SDKBase.VRCStation)))
+                    || Utilities.IsValid(childGo.GetComponent(typeof(VRCStation)))
                     || Utilities.IsValid(childGo.GetComponent(typeof(VRC_Pickup)))
                     || Utilities.IsValid(childGo.GetComponent(typeof(VRCObjectSync))))
                 {
@@ -151,6 +153,48 @@ namespace TLP.UdonUtils.Sync
 
             Networking.SetOwner(vrcPlayerApi, gameObject);
             return Networking.IsOwner(vrcPlayerApi, gameObject);
+        }
+
+        /// <summary>
+        /// If the current owner is not the master it iterates through the list of player in O(n) time to find the
+        /// master and transfer ownership
+        /// </summary>
+        /// <param name="behaviour"></param>
+        /// <returns>false if ownership transfer was not allowed by the behaviour or arguments are invalid,
+        /// true if already owner or ownership transfer succeeded</returns>
+        public static bool TransferOwnershipToMaster(this TlpBaseBehaviour behaviour)
+        {
+            if (!Utilities.IsValid(behaviour))
+            {
+                Debug.LogError($"{nameof(TransferOwnershipToMaster)}: {nameof(behaviour)} is invalid");
+                return false;
+            }
+
+            if (Networking.GetOwner(behaviour.gameObject).IsMasterSafe())
+            {
+                // nothing to do
+                return true;
+            }
+
+            var players = new VRCPlayerApi[VRCPlayerApi.GetPlayerCount()];
+            players = VRCPlayerApi.GetPlayers(players);
+            foreach (var existingPlayer in players)
+            {
+                if (!existingPlayer.IsMasterSafe())
+                {
+                    continue;
+                }
+
+                if (Networking.IsOwner(existingPlayer, behaviour.gameObject))
+                {
+                    return true;
+                }
+
+                Networking.SetOwner(existingPlayer, behaviour.gameObject);
+                return Networking.IsOwner(existingPlayer, behaviour.gameObject);
+            }
+
+            return false;
         }
     }
 }

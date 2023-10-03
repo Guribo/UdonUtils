@@ -1,3 +1,4 @@
+using TLP.UdonUtils.Extensions;
 using UdonSharp;
 using UnityEngine;
 
@@ -16,7 +17,6 @@ namespace TLP.UdonUtils.Physics
 
         private Vector3 _position;
         private Quaternion _rotation;
-        private Quaternion _previousRotation;
 
         private void FixedUpdate()
         {
@@ -98,11 +98,10 @@ namespace TLP.UdonUtils.Physics
             _angularAcceleration[0] = _angularAcceleration[1];
             _angularAcceleration[1] = _angularAcceleration[2];
 
-            _angularVelocity[2] = angularVelocity; //RelativeTo.InverseTransformVector(angularVelocity);
+            _angularVelocity[2] = RelativeTo.InverseTransformVector(angularVelocity);
             _angularAcceleration[2] = (_angularVelocity[2] - _angularVelocity[1]) / deltaTime;
 
-            _previousRotation = _rotation;
-            _rotation = worldRotation; //UdonMath.GetDeltaAToB(RelativeTo.rotation.normalized, worldRotation.normalized).normalized;
+            _rotation = RelativeTo.rotation.normalized.GetDeltaAToB(worldRotation.normalized).normalized;
         }
     }
 }

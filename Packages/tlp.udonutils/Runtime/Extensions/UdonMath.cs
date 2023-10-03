@@ -103,7 +103,7 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns>delta rotation which can turn a into b</returns>
-        public static Quaternion GetDeltaAToB(Quaternion a, Quaternion b)
+        public static Quaternion GetDeltaAToB(this Quaternion a, Quaternion b)
         {
             return Quaternion.Inverse(a) * b;
         }
@@ -162,10 +162,9 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns>true if a == +- b</returns>
-        public static bool HaveSameOrientation(Quaternion a, Quaternion b)
+        public static bool HaveSameOrientation(this Quaternion a, Quaternion b, float epsilon = 0.0001f)
         {
-            const float quaternionEps = 0.0001f;
-            return Mathf.Abs(Quaternion.Dot(a.normalized, b.normalized)) > 1.0f - quaternionEps;
+            return Mathf.Abs(Quaternion.Dot(a.normalized, b.normalized)) > 1.0f - epsilon;
         }
 
         /// <summary>
@@ -174,10 +173,9 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns>true if a == b</returns>
-        public static bool HaveSameRotation(Quaternion a, Quaternion b)
+        public static bool HaveSameRotation(this Quaternion a, Quaternion b, float epsilon = 0.0001f)
         {
-            const float quaternionEps = 0.0001f;
-            return Quaternion.Dot(a.normalized, b.normalized) > 1.0f - quaternionEps;
+            return Quaternion.Dot(a.normalized, b.normalized) > 1.0f - epsilon;
         }
 
         /// <summary>

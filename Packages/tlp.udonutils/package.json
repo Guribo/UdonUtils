@@ -1,15 +1,19 @@
 {
   "name": "tlp.udonutils",
   "displayName": "TLP UdonUtils",
-  "version": "1.0.0",
-  "description": "Prefabs and potentially helpful examples for working with Udon/UdonSharp for VRChat Worlds.",
+  "version": "1.0.1",
+  "description": "Contains the base scripts/tools for TLP packages as well as prefabs and potentially helpful scripts for VRChat worlds.",
   "gitDependencies": {},
+  "legacyFolders": {
+    "Assets\\Guribo\\UdonUtils": ""
+  },
   "author": {
     "name": "Guribo",
     "url": "https://github.com/Guribo"
   },
   "vpmDependencies": {
-    "com.vrchat.udonsharp": "^1.1.x"
+    "com.vrchat.worlds": "^3.4.x",
+    "com.cyan.playerobjectpool": "^1.1.x"
   },
   "unity": "2019.4"
 }
