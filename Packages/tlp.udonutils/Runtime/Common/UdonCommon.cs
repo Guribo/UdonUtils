@@ -1,5 +1,7 @@
 ﻿using System;
+using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.Data;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Common
@@ -161,6 +163,48 @@ namespace TLP.UdonUtils.Common
         {
             string[] productTypeName = udonTypeName.Split('.');
             return productTypeName.Length > 0 ? productTypeName[productTypeName.Length - 1] : udonTypeName;
+        }
+
+        /// <summary>
+        /// Expects at most one object of the given type on each GameObject!
+        /// </summary>
+        /// <param name="start"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static T[] GetBehavioursInChildren<T>(this Transform start) where T : UdonSharpBehaviour
+        {
+            var toProcess = new DataList();
+            toProcess.Add(start);
+            var result = new DataList();
+
+            while (toProcess.Count > 0)
+            {
+                var current = (Transform)toProcess[0].Reference;
+                toProcess.RemoveAt(0);
+                if (!Utilities.IsValid(toProcess))
+                {
+                    continue;
+                }
+
+                var behaviour = current.gameObject.GetComponent<T>();
+                if (Utilities.IsValid(behaviour))
+                {
+                    result.Add(behaviour);
+                }
+
+                for (int i = 0; i < current.childCount; i++)
+                {
+                    toProcess.Add(current.GetChild(i));
+                }
+            }
+
+            var outPut = new T[result.Count];
+            for (int i = 0; i < result.Count; i++)
+            {
+                outPut[i] = (T)result[i].Reference;
+            }
+
+            return outPut;
         }
     }
 }

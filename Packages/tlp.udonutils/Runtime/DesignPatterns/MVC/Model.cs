@@ -98,23 +98,30 @@ namespace TLP.UdonUtils.DesignPatterns.MVC
         }
 
 
-        public void NotifyIfDirty(int delayFrames = 0)
+        /// <summary>
+        /// Raises the event instantly if dirty and delayFrames == 0.
+        /// No-Op if not dirty.
+        /// Delays the event if dirty and delayFrames > 0 by delayFrames frames.
+        /// </summary>
+        /// <param name="delayFrames"></param>
+        /// <returns>true if not dirty or the event was successfully raised or scheduled, false only on error, note that in case of delayFrames > 0 there might be errors at a later point in time that are not captured here</returns>
+        public bool NotifyIfDirty(int delayFrames = 0)
         {
             if (!Dirty)
             {
-                return;
+                return true;
             }
 
             if (HasError || !Initialized)
             {
                 Error(HasError ? "Has Error" : "Not Initialized");
-                return;
+                return false;
             }
 
             if (!Utilities.IsValid(ChangeEvent))
             {
                 Error($"{nameof(ChangeEvent)} invalid");
-                return;
+                return false;
             }
 
             if (delayFrames < 1)
@@ -122,15 +129,19 @@ namespace TLP.UdonUtils.DesignPatterns.MVC
                 if (!ChangeEvent.Raise(this))
                 {
                     Error($"Failed to raise {nameof(ChangeEvent)} '{ChangeEvent.ListenerMethod}'");
+                    return false;
                 }
 
-                return;
+                return true;
             }
 
             if (!ChangeEvent.RaiseOnIdle(this, delayFrames))
             {
                 Error($"Failed to raise {nameof(ChangeEvent)} '{ChangeEvent.ListenerMethod}'");
+                return false;
             }
+
+            return true;
         }
 
         public virtual bool Dirty { get; set; }

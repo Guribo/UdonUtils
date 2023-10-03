@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: NetworkTime
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 634b0cba14bfb1a41bf93a191f93d659,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 6f8d1123d681bfb42ba100e8cca07419,
     type: 2}
   udonAssembly: 
   assemblyError: 
