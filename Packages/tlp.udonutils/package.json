@@ -1,11 +1,13 @@
 {
   "name": "tlp.udonutils",
   "displayName": "TLP UdonUtils",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Contains the base scripts/tools for TLP packages as well as prefabs and potentially helpful scripts for VRChat worlds.",
   "gitDependencies": {},
   "legacyFolders": {
-    "Assets\\Guribo\\UdonUtils": ""
+    "Assets\\Guribo\\UdonUtils": "",
+    "Assets\\TLP\\UdonUtils": "",
+    "Assets\\TLP\\UdonPool": ""
   },
   "author": {
     "name": "Guribo",
