@@ -4,7 +4,7 @@ using TLP.UdonUtils.Factories;
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace TLP.UdonPool.Runtime
+namespace TLP.UdonUtils.Runtime.Pool
 {
     [DefaultExecutionOrder(ExecutionOrder)]
     public class FactoryWithPool : InstantiatingFactory
