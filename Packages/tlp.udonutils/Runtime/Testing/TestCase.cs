@@ -5,6 +5,15 @@ using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Testing
 {
+    public enum TestCaseStatus
+    {
+        Ready,
+        Running,
+        Passed,
+        Failed,
+        NotRun
+    }
+
     /// <summary>
     /// Component which implements the base of a test case, includes preparation, execution and cleanup methods
     /// to be copied to new test scripts and filled for each individual test case.
@@ -16,6 +25,11 @@ namespace TLP.UdonUtils.Testing
     {
         [NonSerialized]
         public TestController TestController;
+
+        [NonSerialized]
+        internal TestResult Result;
+
+        protected internal TestCaseStatus Status = TestCaseStatus.Ready;
 
         public void Initialize()
         {

@@ -3,7 +3,9 @@ using JetBrains.Annotations;
 using TLP.UdonUtils.Extensions;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
+using VRC.SDK3.Data;
 using VRC.SDKBase;
 using VRC.Udon.Common;
 
@@ -38,6 +40,11 @@ namespace TLP.UdonUtils.Sync
 
         public bool UseFixedUpdate;
 
+        protected readonly DataList TimeStamps = new DataList();
+
+        [Tooltip("0 [s] by default (full prediction), number of seconds that shall be removed from prediction")]
+        [Range(0, 1)]
+        public float PredictionReduction;
 
         public override void OnPreSerialization()
         {
@@ -52,13 +59,35 @@ namespace TLP.UdonUtils.Sync
         {
             base.OnDeserialization(deserializationResult);
 
+            #region TLP_DEBUG
+
+#if TLP_DEBUG
             DebugLog(
                 $"Latency VRC = {deserializationResult.Latency()} vs own {NetworkTime.GetTimeForCurrentFrame() - SyncedServerSendTime}"
             );
-            //_UpdateGameTimeDeltaToSender(deserializationResult.Latency());
+#endif
+
+            #endregion
+
             _UpdateGameTimeDeltaToSender((float)(NetworkTime.GetTimeForCurrentFrame() - SyncedServerSendTime));
 
             float elapsed = _GetElapsed();
+
+            float mostRecentTimeStamp = Time.timeSinceLevelLoad - elapsed;
+            TimeStamps.Add(mostRecentTimeStamp);
+            while (TimeStamps.Count > 0 && mostRecentTimeStamp - TimeStamps[0].Float > 3f * PredictionReduction)
+            {
+                TimeStamps.RemoveAt(0);
+            }
+
+            #region TLP_DEBUG
+
+#if TLP_DEBUG
+            DebugLog($"Backlog of timestamps: ${TimeStamps.Count}");
+#endif
+
+            #endregion
+
             PredictMovement(elapsed, 0f);
             if (Text)
             {
@@ -125,7 +154,7 @@ namespace TLP.UdonUtils.Sync
                 SyncedGameTime,
                 Time.timeSinceLevelLoad,
                 _gameTimeDifference
-            ) - ElapsedCompensation;
+            ) - ElapsedCompensation - PredictionReduction;
         }
 
         public static float GetElapsedTime(

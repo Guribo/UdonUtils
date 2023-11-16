@@ -69,5 +69,18 @@ namespace TLP.UdonUtils.Extensions
         {
             return Utilities.IsValid(player);
         }
+
+        public static VRCPlayerApi GetMaster(this VRCPlayerApi[] players)
+        {
+            foreach (var player in players)
+            {
+                if(player.IsMasterSafe())
+                {
+                    return player;
+                }
+            }
+
+            return null;
+        }
     }
 }

@@ -1,15 +1,17 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
+using TLP.UdonUtils.DesignPatterns.MVC;
+using TLP.UdonUtils.Events;
 using TLP.UdonUtils.Extensions;
 using UdonSharp;
 using UnityEngine;
-using UnityEngine.Serialization;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Testing
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     [DefaultExecutionOrder(ExecutionOrder)]
-    public class TestController : TlpBaseBehaviour
+    public class TestController : Controller
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
@@ -18,35 +20,33 @@ namespace TLP.UdonUtils.Testing
 
         private const string LogPrefix = "[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>]";
 
-        [FormerlySerializedAs("onlyMasterCanStart")]
         [Header("Start Input")]
         public bool OnlyMasterCanStart;
 
-        [FormerlySerializedAs("startKey0")]
         public KeyCode StartKey0 = KeyCode.T;
 
-        [FormerlySerializedAs("startKey1")]
         public KeyCode StartKey1 = KeyCode.E;
 
-        [FormerlySerializedAs("startKey2")]
         public KeyCode StartKey2 = KeyCode.S;
 
-        [FormerlySerializedAs("abortKey0")]
         [Header("Abort Input")]
         public KeyCode AbortKey0 = KeyCode.LeftControl;
 
-        [FormerlySerializedAs("abortKey1")]
         public KeyCode AbortKey1 = KeyCode.C;
 
-        [FormerlySerializedAs("StartOnPlayerJoin")]
-        [FormerlySerializedAs("startOnPlayerJoin")]
         [Header("Tests")]
         public bool StartOnLocalPlayerJoin;
 
         public bool StartOnOtherPlayerJoin;
 
-        [FormerlySerializedAs("tests")]
-        public TestCase[] Tests;
+        [SerializeField]
+        private TestData TestData;
+
+        [SerializeField]
+        private TestResultsUi TestResultsUi;
+
+        [SerializeField]
+        private UdonEvent TestDataChangeEvent;
 
         private bool _isTesting;
         private bool _testInitialized;
@@ -55,6 +55,44 @@ namespace TLP.UdonUtils.Testing
 
         private int _testIndex;
         private bool _pendingNextStep;
+
+        private void Start()
+        {
+            #region TLP_DEBUG
+
+#if TLP_DEBUG
+            DebugLog(nameof(Start));
+#endif
+
+            #endregion
+
+            if (!InitializeMvc(TestData, TestResultsUi, this, TestDataChangeEvent))
+            {
+                ErrorAndDisableGameObject($"{LogPrefix} {name}.Start: failed to initialize MVC");
+            }
+        }
+
+        protected override bool InitializeInternal()
+        {
+            #region TLP_DEBUG
+
+#if TLP_DEBUG
+            DebugLog(nameof(InitializeInternal));
+#endif
+
+            #endregion
+
+            var tests = transform.GetComponentsInChildren<TestCase>();
+
+            foreach (var test in tests)
+            {
+                TestData.Tests.Add(test);
+            }
+
+            TestData.Dirty = true;
+
+            return TestData.NotifyIfDirty(1) && base.InitializeInternal();
+        }
 
         public override void OnPlayerJoined(VRCPlayerApi player)
         {
@@ -126,12 +164,21 @@ namespace TLP.UdonUtils.Testing
             }
         }
 
-        private void AbortTestRun()
+        public void AbortTestRun()
         {
             Info($"{LogPrefix} {name}.AbortTestRun: aborting after current test");
 
+            for (++_testIndex; _testIndex < TestData.Tests.Count; ++_testIndex)
+            {
+                var testCase = (TestCase)TestData.Tests[_testIndex].Reference;
+                testCase.Status = TestCaseStatus.NotRun;
+            }
+
             // set the index to the lenght of the list of tests to prevent continuation
-            _testIndex = Tests.Length;
+            _testIndex = TestData.Tests.Count;
+
+            TestData.Dirty = true;
+            TestData.NotifyIfDirty(1);
         }
 
         public void StartTestRun()
@@ -150,14 +197,22 @@ namespace TLP.UdonUtils.Testing
             _isTesting = true;
             _testIndex = 0;
             _pendingNextStep = true;
+
+            for (int i = 0; i < TestData.Tests.Count; ++i)
+            {
+                var testCase = (TestCase)TestData.Tests[i].Reference;
+                testCase.Status = TestCaseStatus.Ready;
+                TestData.Dirty = true;
+                TestData.NotifyIfDirty(1);
+            }
         }
 
         private void ContinueTesting()
         {
-            int numberOfTests = Tests.LengthSafe();
+            int numberOfTests = TestData.Tests.Count;
             if (numberOfTests > 0 && _testIndex > -1 && _testIndex < numberOfTests)
             {
-                var testCase = Tests[_testIndex];
+                var testCase = (TestCase)TestData.Tests[_testIndex].Reference;
                 if (!testCase)
                 {
                     Error($"{LogPrefix} {name}.ContinueTesting: tests contains invalid behaviour");
@@ -188,7 +243,7 @@ namespace TLP.UdonUtils.Testing
                 }
 
                 ++_testIndex;
-                _isTesting = _testIndex < Tests.Length;
+                _isTesting = _testIndex < TestData.Tests.Count;
 
                 _testInitialized = false;
                 _testCompleted = false;
@@ -215,14 +270,20 @@ namespace TLP.UdonUtils.Testing
 
         public void TestInitialized(bool success)
         {
+            var testCase = ((TestCase)TestData.Tests[_testIndex].Reference);
             if (success)
             {
                 Info($"{LogPrefix} {name}.TestInitialized: Initialized test successfully");
+                testCase.Status = TestCaseStatus.Running;
             }
             else
             {
                 Error($"{LogPrefix} {name}.TestInitialized: Test initialization failed");
+                testCase.Status = TestCaseStatus.Failed;
             }
+
+            TestData.Dirty = true;
+            TestData.NotifyIfDirty(1);
 
             _testInitialized = true;
             if (!success)
@@ -235,14 +296,21 @@ namespace TLP.UdonUtils.Testing
 
         public void TestCompleted(bool success)
         {
+            var testCase = ((TestCase)TestData.Tests[_testIndex].Reference);
+
             if (success)
             {
                 Info($"{LogPrefix} {name}.TestCompleted: PASS");
+                testCase.Status = TestCaseStatus.Passed;
             }
             else
             {
                 Error($"{LogPrefix} {name}.TestCompleted: FAIL");
+                testCase.Status = TestCaseStatus.Failed;
             }
+
+            TestData.Dirty = true;
+            TestData.NotifyIfDirty(1);
 
             _testCompleted = true;
             _pendingNextStep = true;
@@ -250,6 +318,7 @@ namespace TLP.UdonUtils.Testing
 
         public void TestCleanedUp(bool success)
         {
+            var testCase = ((TestCase)TestData.Tests[_testIndex].Reference);
             if (success)
             {
                 Info($"{LogPrefix} {name}.TestCleanedUp: Cleaned up test successfully");
@@ -257,10 +326,14 @@ namespace TLP.UdonUtils.Testing
             else
             {
                 Error($"{LogPrefix} {name}.TestCleanedUp: Test cleanup failed");
+                testCase.Status = TestCaseStatus.Failed;
             }
 
+            TestData.Dirty = true;
+            TestData.NotifyIfDirty(1);
+
             // ensure we don't get any more messages from the test
-            Tests[_testIndex].TestController = null;
+            testCase.TestController = null;
 
             _testCleanedUp = true;
             _pendingNextStep = true;

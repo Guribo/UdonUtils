@@ -29,7 +29,7 @@ namespace TLP.UdonUtils.Common
 
             var instance = Instantiate(prefab);
             var trackingDataFollower = instance.GetComponent<TrackingDataFollower>();
-            trackingDataFollower.useLocalPlayerByDefault = false;
+            trackingDataFollower.UseLocalPlayerByDefault = false;
             trackingDataFollower.Player = player;
             instance.SetActive(true);
         }

@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.Serialization;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Player
@@ -15,13 +16,18 @@ namespace TLP.UdonUtils.Player
         public new const int ExecutionOrder = TlpExecutionOrder.DefaultStart;
 
         public VRCPlayerApi Player;
-        public VRCPlayerApi.TrackingDataType trackingDataType = VRCPlayerApi.TrackingDataType.Head;
-        public bool useLocalPlayerByDefault = true;
+
+        [FormerlySerializedAs("trackingDataType")]
+        public VRCPlayerApi.TrackingDataType TrackingDataType = VRCPlayerApi.TrackingDataType.Head;
+
+        [FormerlySerializedAs("useLocalPlayerByDefault")]
+        public bool UseLocalPlayerByDefault = true;
+
         protected Transform OwnTransform;
 
         public void Start()
         {
-            if (useLocalPlayerByDefault)
+            if (UseLocalPlayerByDefault)
             {
                 Player = Networking.LocalPlayer;
             }
@@ -31,10 +37,20 @@ namespace TLP.UdonUtils.Player
 
         public override void PostLateUpdate()
         {
-            if (Utilities.IsValid(Player))
+            if (!Utilities.IsValid(Player))
             {
-                var trackingData = Player.GetTrackingData(trackingDataType);
+                return;
+            }
+
+            var trackingData = Player.GetTrackingData(TrackingDataType);
+            if (trackingData.position.sqrMagnitude > 0.001f)
+            {
                 OwnTransform.SetPositionAndRotation(trackingData.position, trackingData.rotation);
+            }
+            else
+            {
+                // fallback to player position/Rotation if non-humanoid
+                OwnTransform.SetPositionAndRotation(Player.GetPosition(), Player.GetRotation());
             }
         }
     }

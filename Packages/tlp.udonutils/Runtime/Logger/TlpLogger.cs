@@ -28,13 +28,10 @@ namespace TLP.UdonUtils.Logger
 
         private int _startTime;
 
-        [FormerlySerializedAs("detailedPlayerInfo")]
         public bool DetailedPlayerInfo = true;
 
-        [FormerlySerializedAs("detailedContextInfo")]
         public bool DetailedContextInfo = true;
 
-        [FormerlySerializedAs("createDebugFrameLog")]
         [Tooltip(
             "If true will combine all Debug logs of a frame into a single string, can be used to see what has been logged in the entire frame. Can be useful to determine frames with excessive logging."
         )]

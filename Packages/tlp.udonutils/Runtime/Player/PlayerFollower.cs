@@ -18,21 +18,46 @@ namespace TLP.UdonUtils.Player
         public bool UseLocalPlayerByDefault = true;
         protected Transform OwnTransform;
 
+        [SerializeField]
+        [Range(0, 1)]
+        private float SmoothTime;
+
+        private Vector3 _smoothingVelocity;
+
         public void Start()
+        {
+            OwnTransform = transform;
+        }
+
+        public override void PostLateUpdate()
         {
             if (UseLocalPlayerByDefault)
             {
                 Player = Networking.LocalPlayer;
             }
 
-            OwnTransform = transform;
-        }
+            if (!Utilities.IsValid(Player))
+            {
+                Warn("Player is not valid");
+                return;
+            }
 
-        public override void PostLateUpdate()
-        {
-            if (Utilities.IsValid(Player))
+            if (SmoothTime <= 0f)
             {
                 OwnTransform.SetPositionAndRotation(Player.GetPosition(), Player.GetRotation());
+            }
+            else
+            {
+                var newPosition = Vector3.SmoothDamp(
+                    OwnTransform.position,
+                    Player.GetPosition(),
+                    ref _smoothingVelocity,
+                    SmoothTime
+                );
+                OwnTransform.SetPositionAndRotation(
+                    newPosition,
+                    Player.GetRotation()
+                );
             }
         }
     }
