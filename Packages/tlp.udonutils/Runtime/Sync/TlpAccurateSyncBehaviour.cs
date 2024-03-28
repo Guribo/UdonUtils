@@ -1,11 +1,10 @@
 using System;
+using System.Diagnostics;
 using JetBrains.Annotations;
 using TLP.UdonUtils.Extensions;
+using TLP.UdonUtils.Sources;
 using UdonSharp;
 using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.UI;
-using VRC.SDK3.Data;
 using VRC.SDKBase;
 using VRC.Udon.Common;
 
@@ -15,196 +14,145 @@ namespace TLP.UdonUtils.Sync
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public abstract class TlpAccurateSyncBehaviour : TlpBaseBehaviour
     {
+        public bool Testing;
+
+        #region ExecutionOrder
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TlpBaseBehaviour.ExecutionOrder + 1;
+        #endregion
 
-        [UdonSynced]
-        public float SyncedGameTime;
-
-        [UdonSynced]
-        public double SyncedServerSendTime;
-
-        [UdonSynced]
-        public float SyncedSnapshotGameTime;
+        #region Dependencies
+        [SerializeField]
+        protected internal TimeBacklog Backlog;
 
         [SerializeField]
-        protected NetworkTime NetworkTime;
+        internal TimeSnapshot Snapshot;
 
-        private const float ElapsedCompensation = 0.007f;
+        [SerializeField]
+        protected internal TimeSource NetworkTime;
+        #endregion
 
-        private float _gameTimeDifference;
-        private float _previousGameTimeDifference;
-        private float _smoothingSpeedGameTimeDifference;
+        #region NetworkState
+        public double SendTime
+        {
+            get
+            {
+                DebugLog($"Get {nameof(SendTime)} = {SyncedSendTime}s");
+                return SyncedSendTime;
+            }
+            set
+            {
+                DebugLog($"Set {nameof(SendTime)} = {SyncedSendTime}s to {value}s");
+                SyncedSendTime = value;
+                DebugLog($"{nameof(SendTime)} = {SyncedSendTime}s");
+            }
+        }
 
+        [UdonSynced]
+        public double SyncedSendTime = double.MinValue;
+
+        #region Working Copy
+        protected double WorkingSendTime;
+        #endregion
+        #endregion
+
+        #region Settings
         public bool UseFixedUpdate;
-
-        protected readonly DataList TimeStamps = new DataList();
 
         [Tooltip("0 [s] by default (full prediction), number of seconds that shall be removed from prediction")]
         [Range(0, 1)]
         public float PredictionReduction;
+        #endregion
 
-        public override void OnPreSerialization()
-        {
-            base.OnPreSerialization();
-            SyncedGameTime = Time.timeSinceLevelLoad - Time.smoothDeltaTime;
-            SyncedServerSendTime = NetworkTime.GetTimeForCurrentFrame();
-        }
-
-        public Text Text;
-
-        public override void OnDeserialization(DeserializationResult deserializationResult)
-        {
+        #region Network Events
+        public override void OnDeserialization(DeserializationResult deserializationResult) {
             base.OnDeserialization(deserializationResult);
+            DebugLog($"Latency VRC = {deserializationResult.Latency()} vs own {GetAge()}");
 
-            #region TLP_DEBUG
-
-#if TLP_DEBUG
-            DebugLog(
-                $"Latency VRC = {deserializationResult.Latency()} vs own {NetworkTime.GetTimeForCurrentFrame() - SyncedServerSendTime}"
-            );
-#endif
-
-            #endregion
-
-            _UpdateGameTimeDeltaToSender((float)(NetworkTime.GetTimeForCurrentFrame() - SyncedServerSendTime));
-
-            float elapsed = _GetElapsed();
-
-            float mostRecentTimeStamp = Time.timeSinceLevelLoad - elapsed;
-            TimeStamps.Add(mostRecentTimeStamp);
-            while (TimeStamps.Count > 0 && mostRecentTimeStamp - TimeStamps[0].Float > 3f * PredictionReduction)
-            {
-                TimeStamps.RemoveAt(0);
-            }
-
-            #region TLP_DEBUG
-
-#if TLP_DEBUG
-            DebugLog($"Backlog of timestamps: ${TimeStamps.Count}");
-#endif
-
-            #endregion
-
-            PredictMovement(elapsed, 0f);
-            if (Text)
-            {
-                Text.text = $"_gameTimeDifference = {_gameTimeDifference}\nelapsed = {elapsed}";
-            }
-        }
-
-        public virtual void Update()
-        {
-            if (UseFixedUpdate)
-            {
+            if (IsReceivedNetworkStateOutdated()) {
                 return;
             }
 
-            if (Networking.IsOwner(gameObject))
-            {
+            CreateWorkingCopyOfNetworkState();
+            RecordSnapshot(
+                    Snapshot,
+                    (float)WorkingSendTime);
+            Backlog.Add(Snapshot, 3f * PredictionReduction);
+            PredictMovement(GetElapsed(), 0f);
+        }
+        #endregion
+
+        #region U# Lifecycle
+        public virtual void Update() {
+            if (UseFixedUpdate) {
                 return;
             }
 
-            PredictMovement(_GetElapsed(), Time.deltaTime);
+            DebugLog(nameof(Update));
+
+            if (!Testing) {
+                if (Networking.IsOwner(gameObject)) {
+                    return;
+                }
+            }
+
+            PredictMovement(GetElapsed(), Time.deltaTime);
         }
 
-        public virtual void FixedUpdate()
-        {
-            if (!UseFixedUpdate)
-            {
+
+        public virtual void FixedUpdate() {
+            if (!UseFixedUpdate) {
                 return;
             }
 
-            if (Networking.IsOwner(gameObject))
-            {
-                return;
+            DebugLog(nameof(FixedUpdate));
+
+            if (!Testing) {
+                if (Networking.IsOwner(gameObject)) {
+                    return;
+                }
             }
 
-            PredictMovement(_GetElapsed(), Time.fixedDeltaTime);
+            PredictMovement(GetElapsed(), Time.fixedDeltaTime);
+        }
+        #endregion
+
+        #region Hooks
+        protected virtual void RecordSnapshot(TimeSnapshot timeSnapshot, float mostRecentServerTime) {
+            DebugLog($"{nameof(RecordSnapshot)}: {nameof(mostRecentServerTime)} = {mostRecentServerTime}s");
+            timeSnapshot.ServerTime = mostRecentServerTime;
         }
 
-        protected abstract void PredictMovement(float elapsed, float deltaTime);
+        protected abstract void PredictMovement(float elapsedSinceSent, float deltaTime);
 
-        private void _UpdateGameTimeDeltaToSender(float latency)
-        {
-            float gameTimeDifference = GameTimeDifference(
-                SyncedGameTime,
-                latency,
-                Time.timeSinceLevelLoad
-            );
+        protected virtual void CreateWorkingCopyOfNetworkState() {
+            DebugLog(nameof(CreateWorkingCopyOfNetworkState));
+            WorkingSendTime = SyncedSendTime;
+        }
+        #endregion
 
-            if (Mathf.Abs(_gameTimeDifference - gameTimeDifference) > 1.0)
-            {
-                _gameTimeDifference = gameTimeDifference;
+        #region Internal
+        internal float GetElapsed() {
+            DebugLog(nameof(GetElapsed));
+            return (float)(GetAge() - PredictionReduction);
+        }
+
+        private bool IsReceivedNetworkStateOutdated() {
+            DebugLog(nameof(IsReceivedNetworkStateOutdated));
+            if (SyncedSendTime > WorkingSendTime || SyncedSendTime == 0.0) {
+                return false;
             }
 
-            UpdateAverageGameTimeDifference(
-                ref _gameTimeDifference,
-                ref _previousGameTimeDifference,
-                gameTimeDifference - Time.smoothDeltaTime
-            );
+            Warn($"Received outdated {nameof(SyncedSendTime)} = {SyncedSendTime}s");
+            return true;
         }
 
-        internal float _GetElapsed()
-        {
-            return GetElapsedTime(
-                SyncedSnapshotGameTime,
-                SyncedGameTime,
-                Time.timeSinceLevelLoad,
-                _gameTimeDifference
-            ) - ElapsedCompensation - PredictionReduction;
+        internal double GetAge() {
+            DebugLog($"{nameof(GetAge)}: {NetworkTime.TimeAsDouble()} - {WorkingSendTime}");
+            return NetworkTime.TimeAsDouble() - WorkingSendTime;
         }
-
-        public static float GetElapsedTime(
-            float gameTimeSenderOnSnapshot,
-            float gameTimeSenderOnSend,
-            float gameTimeReceiverOnUpdate,
-            float estimatedGameTimeDifference
-        )
-        {
-            return gameTimeReceiverOnUpdate - (gameTimeSenderOnSend + estimatedGameTimeDifference -
-                                               (gameTimeSenderOnSend - gameTimeSenderOnSnapshot));
-        }
-
-        public static float GameTimeDifference(
-            float gameTimeOnSend,
-            float transmitDuration,
-            float gameTimeOnReceive
-        )
-        {
-            return gameTimeOnReceive - (gameTimeOnSend + transmitDuration);
-        }
-
-        public static void UpdateAverageGameTimeDifference(
-            ref float averageGameTimeDifference,
-            ref float previousAverageGameTimeDifference,
-            float gameTimeDifference
-        )
-        {
-            float change = Mathf.Abs(averageGameTimeDifference - previousAverageGameTimeDifference);
-            previousAverageGameTimeDifference = averageGameTimeDifference;
-            if (change > 0.1f * 0.1f)
-            {
-                averageGameTimeDifference = (float)(0.9 *
-                    averageGameTimeDifference + 0.1 * gameTimeDifference);
-            }
-            else if (change > 0.01f * 0.01f)
-            {
-                averageGameTimeDifference = (float)(0.99 *
-                    averageGameTimeDifference + 0.01 * gameTimeDifference);
-            }
-            else if (change > 0.001f * 0.001f)
-            {
-                averageGameTimeDifference = (float)(0.999 *
-                    averageGameTimeDifference + 0.001 * gameTimeDifference);
-            }
-            else
-            {
-                averageGameTimeDifference = (float)(0.99995 *
-                    averageGameTimeDifference + 0.00005 * gameTimeDifference);
-            }
-        }
+        #endregion
     }
 }

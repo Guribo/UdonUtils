@@ -1,4 +1,5 @@
 using TLP.UdonUtils.Extensions;
+using TLP.UdonUtils.Sources;
 using UdonSharp;
 using UnityEngine;
 
@@ -12,50 +13,54 @@ namespace TLP.UdonUtils.Physics
     [DefaultExecutionOrder(ExecutionOrder)]
     public class RigidbodyVelocityProvider : VelocityProvider
     {
+        #region Dependencies
         [SerializeField]
         internal Rigidbody ToTrack;
 
+        [SerializeField]
+        internal TimeSource TimeSource;
+        #endregion
+
+        #region State
         private Vector3 _position;
         private Quaternion _rotation;
+        #endregion
 
-        private void FixedUpdate()
-        {
+        #region U# Lifecycle
+        private void FixedUpdate() {
             var trackTransform = ToTrack.transform;
             _UpdatePositionSnapshot(
-                trackTransform.position,
-                ToTrack.velocity,
-                Time.fixedDeltaTime,
-                Time.timeSinceLevelLoad
+                    trackTransform.position,
+                    ToTrack.velocity,
+                    TimeSource.FixedDeltaTime(),
+                    TimeSource.Time()
             );
 
             _UpdateRotationSnapshot(
-                trackTransform.rotation,
-                ToTrack.angularVelocity,
-                Time.fixedDeltaTime
+                    trackTransform.rotation,
+                    ToTrack.angularVelocity,
+                    TimeSource.FixedDeltaTime()
             );
 #if TLP_DEBUG
             UpdateDebugEditorValues();
 #endif
         }
+        #endregion
 
+        #region Public
         public override float GetLatestSnapShot(
-            out Vector3 position,
-            out Vector3 velocity,
-            out Vector3 acceleration,
-            out Quaternion rotation,
-            out Vector3 angularVelocity,
-            out Vector3 angularAcceleration,
-            out Transform relativeTo
-        )
-        {
+                out Vector3 position,
+                out Vector3 velocity,
+                out Vector3 acceleration,
+                out Quaternion rotation,
+                out Vector3 angularVelocity,
+                out Vector3 angularAcceleration,
+                out Transform relativeTo) {
             #region TLP_DEBUG
-
 #if TLP_DEBUG
             DebugLog(nameof(GetLatestSnapShot));
 #endif
-
             #endregion
-
 
             position = _position;
             velocity = _velocity[2];
@@ -68,13 +73,26 @@ namespace TLP.UdonUtils.Physics
             return _accelerationTime[2];
         }
 
+        public void _UpdateRotationSnapshot(Quaternion worldRotation, Vector3 angularVelocity, float deltaTime) {
+            _angularVelocity[0] = _angularVelocity[1];
+            _angularVelocity[1] = _angularVelocity[2];
+
+            _angularAcceleration[0] = _angularAcceleration[1];
+            _angularAcceleration[1] = _angularAcceleration[2];
+
+            _angularVelocity[2] = RelativeTo.InverseTransformVector(angularVelocity);
+            _angularAcceleration[2] = (_angularVelocity[2] - _angularVelocity[1]) / deltaTime;
+
+            _rotation = RelativeTo.rotation.normalized.GetDeltaAToB(worldRotation.normalized).normalized;
+        }
+        #endregion
+
+        #region Internal
         internal void _UpdatePositionSnapshot(
-            Vector3 worldPosition,
-            Vector3 rigidbodyVelocity,
-            float deltaTime,
-            float time
-        )
-        {
+                Vector3 worldPosition,
+                Vector3 rigidbodyVelocity,
+                float deltaTime,
+                float time) {
             _velocity[0] = _velocity[1];
             _velocity[1] = _velocity[2];
 
@@ -89,19 +107,6 @@ namespace TLP.UdonUtils.Physics
 
             _position = RelativeTo.InverseTransformPoint(worldPosition);
         }
-
-        public void _UpdateRotationSnapshot(Quaternion worldRotation, Vector3 angularVelocity, float deltaTime)
-        {
-            _angularVelocity[0] = _angularVelocity[1];
-            _angularVelocity[1] = _angularVelocity[2];
-
-            _angularAcceleration[0] = _angularAcceleration[1];
-            _angularAcceleration[1] = _angularAcceleration[2];
-
-            _angularVelocity[2] = RelativeTo.InverseTransformVector(angularVelocity);
-            _angularAcceleration[2] = (_angularVelocity[2] - _angularVelocity[1]) / deltaTime;
-
-            _rotation = RelativeTo.rotation.normalized.GetDeltaAToB(worldRotation.normalized).normalized;
-        }
+        #endregion
     }
 }

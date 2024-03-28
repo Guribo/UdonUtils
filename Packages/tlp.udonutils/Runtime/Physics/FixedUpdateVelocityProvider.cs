@@ -1,3 +1,4 @@
+using TLP.UdonUtils.Sources;
 using UdonSharp;
 using UnityEngine;
 
@@ -11,13 +12,18 @@ namespace TLP.UdonUtils.Physics
     [DefaultExecutionOrder(ExecutionOrder)]
     public class FixedUpdateVelocityProvider : VelocityProvider
     {
+        private readonly Vector3[] _position = new Vector3[3];
+
+        #region Dependencies
         [SerializeField]
         private Transform ToTrack;
 
-        private Vector3[] _position = new Vector3[3];
+        [SerializeField]
+        internal TimeSource TimeSource;
+        #endregion
 
-        private void FixedUpdate()
-        {
+        #region U# Lifecycle
+        private void FixedUpdate() {
             _velocity[0] = _velocity[1];
             _velocity[1] = _velocity[2];
 
@@ -32,7 +38,7 @@ namespace TLP.UdonUtils.Physics
             _position[2] = RelativeTo.InverseTransformPoint(ToTrack.position);
 
             // central difference method to calculate velocity (adds 1 frame of age)
-            _velocityTime[2] = Time.timeSinceLevelLoad - Time.fixedDeltaTime;
+            _velocityTime[2] = TimeSource.Time() - TimeSource.FixedDeltaTime();
             _velocity[2] = (_position[2] - _position[0]) / (2 * Time.fixedDeltaTime);
 
             // central difference method to calculate velocity (adds a second frame of age)
@@ -40,42 +46,37 @@ namespace TLP.UdonUtils.Physics
 
             float delta = _velocityTime[2] - _velocityTime[0];
 
-            if (delta != 0)
-            {
+            if (delta != 0) {
                 _acceleration[2] = (_velocity[2] - _velocity[0]) / delta;
             }
 
 #if TLP_DEBUG
             UpdateDebugEditorValues();
 #endif
-#if TLP_DEBUG
-            UpdateDebugEditorValues();
-#endif
         }
+        #endregion
 
-        public override void SetTeleported(bool keepVelocity = true)
-        {
+        #region Public
+        public override void SetTeleported(bool keepVelocity = true) {
             base.SetTeleported(keepVelocity);
-            if (keepVelocity)
-            {
-                var position = RelativeTo.InverseTransformPoint(ToTrack.position);
-                for (int i = 0; i < _position.Length; i++)
-                {
-                    _position[i] = position;
-                }
+            if (!keepVelocity) {
+                return;
+            }
+
+            var position = RelativeTo.InverseTransformPoint(ToTrack.position);
+            for (int i = 0; i < _position.Length; i++) {
+                _position[i] = position;
             }
         }
 
         public override float GetLatestSnapShot(
-            out Vector3 position,
-            out Vector3 velocity,
-            out Vector3 acceleration,
-            out Quaternion rotation,
-            out Vector3 angularVelocity,
-            out Vector3 angularAcceleration,
-            out Transform relativeTo
-        )
-        {
+                out Vector3 position,
+                out Vector3 velocity,
+                out Vector3 acceleration,
+                out Quaternion rotation,
+                out Vector3 angularVelocity,
+                out Vector3 angularAcceleration,
+                out Transform relativeTo) {
             position = _position[0];
             velocity = _velocity[1];
             acceleration = _acceleration[2];
@@ -87,14 +88,13 @@ namespace TLP.UdonUtils.Physics
             return _accelerationTime[2];
         }
 
-        public override void Clear()
-        {
+        public override void Clear() {
             base.Clear();
             var position = RelativeTo.InverseTransformPoint(ToTrack.position);
-            for (int i = 0; i < _position.Length; i++)
-            {
+            for (int i = 0; i < _position.Length; i++) {
                 _position[i] = position;
             }
         }
+        #endregion
     }
 }

@@ -31,13 +31,17 @@ namespace TLP.UdonUtils.Extensions
         /// <summary>
         /// unclamped
         /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
         /// <param name="t"></param>
         /// <returns></returns>
-        public static float Lerp(this float a, float b, float t)
+        public static float Lerp(this float source, float target, float t)
         {
-            return (1f - t) * a + t * b;
+            return (1f - t) * source + t * target;
+        }
+
+        public static double LerpDouble(this double source, double target, double t) {
+            return (1.0 - t) * source + t * target;
         }
 
         /// <summary>

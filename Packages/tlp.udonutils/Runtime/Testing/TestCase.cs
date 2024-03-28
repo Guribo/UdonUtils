@@ -106,32 +106,6 @@ namespace TLP.UdonUtils.Testing
             TestController.TestCleanedUp(true);
         }
 
-        protected bool Assert(bool condition, string message)
-        {
-            if (!condition)
-            {
-                if (Utilities.IsValid(this))
-                {
-                    Error(
-                        "[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Assertion failed : '" +
-                        GetType() + " : " + message + "'"
-                    );
-                }
-                else
-                {
-                    Error(
-                        "[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Assertion failed :  'UNKNOWN TYPE: " +
-                        message + "'"
-                    );
-                }
-
-                return false;
-            }
-
-            Debug.Assert(condition, message);
-            return true;
-        }
-
         #endregion
     }
 }
