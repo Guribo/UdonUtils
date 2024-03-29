@@ -30,6 +30,12 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [3.0.0-rc.2] - 2024-03-29
+
+#### 🚀 Features
+
+- *(TlpAccurateSyncBehaviour)* Add setup checks to start
+
 ### [3.0.0-rc.1] - 2024-03-28
 
 #### 🚀 Features

@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using JetBrains.Annotations;
 using TLP.UdonUtils.Extensions;
 using TLP.UdonUtils.Sources;
@@ -54,7 +53,7 @@ namespace TLP.UdonUtils.Sync
         public double SyncedSendTime = double.MinValue;
 
         #region Working Copy
-        protected double WorkingSendTime;
+        protected internal double WorkingSendTime;
         #endregion
         #endregion
 
@@ -85,6 +84,11 @@ namespace TLP.UdonUtils.Sync
         #endregion
 
         #region U# Lifecycle
+        public void Start() {
+            if (!Utilities.IsValid(Backlog)) ErrorAndDisableGameObject($"{nameof(Backlog)} not set");
+            if (!Utilities.IsValid(Snapshot)) ErrorAndDisableGameObject($"{nameof(Snapshot)} not set");
+        }
+
         public virtual void Update() {
             if (UseFixedUpdate) {
                 return;
@@ -100,7 +104,6 @@ namespace TLP.UdonUtils.Sync
 
             PredictMovement(GetElapsed(), Time.deltaTime);
         }
-
 
         public virtual void FixedUpdate() {
             if (!UseFixedUpdate) {
