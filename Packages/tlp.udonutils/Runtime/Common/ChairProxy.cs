@@ -11,14 +11,12 @@ namespace TLP.UdonUtils.Common
         protected Chair actualChair;
 
         [PublicAPI]
-        public virtual bool OnLocalPlayerEntered()
-        {
+        public virtual bool OnLocalPlayerEntered() {
 #if TLP_DEBUG
             DebugLog(nameof(OnLocalPlayerEntered));
 #endif
 
-            if (!Assert(Utilities.IsValid(actualChair), "actualChair invalid", this))
-            {
+            if (!Assert(Utilities.IsValid(actualChair), "actualChair invalid", this)) {
                 return false;
             }
 
@@ -27,13 +25,11 @@ namespace TLP.UdonUtils.Common
         }
 
         [PublicAPI]
-        public virtual bool OnLocalPlayerExited()
-        {
+        public virtual bool OnLocalPlayerExited() {
 #if TLP_DEBUG
             DebugLog(nameof(OnLocalPlayerExited));
 #endif
-            if (!Assert(Utilities.IsValid(actualChair), "actualChair invalid", this))
-            {
+            if (!Assert(Utilities.IsValid(actualChair), "actualChair invalid", this)) {
                 return false;
             }
 
@@ -42,8 +38,7 @@ namespace TLP.UdonUtils.Common
         }
 
         [PublicAPI]
-        public virtual bool OnRemotePlayerEntered(VRCPlayerApi remotePlayer)
-        {
+        public virtual bool OnRemotePlayerEntered(VRCPlayerApi remotePlayer) {
 #if TLP_DEBUG
             DebugLog(nameof(OnRemotePlayerEntered));
 #endif
@@ -51,8 +46,7 @@ namespace TLP.UdonUtils.Common
         }
 
         [PublicAPI]
-        public virtual bool OnRemotePlayerExited(VRCPlayerApi remotePlayer)
-        {
+        public virtual bool OnRemotePlayerExited(VRCPlayerApi remotePlayer) {
 #if TLP_DEBUG
             DebugLog(nameof(OnRemotePlayerExited));
 #endif
@@ -60,8 +54,7 @@ namespace TLP.UdonUtils.Common
         }
 
         [PublicAPI]
-        public VRCPlayerApi GetSeatedPlayer()
-        {
+        public VRCPlayerApi GetSeatedPlayer() {
             return Utilities.IsValid(actualChair) ? actualChair.GetSeatedPlayer() : null;
         }
     }

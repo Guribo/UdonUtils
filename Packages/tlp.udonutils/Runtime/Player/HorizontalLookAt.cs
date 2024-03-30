@@ -12,23 +12,20 @@ namespace TLP.UdonUtils.Player
     public class HorizontalLookAt : UdonSharpBehaviour
     {
         [Tooltip(
-            "e.g. 0.5 makes it blend 50% between initial rotation and target rotation, 1.0 makes it look directly at the player"
+                "e.g. 0.5 makes it blend 50% between initial rotation and target rotation, 1.0 makes it look directly at the player"
         )]
         [Range(0, 1)]
         public float weight = 1f;
 
         private Quaternion _initialRotation;
 
-        public void Start()
-        {
+        public void Start() {
             _initialRotation = transform.rotation;
         }
 
-        public void Update()
-        {
+        public void Update() {
             var localPlayer = Networking.LocalPlayer;
-            if (!Utilities.IsValid(localPlayer))
-            {
+            if (!Utilities.IsValid(localPlayer)) {
                 return;
             }
 

@@ -33,9 +33,16 @@ namespace TLP.UdonUtils.Sources
         /// Smooth delta time of this source.
         /// </summary>
         /// <returns>Time in seconds</returns>
-        public virtual float SmoothDeltaTime()
-        {
+        public virtual float SmoothDeltaTime() {
             return UnityEngine.Time.smoothDeltaTime;
+        }
+
+        /// <summary>
+        /// Delta time of this source.
+        /// </summary>
+        /// <returns>Time in seconds</returns>
+        public virtual float DeltaTime() {
+            return UnityEngine.Time.deltaTime;
         }
     }
 }

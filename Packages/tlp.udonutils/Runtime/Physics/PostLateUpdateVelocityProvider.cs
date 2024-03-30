@@ -18,8 +18,7 @@ namespace TLP.UdonUtils.Physics
         private float[] _positionTime = new float[3];
 
 
-        public override void PostLateUpdate()
-        {
+        public override void PostLateUpdate() {
             base.PostLateUpdate();
 
             _velocity[0] = _velocity[1];
@@ -47,8 +46,7 @@ namespace TLP.UdonUtils.Physics
             _accelerationTime[2] = _velocityTime[1];
             float delta = _velocityTime[2] - _velocityTime[0];
 
-            if (delta != 0)
-            {
+            if (delta != 0) {
                 _acceleration[2] = (_velocity[2] - _velocity[0]) / delta;
             }
 
@@ -57,29 +55,25 @@ namespace TLP.UdonUtils.Physics
 #endif
         }
 
-        public override void SetTeleported(bool keepVelocity = true)
-        {
+        public override void SetTeleported(bool keepVelocity = true) {
             base.SetTeleported(keepVelocity);
-            if (keepVelocity)
-            {
+            if (keepVelocity) {
                 var position = RelativeTo.InverseTransformPoint(ToTrack.position);
-                for (int i = 0; i < _position.Length; i++)
-                {
+                for (int i = 0; i < _position.Length; i++) {
                     _position[i] = position;
                 }
             }
         }
 
         public override float GetLatestSnapShot(
-            out Vector3 position,
-            out Vector3 velocity,
-            out Vector3 acceleration,
-            out Quaternion rotation,
-            out Vector3 angularVelocity,
-            out Vector3 angularAcceleration,
-            out Transform relativeTo
-        )
-        {
+                out Vector3 position,
+                out Vector3 velocity,
+                out Vector3 acceleration,
+                out Quaternion rotation,
+                out Vector3 angularVelocity,
+                out Vector3 angularAcceleration,
+                out Transform relativeTo
+        ) {
             position = _position[0];
             velocity = _velocity[1];
             acceleration = _acceleration[2];
@@ -92,12 +86,10 @@ namespace TLP.UdonUtils.Physics
         }
 
 
-        public override void Clear()
-        {
+        public override void Clear() {
             base.Clear();
             var position = RelativeTo.InverseTransformPoint(ToTrack.position);
-            for (int i = 0; i < _position.Length; i++)
-            {
+            for (int i = 0; i < _position.Length; i++) {
                 _position[i] = position;
             }
         }

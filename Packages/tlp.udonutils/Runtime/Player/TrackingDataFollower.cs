@@ -25,30 +25,23 @@ namespace TLP.UdonUtils.Player
 
         protected Transform OwnTransform;
 
-        public void Start()
-        {
-            if (UseLocalPlayerByDefault)
-            {
+        public void Start() {
+            if (UseLocalPlayerByDefault) {
                 Player = Networking.LocalPlayer;
             }
 
             OwnTransform = transform;
         }
 
-        public override void PostLateUpdate()
-        {
-            if (!Utilities.IsValid(Player))
-            {
+        public override void PostLateUpdate() {
+            if (!Utilities.IsValid(Player)) {
                 return;
             }
 
             var trackingData = Player.GetTrackingData(TrackingDataType);
-            if (trackingData.position.sqrMagnitude > 0.001f)
-            {
+            if (trackingData.position.sqrMagnitude > 0.001f) {
                 OwnTransform.SetPositionAndRotation(trackingData.position, trackingData.rotation);
-            }
-            else
-            {
+            } else {
                 // fallback to player position/Rotation if non-humanoid
                 OwnTransform.SetPositionAndRotation(Player.GetPosition(), Player.GetRotation());
             }

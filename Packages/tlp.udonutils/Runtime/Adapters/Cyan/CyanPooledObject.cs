@@ -16,8 +16,7 @@ namespace TLP.UdonUtils.Adapters.Cyan
         /// Initialize the object here
         /// </summary>
         [PublicAPI]
-        public virtual void _OnOwnerSet()
-        {
+        public virtual void _OnOwnerSet() {
 #if TLP_DEBUG
             DebugLog(nameof(_OnOwnerSet));
 #endif
@@ -29,8 +28,7 @@ namespace TLP.UdonUtils.Adapters.Cyan
         /// Cleanup the object here.
         /// </summary>
         [PublicAPI]
-        public virtual void _OnCleanup()
-        {
+        public virtual void _OnCleanup() {
 #if TLP_DEBUG
             DebugLog(nameof(_OnCleanup));
 #endif

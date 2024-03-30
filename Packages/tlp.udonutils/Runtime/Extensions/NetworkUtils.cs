@@ -4,10 +4,8 @@ namespace TLP.UdonUtils.Extensions
 {
     public static class NetworkUtils
     {
-        public static float Latency(this DeserializationResult deserializationResult)
-        {
-            if (deserializationResult.receiveTime > deserializationResult.sendTime)
-            {
+        public static float Latency(this DeserializationResult deserializationResult) {
+            if (deserializationResult.receiveTime > deserializationResult.sendTime) {
                 return deserializationResult.receiveTime - deserializationResult.sendTime;
             }
 

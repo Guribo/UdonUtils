@@ -26,14 +26,11 @@ public class TestResult : TlpBaseBehaviour
     [SerializeField]
     private Image Background;
 
-    public void Initialize(TestCase testCase)
-    {
+    public void Initialize(TestCase testCase) {
         #region TLP_DEBUG
-
 #if TLP_DEBUG
         DebugLog(nameof(Initialize));
 #endif
-
         #endregion
 
         Id.text = testCase.transform.GetSiblingIndex().ToString();
@@ -41,8 +38,7 @@ public class TestResult : TlpBaseBehaviour
 
         ButtonText.text = "Start";
         Background.color = Color.gray;
-        switch (testCase.Status)
-        {
+        switch (testCase.Status) {
             case TestCaseStatus.Ready:
                 Status.text = "Ready";
                 break;
@@ -55,7 +51,7 @@ public class TestResult : TlpBaseBehaviour
                 Background.color = Color.green;
                 break;
             case TestCaseStatus.Failed:
-                Status.text ="Fail";
+                Status.text = "Fail";
                 Background.color = Color.red;
                 break;
             case TestCaseStatus.NotRun:

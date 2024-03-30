@@ -128,7 +128,7 @@ namespace TLP.UdonUtils
             if (result.success) {
 #if TLP_DEBUG
                 DebugLog(
-                    $"{nameof(OnPostSerialization)} wrote {result.byteCount} bytes of {PendingSerializations} serialization requests to the network"
+                        $"{nameof(OnPostSerialization)} wrote {result.byteCount} bytes of {PendingSerializations} serialization requests to the network"
                 );
 #endif
                 PendingSerializations = 0;
@@ -157,17 +157,13 @@ namespace TLP.UdonUtils
 
         protected void DebugLog(string message) {
 #if TLP_DEBUG
-            if ((int)Severity < (int)ELogLevel.Debug)
-            {
+            if ((int)Severity < (int)ELogLevel.Debug) {
                 return;
             }
 
-            if (GetLogger())
-            {
+            if (GetLogger()) {
                 Logger.DebugLog(LOGPrefix, message, ExecutionOrder, this);
-            }
-            else
-            {
+            } else {
                 Debug.Log(LOGPrefix + message, this);
             }
 #endif
@@ -259,31 +255,23 @@ namespace TLP.UdonUtils
 #if !TLP_DEBUG
             return condition;
 #else
-            if ((int)Severity < (int)ELogLevel.Assertion)
-            {
+            if ((int)Severity < (int)ELogLevel.Assertion) {
                 return condition;
             }
 
-            if (condition)
-            {
+            if (condition) {
                 return true;
             }
 
-            if (Utilities.IsValid(context))
-            {
+            if (Utilities.IsValid(context)) {
                 var udonSharpBehaviour = (UdonSharpBehaviour)context;
                 // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
-                if (Utilities.IsValid(udonSharpBehaviour))
-                {
+                if (Utilities.IsValid(udonSharpBehaviour)) {
                     Error($"Assertion failed : '{udonSharpBehaviour.gameObject.name} : {message}'");
-                }
-                else
-                {
+                } else {
                     Error($"Assertion failed : '{context.GetType()} : {message}'");
                 }
-            }
-            else
-            {
+            } else {
                 Error("Assertion failed :  '" + message + "'");
             }
 

@@ -13,12 +13,9 @@ namespace TLP.UdonUtils.Physics
         public bool useCustomCenterOfGravityOnEnable;
         public Transform centerOfMass;
 
-        public void OnEnable()
-        {
-            if (useCustomCenterOfGravityOnEnable)
-            {
-                if (!Utilities.IsValid(centerOfMass))
-                {
+        public void OnEnable() {
+            if (useCustomCenterOfGravityOnEnable) {
+                if (!Utilities.IsValid(centerOfMass)) {
                     Debug.LogError("Invalid centerOfGravity", gameObject);
                     return;
                 }
@@ -30,15 +27,12 @@ namespace TLP.UdonUtils.Physics
             enabled = false;
         }
 
-        public void Start()
-        {
+        public void Start() {
             OnEnable();
         }
 
-        public void Set(Vector3 worldPosition)
-        {
-            if (!Utilities.IsValid(body))
-            {
+        public void Set(Vector3 worldPosition) {
+            if (!Utilities.IsValid(body)) {
                 Debug.LogError("Invalid Rigidbody", gameObject);
                 return;
             }
@@ -46,10 +40,8 @@ namespace TLP.UdonUtils.Physics
             body.centerOfMass = body.transform.InverseTransformPoint(worldPosition);
         }
 
-        private void LogCenterOfMass()
-        {
-            if (!Utilities.IsValid(body))
-            {
+        private void LogCenterOfMass() {
+            if (!Utilities.IsValid(body)) {
                 Debug.LogError("Invalid Rigidbody", gameObject);
                 return;
             }

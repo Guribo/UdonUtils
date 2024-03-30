@@ -21,7 +21,6 @@ namespace TLP.UdonUtils.Sync.SyncedVariables
         public int[] oldValue;
 
         #region Target behaviour
-
         [Header("Target settings")]
         /// <summary>
         /// Udon behaviour that wants to have one of its variables synced to all players
@@ -32,11 +31,9 @@ namespace TLP.UdonUtils.Sync.SyncedVariables
         /// Variable which will get synchronized with all players
         /// </summary>
         public string targetVariable = "values";
-
         #endregion
 
         #region Optional Callbacks
-
         [Header("Optional callback events")]
         public UdonSharpBehaviour[] changeEventListeners;
 
@@ -57,7 +54,6 @@ namespace TLP.UdonUtils.Sync.SyncedVariables
 
         [Tooltip("Event to fire on the owner when the value was successfully sent")]
         public string targetSerializedEvent;
-
         #endregion
 
         /// <summary>
@@ -65,8 +61,7 @@ namespace TLP.UdonUtils.Sync.SyncedVariables
         /// Does nothing if the caller does not own this behaviour/gameobject.
         /// </summary>
         /// <returns>false if the local player is not the owner or anything goes wrong</returns>
-        public bool UpdateForAll()
-        {
+        public bool UpdateForAll() {
 #if TLP_DEBUG
             DebugLog(nameof(UpdateForAll));
 #endif
@@ -75,26 +70,22 @@ namespace TLP.UdonUtils.Sync.SyncedVariables
 
             if (!Assert(Utilities.IsValid(localPlayer), "Local player invalid", this)
                 || !Assert(
-                    Utilities.IsValid(localPlayer.IsOwner(gameObject)),
-                    "Local player is not owner",
-                    this
+                        Utilities.IsValid(localPlayer.IsOwner(gameObject)),
+                        "Local player is not owner",
+                        this
                 )
-                || !Assert(Utilities.IsValid(targetBehaviour), "Target UdonBehaviour invalid", this))
-            {
+                || !Assert(Utilities.IsValid(targetBehaviour), "Target UdonBehaviour invalid", this)) {
                 return false;
             }
 
             Notify(preSerializationEventListeners, targetPreSerialization);
 
             object value = targetBehaviour.GetProgramVariable(targetVariable);
-            if (value != null)
-            {
+            if (value != null) {
                 int[] array = (int[])value;
                 syncedValue = new int[array.Length];
                 array.CopyTo(syncedValue, 0);
-            }
-            else
-            {
+            } else {
                 syncedValue = null;
             }
 
@@ -107,29 +98,23 @@ namespace TLP.UdonUtils.Sync.SyncedVariables
             return true;
         }
 
-        private void UpdateOldValueAndTriggerChangeEvent()
-        {
+        private void UpdateOldValueAndTriggerChangeEvent() {
             Notify(changeEventListeners, targetChangeEvent);
 
-            if (syncedValue != null)
-            {
+            if (syncedValue != null) {
                 int[] temp = new int[syncedValue.Length];
                 syncedValue.CopyTo(temp, 0);
                 oldValue = temp;
-            }
-            else
-            {
+            } else {
                 oldValue = null;
             }
         }
 
-        public override void OnDeserialization(DeserializationResult deserializationResult)
-        {
+        public override void OnDeserialization(DeserializationResult deserializationResult) {
             var localPlayer = Networking.LocalPlayer;
             if (localPlayer.IsOwner(gameObject)
                 || !Utilities.IsValid(targetBehaviour)
-                || !Utilities.IsValid(localPlayer))
-            {
+                || !Utilities.IsValid(localPlayer)) {
                 return;
             }
 
@@ -140,19 +125,16 @@ namespace TLP.UdonUtils.Sync.SyncedVariables
             UpdateOldValueAndTriggerChangeEvent();
         }
 
-        public override void OnPostSerialization(SerializationResult result)
-        {
+        public override void OnPostSerialization(SerializationResult result) {
             var localPlayer = Networking.LocalPlayer;
             if (!(localPlayer.IsOwner(gameObject)
                   && Utilities.IsValid(targetBehaviour)
-                  && Utilities.IsValid(localPlayer)))
-            {
+                  && Utilities.IsValid(localPlayer))) {
                 Debug.LogWarning($"SyncedInteger.OnPostSerialization: aborting", this);
                 return;
             }
 
-            if (!result.success)
-            {
+            if (!result.success) {
                 Debug.LogWarning($"SyncedInteger.OnPostSerialization: Serialization failed, trying again", this);
                 RequestSerialization();
                 return;
@@ -163,17 +145,13 @@ namespace TLP.UdonUtils.Sync.SyncedVariables
             Notify(serializedEventListeners, targetSerializedEvent);
         }
 
-        internal void Notify(UdonSharpBehaviour[] listeners, string eventName)
-        {
+        internal void Notify(UdonSharpBehaviour[] listeners, string eventName) {
 #if TLP_DEBUG
             DebugLog(nameof(Notify));
 #endif
-            if (listeners != null && !string.IsNullOrEmpty(eventName))
-            {
-                foreach (var preSerializationEventListener in listeners)
-                {
-                    if (Utilities.IsValid(preSerializationEventListener))
-                    {
+            if (listeners != null && !string.IsNullOrEmpty(eventName)) {
+                foreach (var preSerializationEventListener in listeners) {
+                    if (Utilities.IsValid(preSerializationEventListener)) {
                         preSerializationEventListener.SendCustomEvent(eventName);
                     }
                 }

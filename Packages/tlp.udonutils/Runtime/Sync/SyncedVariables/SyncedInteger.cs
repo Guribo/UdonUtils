@@ -33,17 +33,14 @@ namespace TLP.UdonUtils.Sync.SyncedVariables
             set
             {
                 #region TLP_DEBUG
-
 #if TLP_DEBUG
                 DebugLog($"Set IntValueProperty: {value}");
 #endif
-
                 #endregion
 
-                
+
                 bool valueUnchanged = SyncedValue == value;
-                if (valueUnchanged)
-                {
+                if (valueUnchanged) {
                     return;
                 }
 
@@ -52,51 +49,41 @@ namespace TLP.UdonUtils.Sync.SyncedVariables
                 MarkNetworkDirty();
                 RequestSerialization();
                 NotifyListeners();
-        
             }
             get => SyncedValue;
         }
 
-        public override void OnPostSerialization(SerializationResult result)
-        {
+        public override void OnPostSerialization(SerializationResult result) {
             base.OnPostSerialization(result);
-            if (!result.success)
-            {
+            if (!result.success) {
                 return;
             }
 
-            if (autoResetOnSuccess)
-            {
+            if (autoResetOnSuccess) {
                 IntValueProperty = 0;
             }
         }
 
-        public override void OnDeserialization(DeserializationResult deserializationResult)
-        {
+        public override void OnDeserialization(DeserializationResult deserializationResult) {
             base.OnDeserialization(deserializationResult);
             NotifyListeners();
         }
 
-        internal void NotifyListeners()
-        {
-            if (Utilities.IsValid(onChanged))
-            {
+        internal void NotifyListeners() {
+            if (Utilities.IsValid(onChanged)) {
                 onChanged.Raise(this);
             }
-            
+
             bool listenersInvalid = listeners == null
                                     || targetFieldNames == null
                                     || listeners.Length != targetFieldNames.Length;
-            if (listenersInvalid)
-            {
+            if (listenersInvalid) {
                 Debug.LogError("Invalid listener setup");
                 return;
             }
 
-            for (int i = 0; i < listeners.Length; i++)
-            {
-                if (!Utilities.IsValid(listeners[i]))
-                {
+            for (int i = 0; i < listeners.Length; i++) {
+                if (!Utilities.IsValid(listeners[i])) {
                     Warn($"Invalid listener at index %{i}");
                     continue;
                 }

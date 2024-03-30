@@ -12,22 +12,18 @@ namespace TLP.UdonUtils.Rendering
         [Range(0, 60)]
         public float updateInterval = 10f;
 
-        public void OnEnable()
-        {
-            if (!Assert(Utilities.IsValid(reflectionProbe), "reflectionProbe invalid", this))
-            {
+        public void OnEnable() {
+            if (!Assert(Utilities.IsValid(reflectionProbe), "reflectionProbe invalid", this)) {
                 return;
             }
 
             UpdateReflections();
         }
 
-        public void UpdateReflections()
-        {
+        public void UpdateReflections() {
             if (!(gameObject.activeInHierarchy
                   && enabled
-                  && Assert(Utilities.IsValid(reflectionProbe), "reflectionProbe invalid", this)))
-            {
+                  && Assert(Utilities.IsValid(reflectionProbe), "reflectionProbe invalid", this))) {
                 return;
             }
 

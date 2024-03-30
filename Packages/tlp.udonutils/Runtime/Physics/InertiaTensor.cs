@@ -14,10 +14,8 @@ namespace TLP.UdonUtils.Physics
         public Vector3 customInertiaTensor;
         public Vector3 customInertiaTensorRotation = Quaternion.identity.eulerAngles;
 
-        public void OnEnable()
-        {
-            if (useCustomInertiaOnEnable)
-            {
+        public void OnEnable() {
+            if (useCustomInertiaOnEnable) {
                 SetTensor(customInertiaTensor, Quaternion.Euler(customInertiaTensorRotation));
             }
 
@@ -25,15 +23,12 @@ namespace TLP.UdonUtils.Physics
             enabled = false;
         }
 
-        public void Start()
-        {
+        public void Start() {
             OnEnable();
         }
 
-        public void SetTensor(Vector3 tensor, Quaternion rotation)
-        {
-            if (!Utilities.IsValid(body))
-            {
+        public void SetTensor(Vector3 tensor, Quaternion rotation) {
+            if (!Utilities.IsValid(body)) {
                 Debug.LogError("Invalid Rigidbody", gameObject);
                 return;
             }
@@ -42,17 +37,15 @@ namespace TLP.UdonUtils.Physics
             body.inertiaTensorRotation = rotation;
         }
 
-        private void LogTensor()
-        {
-            if (!Utilities.IsValid(body))
-            {
+        private void LogTensor() {
+            if (!Utilities.IsValid(body)) {
                 Debug.LogError("Invalid Rigidbody", gameObject);
                 return;
             }
 
             Debug.Log($"[{GetType()}.LogTensor] {body.gameObject.name}.inertiaTensor = {body.inertiaTensor}");
             Debug.Log(
-                $"[{GetType()}.LogTensor] {body.gameObject.name}.inertiaTensorRotation = {body.inertiaTensorRotation.eulerAngles}"
+                    $"[{GetType()}.LogTensor] {body.gameObject.name}.inertiaTensorRotation = {body.inertiaTensorRotation.eulerAngles}"
             );
         }
     }

@@ -55,7 +55,8 @@ namespace TLP.UdonUtils.Physics
                 out Quaternion rotation,
                 out Vector3 angularVelocity,
                 out Vector3 angularAcceleration,
-                out Transform relativeTo) {
+                out Transform relativeTo
+        ) {
             #region TLP_DEBUG
 #if TLP_DEBUG
             DebugLog(nameof(GetLatestSnapShot));
@@ -92,7 +93,8 @@ namespace TLP.UdonUtils.Physics
                 Vector3 worldPosition,
                 Vector3 rigidbodyVelocity,
                 float deltaTime,
-                float time) {
+                float time
+        ) {
             _velocity[0] = _velocity[1];
             _velocity[1] = _velocity[2];
 

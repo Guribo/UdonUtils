@@ -14,18 +14,14 @@ namespace TLP.UdonUtils.Player
         public float minSize = 0.00001f;
         public float maxSize = 1000f;
 
-        public void Start()
-        {
-            if (useLocalPlayerByDefault)
-            {
+        public void Start() {
+            if (useLocalPlayerByDefault) {
                 player = Networking.LocalPlayer;
             }
         }
 
-        public override void PostLateUpdate()
-        {
-            if (!Utilities.IsValid(player))
-            {
+        public override void PostLateUpdate() {
+            if (!Utilities.IsValid(player)) {
                 return;
             }
 

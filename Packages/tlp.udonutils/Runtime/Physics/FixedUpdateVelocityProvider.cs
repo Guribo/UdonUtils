@@ -76,7 +76,8 @@ namespace TLP.UdonUtils.Physics
                 out Quaternion rotation,
                 out Vector3 angularVelocity,
                 out Vector3 angularAcceleration,
-                out Transform relativeTo) {
+                out Transform relativeTo
+        ) {
             position = _position[0];
             velocity = _velocity[1];
             acceleration = _acceleration[2];

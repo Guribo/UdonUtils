@@ -24,57 +24,47 @@ namespace TLP.UdonUtils.DesignPatterns.MVC
         protected View View { get; private set; }
 
         #region PublicAPI
-
         [PublicAPI]
-        public bool Initialize(Model model, View view)
-        {
+        public bool Initialize(Model model, View view) {
 #if TLP_DEBUG
             DebugLog(nameof(Initialize));
 #endif
-            if (HasError)
-            {
+            if (HasError) {
                 Error($"Can not initialize again due to previous critical error: '{CriticalError}'");
                 return false;
             }
 
-            if (Initialized)
-            {
+            if (Initialized) {
                 Warn("Already initialized");
                 return false;
             }
 
-            if (!Utilities.IsValid(view))
-            {
+            if (!Utilities.IsValid(view)) {
                 Error($"{nameof(view)} invalid");
                 return false;
             }
 
-            if (!Utilities.IsValid(model))
-            {
+            if (!Utilities.IsValid(model)) {
                 Error($"{nameof(model)} invalid");
                 return false;
             }
 
-            if (view.HasError)
-            {
+            if (view.HasError) {
                 Error($"{nameof(view)} has critical error: '{view.CriticalError}'");
                 return false;
             }
 
-            if (view.Initialized)
-            {
+            if (view.Initialized) {
                 Error($"{nameof(view)} is already initialized");
                 return false;
             }
 
-            if (model.HasError)
-            {
+            if (model.HasError) {
                 Error($"{nameof(model)} has critical error: '{model.CriticalError}'");
                 return false;
             }
 
-            if (!model.Initialized)
-            {
+            if (!model.Initialized) {
                 Error($"{nameof(model)} is not initialized");
                 return false;
             }
@@ -86,8 +76,7 @@ namespace TLP.UdonUtils.DesignPatterns.MVC
             // failed to initialize and are in need of cleanup
             Initialized = true;
 
-            if (InitializeInternal())
-            {
+            if (InitializeInternal()) {
                 return true;
             }
 
@@ -96,40 +85,34 @@ namespace TLP.UdonUtils.DesignPatterns.MVC
             return false;
         }
 
-        protected virtual void OnDestroy()
-        {
+        protected virtual void OnDestroy() {
 #if TLP_DEBUG
             DebugLog(nameof(OnDestroy));
 #endif
             DeInitialize();
         }
 
-        public bool DeInitialize()
-        {
+        public bool DeInitialize() {
 #if TLP_DEBUG
             DebugLog(nameof(DeInitialize));
 #endif
-            if (!Initialized)
-            {
+            if (!Initialized) {
                 return false;
             }
 
-            if (Utilities.IsValid(View))
-            {
+            if (Utilities.IsValid(View)) {
                 View.DeInitialize();
             }
 
             View = null;
 
-            if (Utilities.IsValid(Model))
-            {
+            if (Utilities.IsValid(Model)) {
                 Model.DeInitialize();
             }
 
             Model = null;
 
-            if (DeInitializeInternal())
-            {
+            if (DeInitializeInternal()) {
                 Initialized = false;
                 CriticalError = null;
                 return true;
@@ -140,7 +123,6 @@ namespace TLP.UdonUtils.DesignPatterns.MVC
             HasError = true;
             return false;
         }
-
         #endregion
     }
 }

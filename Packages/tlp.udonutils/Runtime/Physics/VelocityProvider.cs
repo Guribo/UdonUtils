@@ -31,7 +31,7 @@ namespace TLP.UdonUtils.Physics
         /// moving average: most recent 3 values
         /// </summary>
         public Vector3 AccelerationAvg3 =>
-            0.33333333333334f * (_acceleration[0] + _acceleration[1] + _acceleration[2]);
+                0.33333333333334f * (_acceleration[0] + _acceleration[1] + _acceleration[2]);
 
         protected internal Vector3[] _acceleration = new Vector3[3];
         protected Vector3[] _velocity = new Vector3[3];
@@ -40,43 +40,34 @@ namespace TLP.UdonUtils.Physics
         protected Vector3[] _angularVelocity = new Vector3[3];
         protected internal Vector3[] _angularAcceleration = new Vector3[3];
 
-        private void OnEnable()
-        {
+        private void OnEnable() {
             Clear();
         }
 
-        private void OnDisable()
-        {
+        private void OnDisable() {
             Clear();
         }
 
-        public virtual void Clear()
-        {
-            for (int i = 0; i < _velocity.Length; i++)
-            {
+        public virtual void Clear() {
+            for (int i = 0; i < _velocity.Length; i++) {
                 _velocity[i] = Vector3.zero;
             }
 
-            for (int i = 0; i < _acceleration.Length; i++)
-            {
+            for (int i = 0; i < _acceleration.Length; i++) {
                 _acceleration[i] = Vector3.zero;
             }
 
-            for (int i = 0; i < _velocityTime.Length; i++)
-            {
+            for (int i = 0; i < _velocityTime.Length; i++) {
                 _velocityTime[i] = 0;
             }
 
-            for (int i = 0; i < _accelerationTime.Length; i++)
-            {
+            for (int i = 0; i < _accelerationTime.Length; i++) {
                 _accelerationTime[i] = 0;
             }
         }
 
-        public virtual void SetTeleported(bool keepVelocity = true)
-        {
-            if (!keepVelocity)
-            {
+        public virtual void SetTeleported(bool keepVelocity = true) {
+            if (!keepVelocity) {
                 Clear();
             }
         }
@@ -101,16 +92,15 @@ namespace TLP.UdonUtils.Physics
         [SerializeField]
         private float DebugAgeAcceleration;
 
-        protected void UpdateDebugEditorValues()
-        {
+        protected void UpdateDebugEditorValues() {
             float time = GetLatestSnapShot(
-                out var position,
-                out var velocity,
-                out var acceleration,
-                out var _unused,
-                out var __unused,
-                out var ___unused,
-                out var unused
+                    out var position,
+                    out var velocity,
+                    out var acceleration,
+                    out var _unused,
+                    out var __unused,
+                    out var ___unused,
+                    out var unused
             );
             DebugVelocity = velocity.magnitude;
             DebugAccelerationInGs = acceleration.magnitude / 9.81f;
@@ -119,13 +109,13 @@ namespace TLP.UdonUtils.Physics
         }
 #endif
         public abstract float GetLatestSnapShot(
-            out Vector3 position,
-            out Vector3 velocity,
-            out Vector3 acceleration,
-            out Quaternion rotation,
-            out Vector3 angularVelocity,
-            out Vector3 angularAcceleration,
-            out Transform relativeTo
+                out Vector3 position,
+                out Vector3 velocity,
+                out Vector3 acceleration,
+                out Quaternion rotation,
+                out Vector3 angularVelocity,
+                out Vector3 angularAcceleration,
+                out Transform relativeTo
         );
     }
 }

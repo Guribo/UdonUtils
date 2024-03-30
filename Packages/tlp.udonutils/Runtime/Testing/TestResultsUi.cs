@@ -17,27 +17,22 @@ public class TestResultsUi : View
 
     private DataDictionary _testEntries = new DataDictionary();
 
-    public override void OnModelChanged()
-    {
+    public override void OnModelChanged() {
         #region TLP_DEBUG
-
 #if TLP_DEBUG
         DebugLog(nameof(OnModelChanged));
 #endif
-
         #endregion
 
         var testData = (TestData)Model;
-        var tests = testData.Tests.Count;
+        int tests = testData.Tests.Count;
 
         float rectHeight = ((RectTransform)Prefab.transform).rect.height;
         ContentPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, rectHeight * tests);
 
-        for (int i = 0; i < tests; i++)
-        {
+        for (int i = 0; i < tests; i++) {
             var testCase = (TestCase)testData.Tests[i].Reference;
-            if (_testEntries.ContainsKey(testCase))
-            {
+            if (_testEntries.ContainsKey(testCase)) {
                 ((TestResult)_testEntries[testCase].Reference).Initialize(testCase);
                 continue;
             }
@@ -50,19 +45,17 @@ public class TestResultsUi : View
             var newEntryTransform = newTestResult.transform;
             var transformLocalPosition = newEntryTransform.localPosition;
             newEntryTransform.localPosition = new Vector3(
-                transformLocalPosition.x,
-                -i * rectHeight,
-                transformLocalPosition.z
+                    transformLocalPosition.x,
+                    -i * rectHeight,
+                    transformLocalPosition.z
             );
             newTestResult.gameObject.SetActive(true);
             DebugLog("Added test result entry");
         }
     }
 
-    protected override bool InitializeInternal()
-    {
-        if (!Prefab)
-        {
+    protected override bool InitializeInternal() {
+        if (!Prefab) {
             Error($"{nameof(Prefab)} not set");
             return false;
         }

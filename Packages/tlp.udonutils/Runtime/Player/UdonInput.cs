@@ -9,11 +9,9 @@ namespace TLP.UdonUtils.Player
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class UdonInput : TlpBaseBehaviour
     {
-        public static UdonInput Find()
-        {
+        public static UdonInput Find() {
             var udonInputGameObject = GameObject.Find(nameof(UdonInput));
-            if (!Utilities.IsValid(udonInputGameObject))
-            {
+            if (!Utilities.IsValid(udonInputGameObject)) {
                 Debug.LogError($"GameObject called '{nameof(UdonInput)}' does not exist in the scene");
                 return null;
             }
@@ -24,8 +22,7 @@ namespace TLP.UdonUtils.Player
         public bool InputValueJump;
         public UdonInputEventArgs InputArgsJump;
 
-        public override void InputJump(bool value, UdonInputEventArgs args)
-        {
+        public override void InputJump(bool value, UdonInputEventArgs args) {
 #if TLP_DEBUG
             DebugLog(nameof(InputJump));
 #endif
@@ -36,8 +33,7 @@ namespace TLP.UdonUtils.Player
         public bool InputValueUse;
         public UdonInputEventArgs InputArgsUse;
 
-        public override void InputUse(bool value, UdonInputEventArgs args)
-        {
+        public override void InputUse(bool value, UdonInputEventArgs args) {
 #if TLP_DEBUG
             DebugLog(nameof(InputUse));
 #endif
@@ -48,8 +44,7 @@ namespace TLP.UdonUtils.Player
         public bool InputValueGrab;
         public UdonInputEventArgs InputArgsGrab;
 
-        public override void InputGrab(bool value, UdonInputEventArgs args)
-        {
+        public override void InputGrab(bool value, UdonInputEventArgs args) {
 #if TLP_DEBUG
             DebugLog(nameof(InputGrab));
 #endif
@@ -60,8 +55,7 @@ namespace TLP.UdonUtils.Player
         public bool InputValueDrop;
         public UdonInputEventArgs InputArgsDrop;
 
-        public override void InputDrop(bool value, UdonInputEventArgs args)
-        {
+        public override void InputDrop(bool value, UdonInputEventArgs args) {
 #if TLP_DEBUG
             DebugLog(nameof(InputDrop));
 #endif
@@ -72,8 +66,7 @@ namespace TLP.UdonUtils.Player
         public float InputValueMoveHorizontal;
         public UdonInputEventArgs InputArgsMoveHorizontal;
 
-        public override void InputMoveHorizontal(float value, UdonInputEventArgs args)
-        {
+        public override void InputMoveHorizontal(float value, UdonInputEventArgs args) {
 #if TLP_DEBUG
             DebugLog(nameof(InputMoveHorizontal));
 #endif
@@ -84,8 +77,7 @@ namespace TLP.UdonUtils.Player
         public float InputValueMoveVertical;
         public UdonInputEventArgs InputArgsMoveVertical;
 
-        public override void InputMoveVertical(float value, UdonInputEventArgs args)
-        {
+        public override void InputMoveVertical(float value, UdonInputEventArgs args) {
 #if TLP_DEBUG
             DebugLog(nameof(InputMoveVertical));
 #endif
@@ -96,8 +88,7 @@ namespace TLP.UdonUtils.Player
         public float InputValueLookHorizontal;
         public UdonInputEventArgs InputArgsLookHorizontal;
 
-        public override void InputLookHorizontal(float value, UdonInputEventArgs args)
-        {
+        public override void InputLookHorizontal(float value, UdonInputEventArgs args) {
 #if TLP_DEBUG
             DebugLog(nameof(InputLookHorizontal));
 #endif
@@ -108,8 +99,7 @@ namespace TLP.UdonUtils.Player
         public float InputValueLookVertical;
         public UdonInputEventArgs InputArgsLookVertical;
 
-        public override void InputLookVertical(float value, UdonInputEventArgs args)
-        {
+        public override void InputLookVertical(float value, UdonInputEventArgs args) {
 #if TLP_DEBUG
             DebugLog(nameof(InputLookVertical));
 #endif

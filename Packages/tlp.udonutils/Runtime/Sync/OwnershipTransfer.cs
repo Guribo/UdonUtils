@@ -21,66 +21,56 @@ namespace TLP.UdonUtils.Sync
         /// if transfer was denied then false is returned.
         /// If set to false the result of the ownership transfer is ignored and true is returned</param>
         /// <returns>True on success or false of transfer failed or is incomplete</returns>
-        public static bool TransferOwnership(GameObject go, VRCPlayerApi newOwner, bool requireTransferSuccess)
-        {
+        public static bool TransferOwnership(GameObject go, VRCPlayerApi newOwner, bool requireTransferSuccess) {
             return TransferOwnershipFrom(go, null, newOwner, requireTransferSuccess);
         }
 
         public static bool TransferOwnershipFrom(
-            GameObject go,
-            GameObject start,
-            VRCPlayerApi newOwner,
-            bool requireTransferSuccess
-        )
-        {
-            if (!Utilities.IsValid(go))
-            {
+                GameObject go,
+                GameObject start,
+                VRCPlayerApi newOwner,
+                bool requireTransferSuccess
+        ) {
+            if (!Utilities.IsValid(go)) {
                 Debug.LogError($"{nameof(TransferOwnership)}: Invalid gameobject");
                 return !requireTransferSuccess;
             }
 
-            if (!Utilities.IsValid(newOwner))
-            {
+            if (!Utilities.IsValid(newOwner)) {
                 Debug.LogError($"{nameof(TransferOwnership)}: Invalid new owner");
                 return !requireTransferSuccess;
             }
 
             Component topBehaviour;
-            if (!Utilities.IsValid(start))
-            {
+            if (!Utilities.IsValid(start)) {
                 // find the top most udon behaviour
                 topBehaviour = UdonCommon.FindTopComponent(typeof(UdonBehaviour), go.transform);
-                if (!Utilities.IsValid(topBehaviour))
-                {
+                if (!Utilities.IsValid(topBehaviour)) {
                     Debug.LogWarning(
-                        $"{nameof(TransferOwnership)}: GameObject {go.name} " +
-                        $"has no parent UdonBehaviour which could change ownership"
+                            $"{nameof(TransferOwnership)}: GameObject {go.name} " +
+                            $"has no parent UdonBehaviour which could change ownership"
                     );
 
                     topBehaviour = UdonCommon.FindTopComponent(typeof(UdonSharpBehaviour), go.transform);
-                    if (!Utilities.IsValid(topBehaviour))
-                    {
+                    if (!Utilities.IsValid(topBehaviour)) {
                         Debug.LogError(
-                            $"{nameof(TransferOwnership)}: GameObject {go.name} " +
-                            $"also has no parent UdonSharpBehaviour which could change ownership"
+                                $"{nameof(TransferOwnership)}: GameObject {go.name} " +
+                                $"also has no parent UdonSharpBehaviour which could change ownership"
                         );
                         return false;
                     }
                 }
-            }
-            else
-            {
+            } else {
                 topBehaviour = start.transform;
             }
 
 
             var allTransforms = topBehaviour.transform.GetComponentsInChildren<Transform>(true);
 
-            if (allTransforms == null || allTransforms.Length == 0)
-            {
+            if (allTransforms == null || allTransforms.Length == 0) {
                 Debug.LogError(
-                    $"{nameof(TransferOwnership)}:  GameObject {go.name} " +
-                    $"has no udon behaviours it its hierarchy"
+                        $"{nameof(TransferOwnership)}:  GameObject {go.name} " +
+                        $"has no udon behaviours it its hierarchy"
                 );
                 return false;
             }
@@ -88,10 +78,8 @@ namespace TLP.UdonUtils.Sync
             bool anyFailures = false;
             int newOwnerPlayerId = newOwner.playerId;
 
-            foreach (var childTransform in allTransforms)
-            {
-                if (!Utilities.IsValid(childTransform))
-                {
+            foreach (var childTransform in allTransforms) {
+                if (!Utilities.IsValid(childTransform)) {
                     Debug.LogWarning($"{nameof(TransferOwnership)}:  invalid transform found. Skipping.");
                     continue;
                 }
@@ -102,28 +90,24 @@ namespace TLP.UdonUtils.Sync
                     || Utilities.IsValid(childGo.GetComponent(typeof(UdonSharpBehaviour)))
                     || Utilities.IsValid(childGo.GetComponent(typeof(VRCStation)))
                     || Utilities.IsValid(childGo.GetComponent(typeof(VRC_Pickup)))
-                    || Utilities.IsValid(childGo.GetComponent(typeof(VRCObjectSync))))
-                {
+                    || Utilities.IsValid(childGo.GetComponent(typeof(VRCObjectSync)))) {
                     int oldOwnerId = -1;
                     var oldOwner = Networking.GetOwner(childTransform.gameObject);
-                    if (Utilities.IsValid(oldOwner))
-                    {
+                    if (Utilities.IsValid(oldOwner)) {
                         oldOwnerId = oldOwner.playerId;
                     }
 
                     Debug.Log(
-                        $"{nameof(TransferOwnership)}:  setting owner of " +
-                        $"'{childTransform.gameObject.name}' " +
-                        $"from player {oldOwnerId} to player {newOwnerPlayerId}"
+                            $"{nameof(TransferOwnership)}:  setting owner of " +
+                            $"'{childTransform.gameObject.name}' " +
+                            $"from player {oldOwnerId} to player {newOwnerPlayerId}"
                     );
 
-                    if (!Networking.IsOwner(childTransform.gameObject))
-                    {
+                    if (!Networking.IsOwner(childTransform.gameObject)) {
                         Networking.SetOwner(newOwner, childTransform.gameObject);
 
                         // check, if required whether we are the owner now
-                        if (requireTransferSuccess && !Networking.IsOwner(childTransform.gameObject))
-                        {
+                        if (requireTransferSuccess && !Networking.IsOwner(childTransform.gameObject)) {
                             anyFailures = true;
                         }
                     }
@@ -133,21 +117,17 @@ namespace TLP.UdonUtils.Sync
             return !requireTransferSuccess || !anyFailures;
         }
 
-        public static bool TakeOwnership(this UdonSharpBehaviour behaviour)
-        {
+        public static bool TakeOwnership(this UdonSharpBehaviour behaviour) {
             return Utilities.IsValid(behaviour) && behaviour.gameObject.TakeOwnership();
         }
 
-        public static bool TakeOwnership(this GameObject gameObject)
-        {
-            if (!Utilities.IsValid(gameObject))
-            {
+        public static bool TakeOwnership(this GameObject gameObject) {
+            if (!Utilities.IsValid(gameObject)) {
                 return false;
             }
 
             var vrcPlayerApi = Networking.LocalPlayer;
-            if (Networking.IsOwner(vrcPlayerApi, gameObject))
-            {
+            if (Networking.IsOwner(vrcPlayerApi, gameObject)) {
                 return true;
             }
 
@@ -162,31 +142,25 @@ namespace TLP.UdonUtils.Sync
         /// <param name="behaviour"></param>
         /// <returns>false if ownership transfer was not allowed by the behaviour or arguments are invalid,
         /// true if already owner or ownership transfer succeeded</returns>
-        public static bool TransferOwnershipToMaster(this TlpBaseBehaviour behaviour)
-        {
-            if (!Utilities.IsValid(behaviour))
-            {
+        public static bool TransferOwnershipToMaster(this TlpBaseBehaviour behaviour) {
+            if (!Utilities.IsValid(behaviour)) {
                 Debug.LogError($"{nameof(TransferOwnershipToMaster)}: {nameof(behaviour)} is invalid");
                 return false;
             }
 
-            if (Networking.GetOwner(behaviour.gameObject).IsMasterSafe())
-            {
+            if (Networking.GetOwner(behaviour.gameObject).IsMasterSafe()) {
                 // nothing to do
                 return true;
             }
 
             var players = new VRCPlayerApi[VRCPlayerApi.GetPlayerCount()];
             players = VRCPlayerApi.GetPlayers(players);
-            foreach (var existingPlayer in players)
-            {
-                if (!existingPlayer.IsMasterSafe())
-                {
+            foreach (var existingPlayer in players) {
+                if (!existingPlayer.IsMasterSafe()) {
                     continue;
                 }
 
-                if (Networking.IsOwner(existingPlayer, behaviour.gameObject))
-                {
+                if (Networking.IsOwner(existingPlayer, behaviour.gameObject)) {
                     return true;
                 }
 

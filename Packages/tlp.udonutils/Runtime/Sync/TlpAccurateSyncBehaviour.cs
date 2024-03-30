@@ -85,8 +85,13 @@ namespace TLP.UdonUtils.Sync
 
         #region U# Lifecycle
         public void Start() {
-            if (!Utilities.IsValid(Backlog)) ErrorAndDisableGameObject($"{nameof(Backlog)} not set");
-            if (!Utilities.IsValid(Snapshot)) ErrorAndDisableGameObject($"{nameof(Snapshot)} not set");
+            if (!Utilities.IsValid(Backlog)) {
+                ErrorAndDisableGameObject($"{nameof(Backlog)} not set");
+            }
+
+            if (!Utilities.IsValid(Snapshot)) {
+                ErrorAndDisableGameObject($"{nameof(Snapshot)} not set");
+            }
         }
 
         public virtual void Update() {

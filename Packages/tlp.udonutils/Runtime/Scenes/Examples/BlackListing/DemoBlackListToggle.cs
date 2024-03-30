@@ -23,25 +23,20 @@ public class DemoBlackListToggle : TlpBaseBehaviour
 
     public PlayerBlackList PlayerBlackList;
 
-    public void OnEnable()
-    {
+    public void OnEnable() {
         WhiteListButton.gameObject.SetActive(PlayerBlackList.IsBlackListed(Networking.LocalPlayer.DisplayNameSafe()));
         BlackListButton.gameObject.SetActive(PlayerBlackList.IsWhiteListed(Networking.LocalPlayer.DisplayNameSafe()));
     }
 
     [PublicAPI]
-    public void AddLocalPlayerToBlackList()
-    {
+    public void AddLocalPlayerToBlackList() {
         #region TLP_DEBUG
-
 #if TLP_DEBUG
         DebugLog(nameof(AddLocalPlayerToBlackList));
 #endif
-
         #endregion
 
-        if (!PlayerBlackList.AddToBlackList(Networking.LocalPlayer.DisplayNameSafe()))
-        {
+        if (!PlayerBlackList.AddToBlackList(Networking.LocalPlayer.DisplayNameSafe())) {
             Warn($"Failed to add '{Networking.LocalPlayer.DisplayNameSafe()}' to blacklist");
         }
 
@@ -49,18 +44,14 @@ public class DemoBlackListToggle : TlpBaseBehaviour
     }
 
     [PublicAPI]
-    public void AddLocalPlayerToWhiteList()
-    {
+    public void AddLocalPlayerToWhiteList() {
         #region TLP_DEBUG
-
 #if TLP_DEBUG
         DebugLog(nameof(AddLocalPlayerToWhiteList));
 #endif
-
         #endregion
 
-        if (!PlayerBlackList.AddToWhiteList(Networking.LocalPlayer.DisplayNameSafe()))
-        {
+        if (!PlayerBlackList.AddToWhiteList(Networking.LocalPlayer.DisplayNameSafe())) {
             Warn($"Failed to add '{Networking.LocalPlayer.DisplayNameSafe()}' to whitelist");
         }
 

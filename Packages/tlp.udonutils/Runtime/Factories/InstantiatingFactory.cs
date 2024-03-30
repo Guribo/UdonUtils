@@ -10,15 +10,12 @@ namespace TLP.UdonUtils.Factories
     {
         public UdonSharpBehaviour Prototype;
 
-        protected override string GetProductTypeName()
-        {
-            if (!string.IsNullOrWhiteSpace(FactoryKey))
-            {
+        protected override string GetProductTypeName() {
+            if (!string.IsNullOrWhiteSpace(FactoryKey)) {
                 return base.GetProductTypeName();
             }
 
-            if (Utilities.IsValid(Prototype))
-            {
+            if (Utilities.IsValid(Prototype)) {
                 string udonTypeName = Prototype.GetUdonTypeName();
                 FactoryKey = "";
                 return UdonCommon.UdonTypeNameShort(udonTypeName);
@@ -28,10 +25,8 @@ namespace TLP.UdonUtils.Factories
         }
 
 
-        protected override GameObject ProduceInstance()
-        {
-            if (Utilities.IsValid(Prototype))
-            {
+        protected override GameObject ProduceInstance() {
+            if (Utilities.IsValid(Prototype)) {
                 return Instantiate(Prototype.gameObject);
             }
 

@@ -11,8 +11,7 @@ namespace TLP.UdonUtils.Adapters.Cyan
         /// This event is called when the local player's pool object has been assigned.
         /// </summary>
         [PublicAPI]
-        public virtual void _OnLocalPlayerAssigned()
-        {
+        public virtual void _OnLocalPlayerAssigned() {
 #if TLP_DEBUG
             DebugLog(nameof(_OnLocalPlayerAssigned));
 #endif
@@ -45,8 +44,7 @@ namespace TLP.UdonUtils.Adapters.Cyan
         /// Assigned pool is stored in <see cref="playerAssignedPoolObject"/>.
         /// </summary>
         [PublicAPI]
-        public virtual void _OnPlayerAssigned()
-        {
+        public virtual void _OnPlayerAssigned() {
 #if TLP_DEBUG
             DebugLog(nameof(_OnPlayerAssigned));
 #endif
@@ -79,8 +77,7 @@ namespace TLP.UdonUtils.Adapters.Cyan
         /// Unassigned pool is stored in <see cref="playerUnassignedPoolObject"/>.
         /// </summary>
         [PublicAPI]
-        public virtual void _OnPlayerUnassigned()
-        {
+        public virtual void _OnPlayerUnassigned() {
 #if TLP_DEBUG
             DebugLog(nameof(_OnPlayerUnassigned));
 #endif

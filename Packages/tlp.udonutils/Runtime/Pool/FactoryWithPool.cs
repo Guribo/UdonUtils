@@ -21,42 +21,35 @@ namespace TLP.UdonUtils.Runtime.Pool
 
         public Pool OptionalDefaultPool;
 
-        protected override bool InitializeFactory()
-        {
-            if (Utilities.IsValid(OptionalDefaultPool))
-            {
+        protected override bool InitializeFactory() {
+            if (Utilities.IsValid(OptionalDefaultPool)) {
                 DebugLog($"Using {nameof(OptionalDefaultPool)}");
                 _productPool = OptionalDefaultPool;
                 return true;
             }
 
-            if (!Utilities.IsValid(Prototype))
-            {
+            if (!Utilities.IsValid(Prototype)) {
                 Error($"{gameObject.name}: {nameof(Prototype)} is not set");
                 return false;
             }
 
-            if (!AttachToRuntimeFactoriesGameObject())
-            {
+            if (!AttachToRuntimeFactoriesGameObject()) {
                 return false;
             }
 
             _poolFactory = GetConcreteFactory<FactoryWithPool>(nameof(Pool));
-            if (!Utilities.IsValid(_poolFactory))
-            {
+            if (!Utilities.IsValid(_poolFactory)) {
                 Error($"{gameObject.name}: {nameof(FactoryWithPool)} with key {nameof(ProductPool)} not found");
                 return false;
             }
 
             var poolGameObject = _poolFactory.CreateInstance();
-            if (!poolGameObject)
-            {
+            if (!poolGameObject) {
                 return false;
             }
 
             _productPool = poolGameObject.GetComponent<Pool>();
-            if (!Utilities.IsValid(_productPool))
-            {
+            if (!Utilities.IsValid(_productPool)) {
                 Error($"Created {nameof(poolGameObject)} has no {nameof(ProductPool)} attached");
                 Destroy(poolGameObject);
                 return false;
@@ -64,10 +57,9 @@ namespace TLP.UdonUtils.Runtime.Pool
 
             _productPool.PoolInstancePrefab = Prototype.gameObject;
             _productPool.gameObject.name =
-                $"{nameof(ProductPool)}_of_{UdonCommon.UdonTypeNameShort(Prototype.GetUdonTypeName())}s";
+                    $"{nameof(ProductPool)}_of_{UdonCommon.UdonTypeNameShort(Prototype.GetUdonTypeName())}s";
 
-            if (ConfigurePool(_productPool))
-            {
+            if (ConfigurePool(_productPool)) {
                 poolGameObject.SetActive(true);
                 return true;
             }
@@ -77,10 +69,8 @@ namespace TLP.UdonUtils.Runtime.Pool
             return false;
         }
 
-        private bool AttachToRuntimeFactoriesGameObject()
-        {
-            if (!FindFactoriesGameObject(out var runtimeFactories))
-            {
+        private bool AttachToRuntimeFactoriesGameObject() {
+            if (!FindFactoriesGameObject(out var runtimeFactories)) {
                 return false;
             }
 
@@ -88,15 +78,12 @@ namespace TLP.UdonUtils.Runtime.Pool
             return true;
         }
 
-        protected virtual bool ConfigurePool(Pool pool)
-        {
+        protected virtual bool ConfigurePool(Pool pool) {
             return true;
         }
 
-        protected override GameObject ProduceInstance()
-        {
-            if (!Utilities.IsValid(_productPool))
-            {
+        protected override GameObject ProduceInstance() {
+            if (!Utilities.IsValid(_productPool)) {
                 Error($"{nameof(ProductPool)} invalid");
                 return null;
             }

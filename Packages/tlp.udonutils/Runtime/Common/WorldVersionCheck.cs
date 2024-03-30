@@ -61,46 +61,37 @@ namespace TLP.UdonUtils.Common
         [Tooltip("Is automatically incremented during upload, can be set to an initial value")]
         public int build;
 
-        internal void Start()
-        {
+        internal void Start() {
             Info($"Build: {build} Timestamp: {Timestamp}");
 
-            if (VRC.SDKBase.Networking.IsMaster)
-            {
+            if (Networking.IsMaster) {
                 SyncedBuild = build;
                 RequestSerialization();
-            }
-            else
-            {
+            } else {
                 CheckBuildRecency();
             }
         }
 
-        public override void OnOwnershipTransferred(VRCPlayerApi player)
-        {
+        public override void OnOwnershipTransferred(VRCPlayerApi player) {
             if (Utilities.IsValid(player)
-                && VRC.SDKBase.Networking.IsMaster
-                && player.isLocal)
-            {
+                && Networking.IsMaster
+                && player.isLocal) {
                 SyncedBuild = build;
                 RequestSerialization();
             }
         }
 
-        public override bool OnOwnershipRequest(VRCPlayerApi requestingPlayer, VRCPlayerApi requestedOwner)
-        {
-            return VRC.SDKBase.Networking.IsMaster;
+        public override bool OnOwnershipRequest(VRCPlayerApi requestingPlayer, VRCPlayerApi requestedOwner) {
+            return Networking.IsMaster;
         }
 
-        public override void OnDeserialization(DeserializationResult deserializationResult)
-        {
+        public override void OnDeserialization(DeserializationResult deserializationResult) {
             bool versionConflictsAlreadyKnown = InstanceCompromised;
-            if (versionConflictsAlreadyKnown)
-            {
+            if (versionConflictsAlreadyKnown) {
                 Warn(
-                    $"There was {SyncedTotalVersionConflicts} version conflicts in this instance " +
-                    $"({LocalVersionConflicts} conflicts were detected locally). " +
-                    $"Consider creating a new instance."
+                        $"There was {SyncedTotalVersionConflicts} version conflicts in this instance " +
+                        $"({LocalVersionConflicts} conflicts were detected locally). " +
+                        $"Consider creating a new instance."
                 );
                 return;
             }
@@ -108,52 +99,43 @@ namespace TLP.UdonUtils.Common
             CheckBuildRecency();
         }
 
-        internal void LocalVersionOutOfDate()
-        {
+        internal void LocalVersionOutOfDate() {
             Warn(
-                $"The world is {SyncedBuild - build} builds out of date! Please clear your VRChat cache " +
-                $"and restart the game."
+                    $"The world is {SyncedBuild - build} builds out of date! Please clear your VRChat cache " +
+                    $"and restart the game."
             );
             NotifyListeners(updateAvailableListeners, updateAvailableEvent);
         }
 
-        internal void CheckBuildRecency()
-        {
+        internal void CheckBuildRecency() {
             bool localPlayerNeedsToUpdate = SyncedBuild > build;
-            if (localPlayerNeedsToUpdate)
-            {
+            if (localPlayerNeedsToUpdate) {
                 LocalVersionOutOfDate();
                 SendCustomNetworkEvent(NetworkEventTarget.All, nameof(RPC_OutOfDatePlayerJoined));
                 return;
             }
 
             bool worldUpdateAvailable = build > SyncedBuild;
-            if (worldUpdateAvailable)
-            {
+            if (worldUpdateAvailable) {
                 LocalPlayerSkipUpdateNotification = true;
                 SendCustomNetworkEvent(NetworkEventTarget.All, nameof(RPC_VersionUpdateAvailable));
                 return;
             }
 
-            if (SyncedInstanceCompromised)
-            {
+            if (SyncedInstanceCompromised) {
                 HandleVersionConflict(false);
             }
         }
 
-        internal void HandleVersionConflict(bool locallyDetected)
-        {
+        internal void HandleVersionConflict(bool locallyDetected) {
             InstanceCompromised = true;
 
-            if (locallyDetected)
-            {
+            if (locallyDetected) {
                 LocalVersionConflicts++;
             }
 
-            if (VRC.SDKBase.Networking.IsMaster)
-            {
-                if (locallyDetected)
-                {
+            if (Networking.IsMaster) {
+                if (locallyDetected) {
                     ++SyncedTotalVersionConflicts;
                 }
 
@@ -163,40 +145,33 @@ namespace TLP.UdonUtils.Common
 
 
             Warn(
-                $"There was {SyncedTotalVersionConflicts} version conflicts in this instance " +
-                $"({LocalVersionConflicts} conflicts were detected locally). " +
-                $"Consider creating a new instance."
+                    $"There was {SyncedTotalVersionConflicts} version conflicts in this instance " +
+                    $"({LocalVersionConflicts} conflicts were detected locally). " +
+                    $"Consider creating a new instance."
             );
 
             NotifyListeners(versionConflictListeners, versionConflictEvent);
         }
 
         #region Listener Notifying
-
-        internal bool ListenerSetupValid(UdonSharpBehaviour[] listeners, string target)
-        {
+        internal bool ListenerSetupValid(UdonSharpBehaviour[] listeners, string target) {
             bool listenersNull = listeners == null;
-            if (listenersNull)
-            {
+            if (listenersNull) {
                 return false;
             }
 
             return !string.IsNullOrWhiteSpace(target);
         }
 
-        internal void NotifyListeners(UdonSharpBehaviour[] listeners, string target)
-        {
-            if (!ListenerSetupValid(listeners, target))
-            {
+        internal void NotifyListeners(UdonSharpBehaviour[] listeners, string target) {
+            if (!ListenerSetupValid(listeners, target)) {
                 Error($"Invalid listener setup for listener target '{target}'");
                 return;
             }
 
-            for (int i = 0; i < listeners.Length; i++)
-            {
+            for (int i = 0; i < listeners.Length; i++) {
                 var listener = listeners[i];
-                if (!Utilities.IsValid(listener))
-                {
+                if (!Utilities.IsValid(listener)) {
                     Warn($"Invalid listener for target '{target}' at position {i}");
                     continue;
                 }
@@ -204,18 +179,14 @@ namespace TLP.UdonUtils.Common
                 listener.SendCustomEvent(target);
             }
         }
-
         #endregion
 
         #region RPCs
-
-        public void RPC_VersionUpdateAvailable()
-        {
-            if (!LocalPlayerSkipUpdateNotification)
-            {
+        public void RPC_VersionUpdateAvailable() {
+            if (!LocalPlayerSkipUpdateNotification) {
                 Warn(
-                    $"A player with a new build of the world joined. Please re-join the instance or " +
-                    $"create a new instance to update if networking issues occur."
+                        $"A player with a new build of the world joined. Please re-join the instance or " +
+                        $"create a new instance to update if networking issues occur."
                 );
 
                 NotifyListeners(updateAvailableListeners, updateAvailableEvent);
@@ -224,16 +195,14 @@ namespace TLP.UdonUtils.Common
             HandleVersionConflict(true);
         }
 
-        public void RPC_OutOfDatePlayerJoined()
-        {
+        public void RPC_OutOfDatePlayerJoined() {
             Warn(
-                $"A player with an old build of the world joined. It may be required to create a new " +
-                $"instance if networking issues occur."
+                    $"A player with an old build of the world joined. It may be required to create a new " +
+                    $"instance if networking issues occur."
             );
 
             HandleVersionConflict(true);
         }
-
         #endregion
     }
 }

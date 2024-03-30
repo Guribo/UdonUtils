@@ -4,8 +4,7 @@ namespace TLP.UdonUtils.Extensions
 {
     public static class UdonMath
     {
-        public static float Remap(float inMin, float inMax, float outMin, float outMax, float value)
-        {
+        public static float Remap(float inMin, float inMax, float outMin, float outMax, float value) {
             float t = inMin.InverseLerp(inMax, value);
             return outMin.Lerp(outMax, t);
         }
@@ -17,11 +16,9 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="b"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static float InverseLerp(this float a, float b, float value)
-        {
+        public static float InverseLerp(this float a, float b, float value) {
             float divisor = b - a;
-            if (Mathf.Approximately(divisor, 0f))
-            {
+            if (Mathf.Approximately(divisor, 0f)) {
                 return a;
             }
 
@@ -35,8 +32,7 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="target"></param>
         /// <param name="t"></param>
         /// <returns></returns>
-        public static float Lerp(this float source, float target, float t)
-        {
+        public static float Lerp(this float source, float target, float t) {
             return (1f - t) * source + t * target;
         }
 
@@ -50,8 +46,7 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="input"></param>
         /// <param name="factor"></param>
         /// <returns></returns>
-        public static float ApplyExpo(this float input, float factor)
-        {
+        public static float ApplyExpo(this float input, float factor) {
             return (1f - factor) * (input * input * input) + factor * input;
         }
 
@@ -66,8 +61,7 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="b"></param>
         /// <param name="factor"></param>
         /// <returns></returns>
-        public static float AdaptiveInterpolation(float a, float b, float factor)
-        {
+        public static float AdaptiveInterpolation(float a, float b, float factor) {
             return Mathf.Lerp(a, b, factor * Mathf.Abs(a - b));
         }
 
@@ -82,14 +76,13 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="deltaTime"></param>
         /// <returns>result, integral, currentError</returns>
         public static Vector3 PidUpdate(
-            Vector3 pid,
-            float previousIntegral,
-            float previousError,
-            float currentValue,
-            float targetValue,
-            float deltaTime
-        )
-        {
+                Vector3 pid,
+                float previousIntegral,
+                float previousError,
+                float currentValue,
+                float targetValue,
+                float deltaTime
+        ) {
             float currentError = targetValue - currentValue;
 
             float proportional = pid.x * currentError;
@@ -107,8 +100,7 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns>delta rotation which can turn a into b</returns>
-        public static Quaternion GetDeltaAToB(this Quaternion a, Quaternion b)
-        {
+        public static Quaternion GetDeltaAToB(this Quaternion a, Quaternion b) {
             return Quaternion.Inverse(a) * b;
         }
 
@@ -119,8 +111,7 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="powerInWatts"></param>
         /// <param name="rpm"></param>
         /// <returns>Torque in Newton-meter [Nm]</returns>
-        public static float PowerWToTorque(float powerInWatts, float rpm)
-        {
+        public static float PowerWToTorque(float powerInWatts, float rpm) {
             return powerInWatts / rpm;
         }
 
@@ -130,8 +121,7 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="torque">[Nm]</param>
         /// <param name="rpm"></param>
         /// <returns>Power in Watts</returns>
-        public static float TorqueToPowerW(float torque, float rpm)
-        {
+        public static float TorqueToPowerW(float torque, float rpm) {
             return torque * rpm;
         }
 
@@ -142,8 +132,7 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="rpm"></param>
         /// <param name="hpToWatt">default conversion is for mechanical HP to Watt</param>
         /// <returns>Torque in Newton-meter [Nm]</returns>
-        public static float PowerHpToTorque(float powerInHp, float rpm, float hpToWatt = 745.70f)
-        {
+        public static float PowerHpToTorque(float powerInHp, float rpm, float hpToWatt = 745.70f) {
             return powerInHp / rpm * hpToWatt;
         }
 
@@ -154,8 +143,7 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="rpm"></param>
         /// <param name="hpToWatt">default conversion is for mechanical HP to Watt</param>
         /// <returns>Power in Horsepower</returns>
-        public static float TorqueToPowerHp(float torque, float rpm, float hpToWatt = 745.70f)
-        {
+        public static float TorqueToPowerHp(float torque, float rpm, float hpToWatt = 745.70f) {
             return torque / hpToWatt * rpm;
         }
 
@@ -166,8 +154,7 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns>true if a == +- b</returns>
-        public static bool HaveSameOrientation(this Quaternion a, Quaternion b, float epsilon = 0.0001f)
-        {
+        public static bool HaveSameOrientation(this Quaternion a, Quaternion b, float epsilon = 0.0001f) {
             return Mathf.Abs(Quaternion.Dot(a.normalized, b.normalized)) > 1.0f - epsilon;
         }
 
@@ -177,8 +164,7 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns>true if a == b</returns>
-        public static bool HaveSameRotation(this Quaternion a, Quaternion b, float epsilon = 0.0001f)
-        {
+        public static bool HaveSameRotation(this Quaternion a, Quaternion b, float epsilon = 0.0001f) {
             return Quaternion.Dot(a.normalized, b.normalized) > 1.0f - epsilon;
         }
 
@@ -189,8 +175,7 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns>delta rotation which can turn a into b</returns>
-        public static Quaternion GetDeltaToB(this Quaternion a, Quaternion b)
-        {
+        public static Quaternion GetDeltaToB(this Quaternion a, Quaternion b) {
             return Quaternion.Inverse(a) * b;
         }
 
@@ -200,8 +185,7 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="current"></param>
         /// <param name="angVel"></param>
         /// <returns></returns>
-        public static Quaternion AngVelToDeriv(Quaternion current, Vector3 angVel)
-        {
+        public static Quaternion AngVelToDeriv(Quaternion current, Vector3 angVel) {
             var spin = new Quaternion(angVel.x, angVel.y, angVel.z, 0f);
             var result = spin * current;
             return new Quaternion(0.5f * result.x, 0.5f * result.y, 0.5f * result.z, 0.5f * result.w);
@@ -214,8 +198,7 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="current"></param>
         /// <param name="deriv"></param>
         /// <returns></returns>
-        public static Vector3 DerivToAngVel(Quaternion current, Quaternion deriv)
-        {
+        public static Vector3 DerivToAngVel(Quaternion current, Quaternion deriv) {
             var result = deriv * Quaternion.Inverse(current);
             return new Vector3(2f * result.x, 2f * result.y, 2f * result.z);
         }
@@ -227,14 +210,13 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="angularVelocity"></param>
         /// <param name="deltaTime"></param>
         /// <returns></returns>
-        public static Quaternion IntegrateRotation(Quaternion rotation, Vector3 angularVelocity, float deltaTime)
-        {
+        public static Quaternion IntegrateRotation(Quaternion rotation, Vector3 angularVelocity, float deltaTime) {
             var deriv = AngVelToDeriv(rotation, angularVelocity);
             var pred = new Vector4(
-                rotation.x + deriv.x * deltaTime,
-                rotation.y + deriv.y * deltaTime,
-                rotation.z + deriv.z * deltaTime,
-                rotation.w + deriv.w * deltaTime
+                    rotation.x + deriv.x * deltaTime,
+                    rotation.y + deriv.y * deltaTime,
+                    rotation.z + deriv.z * deltaTime,
+                    rotation.w + deriv.w * deltaTime
             ).normalized;
             return new Quaternion(pred.x, pred.y, pred.z, pred.w);
         }
@@ -250,14 +232,13 @@ namespace TLP.UdonUtils.Extensions
         /// <param name="deltaTime"></param>
         /// <returns></returns>
         public static Quaternion SmoothDamp(
-            Quaternion rot,
-            Quaternion target,
-            ref Quaternion deriv,
-            float smoothTime,
-            float maxSpeed,
-            float deltaTime
-        )
-        {
+                Quaternion rot,
+                Quaternion target,
+                ref Quaternion deriv,
+                float smoothTime,
+                float maxSpeed,
+                float deltaTime
+        ) {
             // account for double-cover
             float dot = Quaternion.Dot(rot, target);
             float multi = dot > 0f ? 1f : -1f;
@@ -267,10 +248,10 @@ namespace TLP.UdonUtils.Extensions
             target.w *= multi;
             // smooth damp (nlerp approx)
             var result = new Vector4(
-                Mathf.SmoothDamp(rot.x, target.x, ref deriv.x, smoothTime, maxSpeed, deltaTime),
-                Mathf.SmoothDamp(rot.y, target.y, ref deriv.y, smoothTime, maxSpeed, deltaTime),
-                Mathf.SmoothDamp(rot.z, target.z, ref deriv.z, smoothTime, maxSpeed, deltaTime),
-                Mathf.SmoothDamp(rot.w, target.w, ref deriv.w, smoothTime, maxSpeed, deltaTime)
+                    Mathf.SmoothDamp(rot.x, target.x, ref deriv.x, smoothTime, maxSpeed, deltaTime),
+                    Mathf.SmoothDamp(rot.y, target.y, ref deriv.y, smoothTime, maxSpeed, deltaTime),
+                    Mathf.SmoothDamp(rot.z, target.z, ref deriv.z, smoothTime, maxSpeed, deltaTime),
+                    Mathf.SmoothDamp(rot.w, target.w, ref deriv.w, smoothTime, maxSpeed, deltaTime)
             ).normalized;
             // compute deriv
             float dtInv = 1f / deltaTime;
@@ -291,18 +272,16 @@ namespace TLP.UdonUtils.Extensions
         //-addAmount holds the total amount of quaternions which are currently added
         //This function returns the current average quaternion
         public static Quaternion AverageQuaternion(
-            ref Vector4 cumulative,
-            Quaternion newRotation,
-            Quaternion firstRotation,
-            int addAmount
-        )
-        {
+                ref Vector4 cumulative,
+                Quaternion newRotation,
+                Quaternion firstRotation,
+                int addAmount
+        ) {
             Debug.Assert(addAmount > 0);
 
             //Before we add the new rotation to the average (mean), we have to check whether the quaternion has to be inverted. Because
             //q and -q are the same rotation, but cannot be averaged, we have to make sure they are all the same.
-            if (!AreQuaternionsClose(newRotation, firstRotation))
-            {
+            if (!AreQuaternionsClose(newRotation, firstRotation)) {
                 newRotation = newRotation.InverseSignQuaternion();
             }
 
@@ -323,8 +302,7 @@ namespace TLP.UdonUtils.Extensions
 
         // Source: https://wiki.unity3d.com/index.php/Averaging_Quaternions_and_Vectors
         //Changes the sign of the quaternion components. This is not the same as the inverse.
-        public static Quaternion InverseSignQuaternion(this Quaternion q)
-        {
+        public static Quaternion InverseSignQuaternion(this Quaternion q) {
             return new Quaternion(-q.x, -q.y, -q.z, -q.w);
         }
 
@@ -333,17 +311,12 @@ namespace TLP.UdonUtils.Extensions
         //be used to check whether or not one of two quaternions which are supposed to
         //be very similar but has its component signs reversed (q has the same rotation as
         //-q)
-        public static bool AreQuaternionsClose(Quaternion q1, Quaternion q2)
-        {
+        public static bool AreQuaternionsClose(Quaternion q1, Quaternion q2) {
             float dot = Quaternion.Dot(q1, q2);
 
-            if (dot < 0.0f)
-            {
+            if (dot < 0.0f) {
                 return false;
-            }
-
-            else
-            {
+            } else {
                 return true;
             }
         }

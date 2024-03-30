@@ -1,5 +1,4 @@
-﻿
-using TLP.UdonUtils.DesignPatterns.MVC;
+﻿using TLP.UdonUtils.DesignPatterns.MVC;
 using TLP.UdonUtils.Testing;
 using UdonSharp;
 using UnityEngine;

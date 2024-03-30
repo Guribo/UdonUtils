@@ -11,18 +11,14 @@ namespace TLP.UdonUtils.Player
         public VRCPlayerApi player;
         public bool useLocalPlayerByDefault = true;
 
-        public void Start()
-        {
-            if (useLocalPlayerByDefault)
-            {
+        public void Start() {
+            if (useLocalPlayerByDefault) {
                 player = Networking.LocalPlayer;
             }
         }
 
-        public override void PostLateUpdate()
-        {
-            if (!Utilities.IsValid(player))
-            {
+        public override void PostLateUpdate() {
+            if (!Utilities.IsValid(player)) {
                 return;
             }
 

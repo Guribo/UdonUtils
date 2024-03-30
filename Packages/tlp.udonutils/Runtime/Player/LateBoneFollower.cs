@@ -10,14 +10,12 @@ namespace TLP.UdonUtils.Player
     {
         public HumanBodyBones humanBodyBone;
 
-        public override void PostLateUpdate()
-        {
+        public override void PostLateUpdate() {
             var localPlayer = Networking.LocalPlayer;
-            if (Utilities.IsValid(localPlayer))
-            {
+            if (Utilities.IsValid(localPlayer)) {
                 transform.SetPositionAndRotation(
-                    localPlayer.GetBonePosition(humanBodyBone),
-                    localPlayer.GetBoneRotation(humanBodyBone)
+                        localPlayer.GetBonePosition(humanBodyBone),
+                        localPlayer.GetBoneRotation(humanBodyBone)
                 );
             }
         }

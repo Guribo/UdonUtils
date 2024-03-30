@@ -33,7 +33,7 @@ namespace TLP.UdonUtils.Logger
         public bool DetailedContextInfo = true;
 
         [Tooltip(
-            "If true will combine all Debug logs of a frame into a single string, can be used to see what has been logged in the entire frame. Can be useful to determine frames with excessive logging."
+                "If true will combine all Debug logs of a frame into a single string, can be used to see what has been logged in the entire frame. Can be useful to determine frames with excessive logging."
         )]
         public bool CreateDebugFrameLog;
 
@@ -42,12 +42,11 @@ namespace TLP.UdonUtils.Logger
 
         private readonly System.Diagnostics.Stopwatch _performanceStopwatch = new System.Diagnostics.Stopwatch();
 
-        public void Start()
-        {
+        public void Start() {
             _startTime = Networking.GetServerTimeInMilliseconds();
 
             Info(
-                $"Starting at server time {_startTime}. Initialization took at least {_performanceStopwatch.Elapsed.TotalMilliseconds}ms."
+                    $"Starting at server time {_startTime}. Initialization took at least {_performanceStopwatch.Elapsed.TotalMilliseconds}ms."
             );
         }
 
@@ -55,10 +54,8 @@ namespace TLP.UdonUtils.Logger
 
         protected virtual string Prefix => "[<color=#008000>TLP</color>]";
 
-        protected virtual string GetPlayerInfo(Object context)
-        {
-            if (!DetailedPlayerInfo)
-            {
+        protected virtual string GetPlayerInfo(Object context) {
+            if (!DetailedPlayerInfo) {
                 return "";
             }
 
@@ -70,19 +67,16 @@ namespace TLP.UdonUtils.Logger
             int localPlayerPlayerId = -1;
             bool isLocal = true;
             string playerName = "None";
-            if (Utilities.IsValid(Networking.LocalPlayer))
-            {
+            if (Utilities.IsValid(Networking.LocalPlayer)) {
                 localPlayerPlayerId = Networking.LocalPlayer.playerId;
             }
 
             int ownerId = localPlayerPlayerId;
             // ReSharper disable once OperatorIsCanBeUsed not supported by U#
-            if (Utilities.IsValid(context) && context.GetType() == typeof(UdonBehaviour))
-            {
+            if (Utilities.IsValid(context) && context.GetType() == typeof(UdonBehaviour)) {
                 var udonBehaviour = (UdonBehaviour)context;
                 var theOwner = Networking.GetOwner(udonBehaviour.gameObject);
-                if (Utilities.IsValid(theOwner))
-                {
+                if (Utilities.IsValid(theOwner)) {
                     ownerId = theOwner.playerId;
                     master = theOwner.isMaster;
                     isLocal = theOwner.playerId == localPlayerPlayerId;
@@ -93,104 +87,80 @@ namespace TLP.UdonUtils.Logger
             double elapsedAccurate = _performanceStopwatch.Elapsed.TotalMilliseconds;
             _performanceStopwatch.Restart();
             return
-                $"[<color=#008080>f={Time.frameCount} ntss={Networking.GetServerTimeInMilliseconds() - _startTime}ms nt={Networking.GetServerTimeInMilliseconds()}ms dt={elapsedAccurate:F3}ms</color>][<color=#804040>{(isLocal ? "Local" : "Remote")} owner {playerName}({ownerId}) {(master ? " is Master" : "")}</color>]";
+                    $"[<color=#008080>f={Time.frameCount} ntss={Networking.GetServerTimeInMilliseconds() - _startTime}ms nt={Networking.GetServerTimeInMilliseconds()}ms dt={elapsedAccurate:F3}ms</color>][<color=#804040>{(isLocal ? "Local" : "Remote")} owner {playerName}({ownerId}) {(master ? " is Master" : "")}</color>]";
         }
 
-        public virtual void DebugLog(string logPrefix, string message, int executionOrder, Object context)
-        {
-            if ((int)Severity < (int)ELogLevel.Debug)
-            {
+        public virtual void DebugLog(string logPrefix, string message, int executionOrder, Object context) {
+            if ((int)Severity < (int)ELogLevel.Debug) {
                 return;
             }
 
             string completeMessage;
-            if (DetailedContextInfo)
-            {
+            if (DetailedContextInfo) {
                 completeMessage =
-                    $"[<color=#FF3B8B>DEBUG</color>]{Prefix}{logPrefix}{GetPlayerInfo(context)} {message}";
+                        $"[<color=#FF3B8B>DEBUG</color>]{Prefix}{logPrefix}{GetPlayerInfo(context)} {message}";
                 Debug.Log(completeMessage, context);
-            }
-            else
-            {
+            } else {
                 completeMessage = $"[<color=#FF3B8B>DEBUG</color>]{GetPlayerInfo(context)} {message}";
                 Debug.Log(completeMessage, context);
             }
 
-            if (!CreateDebugFrameLog)
-            {
+            if (!CreateDebugFrameLog) {
                 return;
             }
 
-            if (Time.frameCount == _lastFrame)
-            {
+            if (Time.frameCount == _lastFrame) {
                 DebugLogOfFrame += $"{completeMessage}\n";
-            }
-            else
-            {
+            } else {
                 _lastFrame = Time.frameCount;
                 DebugLogOfFrame = $"{completeMessage}\n";
             }
         }
 
-        public virtual void Info(string logPrefix, string message, Object context)
-        {
-            if ((int)Severity < (int)ELogLevel.Info)
-            {
+        public virtual void Info(string logPrefix, string message, Object context) {
+            if ((int)Severity < (int)ELogLevel.Info) {
                 return;
             }
 
-            if (DetailedContextInfo)
-            {
+            if (DetailedContextInfo) {
                 Debug.Log($"[INFO]{Prefix}{logPrefix}{GetPlayerInfo(context)} {message}", context);
-            }
-            else
-            {
+            } else {
                 Debug.Log($"[INFO]{GetPlayerInfo(context)} {message}", context);
             }
         }
 
-        public virtual void Warn(string logPrefix, string message, Object context)
-        {
-            if ((int)Severity < (int)ELogLevel.Warning)
-            {
+        public virtual void Warn(string logPrefix, string message, Object context) {
+            if ((int)Severity < (int)ELogLevel.Warning) {
                 return;
             }
 
-            if (DetailedContextInfo)
-            {
+            if (DetailedContextInfo) {
                 Debug.LogWarning(
-                    $"[<color=#FFFD55>WARN</color>]{Prefix}{logPrefix}{GetPlayerInfo(context)} {message}",
-                    context
+                        $"[<color=#FFFD55>WARN</color>]{Prefix}{logPrefix}{GetPlayerInfo(context)} {message}",
+                        context
                 );
-            }
-            else
-            {
+            } else {
                 Debug.LogWarning(
-                    $"[<color=#FFFD55>WARN</color>]{GetPlayerInfo(context)} {message}",
-                    context
+                        $"[<color=#FFFD55>WARN</color>]{GetPlayerInfo(context)} {message}",
+                        context
                 );
             }
         }
 
-        public virtual void Error(string logPrefix, string message, Object context)
-        {
-            if ((int)Severity < (int)ELogLevel.Assertion)
-            {
+        public virtual void Error(string logPrefix, string message, Object context) {
+            if ((int)Severity < (int)ELogLevel.Assertion) {
                 return;
             }
 
-            if (DetailedContextInfo)
-            {
+            if (DetailedContextInfo) {
                 Debug.LogError(
-                    $"[<color=#EB3324>ERROR</color>]{Prefix}{logPrefix}{GetPlayerInfo(context)} {message}",
-                    context
+                        $"[<color=#EB3324>ERROR</color>]{Prefix}{logPrefix}{GetPlayerInfo(context)} {message}",
+                        context
                 );
-            }
-            else
-            {
+            } else {
                 Debug.LogError(
-                    $"[<color=#EB3324>ERROR</color>]{GetPlayerInfo(context)} {message}",
-                    context
+                        $"[<color=#EB3324>ERROR</color>]{GetPlayerInfo(context)} {message}",
+                        context
                 );
             }
         }

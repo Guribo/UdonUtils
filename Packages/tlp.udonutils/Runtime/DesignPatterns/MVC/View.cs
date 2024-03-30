@@ -18,8 +18,7 @@ namespace TLP.UdonUtils.DesignPatterns.MVC
         public Controller Controller { get; private set; }
         private UdonEvent _modelChangeEvent;
 
-        protected virtual void OnDestroy()
-        {
+        protected virtual void OnDestroy() {
 #if TLP_DEBUG
             DebugLog(nameof(OnDestroy));
 #endif
@@ -27,67 +26,54 @@ namespace TLP.UdonUtils.DesignPatterns.MVC
         }
 
         #region PublicAPI
-
         [PublicAPI]
-        public bool Initialize(Controller optionalController, Model model)
-        {
+        public bool Initialize(Controller optionalController, Model model) {
 #if TLP_DEBUG
             DebugLog(nameof(Initialize));
 #endif
-            if (HasError)
-            {
+            if (HasError) {
                 Error($"Can not initialize again due to previous critical error: '{CriticalError}'");
                 return false;
             }
 
-            if (Initialized)
-            {
+            if (Initialized) {
                 Warn("Already initialized");
                 return false;
             }
 
-            if (!Utilities.IsValid(model))
-            {
+            if (!Utilities.IsValid(model)) {
                 Error($"{nameof(model)} invalid");
                 return false;
             }
 
-            if (model.HasError)
-            {
+            if (model.HasError) {
                 Error($"{nameof(model)} has critical error: '{model.CriticalError}'");
                 return false;
             }
 
-            if (!model.Initialized)
-            {
+            if (!model.Initialized) {
                 Error($"{nameof(model)} is not initialized");
                 return false;
             }
 
 
-            if (Utilities.IsValid(optionalController))
-            {
-                if (optionalController.HasError)
-                {
+            if (Utilities.IsValid(optionalController)) {
+                if (optionalController.HasError) {
                     Error($"{nameof(optionalController)} has critical error: '{optionalController.CriticalError}'");
                     return false;
                 }
 
-                if (!optionalController.Initialized)
-                {
+                if (!optionalController.Initialized) {
                     Error($"{nameof(optionalController)} is not initialized");
                     return false;
                 }
 
                 Controller = optionalController;
-            }
-            else
-            {
+            } else {
                 Controller = null;
             }
 
-            if (!Utilities.IsValid(model.ChangeEvent))
-            {
+            if (!Utilities.IsValid(model.ChangeEvent)) {
                 Error($"{nameof(model.ChangeEvent)} invalid");
                 return false;
             }
@@ -99,8 +85,7 @@ namespace TLP.UdonUtils.DesignPatterns.MVC
             // setting it to true to prevent attempts to re-initialize controllers that have
             // failed to initialize and are in need of cleanup
             Initialized = true;
-            if (InitializeInternal())
-            {
+            if (InitializeInternal()) {
                 return true;
             }
 
@@ -109,26 +94,22 @@ namespace TLP.UdonUtils.DesignPatterns.MVC
             return false;
         }
 
-        public bool DeInitialize()
-        {
+        public bool DeInitialize() {
 #if TLP_DEBUG
             DebugLog(nameof(DeInitialize));
 #endif
-            if (!Initialized)
-            {
+            if (!Initialized) {
                 return false;
             }
 
-            if (Utilities.IsValid(_modelChangeEvent))
-            {
+            if (Utilities.IsValid(_modelChangeEvent)) {
                 _modelChangeEvent.RemoveListener(this, false);
                 _modelChangeEvent = null;
             }
 
             Model = null;
 
-            if (DeInitializeInternal())
-            {
+            if (DeInitializeInternal()) {
                 Initialized = false;
                 CriticalError = null;
                 return true;
@@ -139,28 +120,19 @@ namespace TLP.UdonUtils.DesignPatterns.MVC
             HasError = true;
             return false;
         }
-
         #endregion
 
         #region Hooks
-
         public abstract void OnModelChanged();
-
         #endregion
 
         #region Internal
-
-        public override void OnEvent(string eventName)
-        {
-            switch (eventName)
-            {
+        public override void OnEvent(string eventName) {
+            switch (eventName) {
                 case nameof(OnModelChanged):
-                    if (Initialized && !HasError)
-                    {
+                    if (Initialized && !HasError) {
                         OnModelChanged();
-                    }
-                    else
-                    {
+                    } else {
                         Warn($"Ignoring '{eventName}' as not initialized or error has occurred");
                         base.OnEvent(eventName);
                     }
@@ -171,7 +143,6 @@ namespace TLP.UdonUtils.DesignPatterns.MVC
                     return;
             }
         }
-
         #endregion
     }
 }

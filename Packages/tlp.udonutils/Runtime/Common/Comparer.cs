@@ -12,41 +12,33 @@ namespace TLP.UdonUtils.Common
         public Comparer optionalFallback;
 
         #region Public API
-
         [PublicAPI]
-        public bool Compare(UdonSharpBehaviour first, UdonSharpBehaviour second, out int comparisonResult)
-        {
+        public bool Compare(UdonSharpBehaviour first, UdonSharpBehaviour second, out int comparisonResult) {
 #if TLP_DEBUG
             DebugLog(nameof(Compare));
 #endif
 
-            if (!ComparisonImplementation(first, second, out comparisonResult))
-            {
+            if (!ComparisonImplementation(first, second, out comparisonResult)) {
                 return false;
             }
 
-            if (comparisonResult != 0)
-            {
+            if (comparisonResult != 0) {
                 // elements are not equal according to this comparison, no further checking needed
-                return true; 
+                return true;
             }
 
             bool noFallbackAvailable = !Utilities.IsValid(optionalFallback);
             return noFallbackAvailable || optionalFallback.Compare(first, second, out comparisonResult);
         }
-
-
         #endregion
 
 
         #region internal
-
         protected abstract bool ComparisonImplementation(
-            UdonSharpBehaviour first,
-            UdonSharpBehaviour second,
-            out int comparisonResult
+                UdonSharpBehaviour first,
+                UdonSharpBehaviour second,
+                out int comparisonResult
         );
-
         #endregion
     }
 }

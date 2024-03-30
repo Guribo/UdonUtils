@@ -31,12 +31,10 @@ namespace TLP.UdonUtils.Testing
 
         protected internal TestCaseStatus Status = TestCaseStatus.Ready;
 
-        public void Initialize()
-        {
-            if (!TestController)
-            {
+        public void Initialize() {
+            if (!TestController) {
                 Error(
-                    "[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Test.Initialize: invalid test controller"
+                        "[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Test.Initialize: invalid test controller"
                 );
                 return;
             }
@@ -45,12 +43,10 @@ namespace TLP.UdonUtils.Testing
             InitializeTest();
         }
 
-        public void Run()
-        {
-            if (!TestController)
-            {
+        public void Run() {
+            if (!TestController) {
                 Error(
-                    "[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Test.Run: invalid test controller"
+                        "[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Test.Run: invalid test controller"
                 );
                 return;
             }
@@ -59,12 +55,10 @@ namespace TLP.UdonUtils.Testing
             RunTest();
         }
 
-        public void CleanUp()
-        {
-            if (!TestController)
-            {
+        public void CleanUp() {
+            if (!TestController) {
                 Error(
-                    "[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Test.CleanUp: invalid test controller"
+                        "[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Test.CleanUp: invalid test controller"
                 );
                 return;
             }
@@ -75,9 +69,7 @@ namespace TLP.UdonUtils.Testing
 
 
         #region Hooks
-
-        protected virtual void InitializeTest()
-        {
+        protected virtual void InitializeTest() {
             // TODO your init behaviour here
             // ...
 
@@ -86,8 +78,7 @@ namespace TLP.UdonUtils.Testing
             TestController.TestInitialized(true);
         }
 
-        protected virtual void RunTest()
-        {
+        protected virtual void RunTest() {
             // TODO your test behaviour here
             // ...
 
@@ -96,8 +87,7 @@ namespace TLP.UdonUtils.Testing
             TestController.TestCompleted(true);
         }
 
-        protected virtual void CleanUpTest()
-        {
+        protected virtual void CleanUpTest() {
             // TODO your clean up behaviour here
             // ...
 
@@ -105,7 +95,6 @@ namespace TLP.UdonUtils.Testing
             // can be later in update or whenever but MUST be called at some point
             TestController.TestCleanedUp(true);
         }
-
         #endregion
     }
 }

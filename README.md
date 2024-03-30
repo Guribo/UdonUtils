@@ -30,6 +30,12 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [3.0.0-rc.3] - 2024-03-30
+
+#### 🚀 Features
+
+- *(TimeSource)* Add DeltaTime getter, reformat codebase
+
 ### [3.0.0-rc.2] - 2024-03-29
 
 #### 🚀 Features

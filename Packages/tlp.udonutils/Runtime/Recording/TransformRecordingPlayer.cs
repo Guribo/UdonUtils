@@ -21,15 +21,14 @@ namespace TLP.UdonUtils.Recording
 
         [FormerlySerializedAs("playOnEnable")]
         public bool PlayOnEnable;
+
         internal float PlaybackStart;
 
         [SerializeField]
         private Transform Target;
 
-        public void OnEnable()
-        {
-            if (!PlayOnEnable)
-            {
+        public void OnEnable() {
+            if (!PlayOnEnable) {
                 enabled = false;
                 return;
             }
@@ -37,17 +36,15 @@ namespace TLP.UdonUtils.Recording
             PlaybackStart = Time.realtimeSinceStartup;
         }
 
-        public void Update()
-        {
-            if (!Utilities.IsValid(Target))
-            {
+        public void Update() {
+            if (!Utilities.IsValid(Target)) {
                 return;
             }
 
             float time = Time.realtimeSinceStartup - PlaybackStart;
             Target.SetPositionAndRotation(
-                TransformRecorder.GetPosition(time),
-                TransformRecorder.GetRotation(time)
+                    TransformRecorder.GetPosition(time),
+                    TransformRecorder.GetRotation(time)
             );
         }
     }

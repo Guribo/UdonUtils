@@ -17,32 +17,28 @@ namespace TLP.UdonUtils.Rendering
         /// <param name="actionUsingPatch">Code that shall run with the patched method. Afterwards the patch is removed again.</param>
         /// <exception cref="Exception">should patching or anything else fail</exception>
         public static void PatchMethod(
-            Type targetClass,
-            string targetMethod,
-            Type injectedClass,
-            string injectMethod,
-            Action<Harmony> actionUsingPatch,
-            Harmony harmony = null
-        )
-        {
+                Type targetClass,
+                string targetMethod,
+                Type injectedClass,
+                string injectMethod,
+                Action<Harmony> actionUsingPatch,
+                Harmony harmony = null
+        ) {
             const string harmonyId = "TLP.UdonUtils.Tests.Editor";
             var activeHarmony = harmony ?? new Harmony(harmonyId);
 
             var origInfo = AccessTools.Method(targetClass, targetMethod);
             bool success = false;
-            try
-            {
+            try {
                 activeHarmony.Patch(
-                    origInfo,
-                    new HarmonyMethod(injectedClass, injectMethod)
+                        origInfo,
+                        new HarmonyMethod(injectedClass, injectMethod)
                 );
                 success = true;
                 actionUsingPatch.Invoke(activeHarmony);
             }
-            finally
-            {
-                if (success)
-                {
+            finally {
+                if (success) {
                     activeHarmony.Unpatch(origInfo, HarmonyPatchType.Prefix, harmonyId);
                 }
             }
@@ -58,20 +54,19 @@ namespace TLP.UdonUtils.Rendering
         /// <param name="actionUsingPatch">Code that shall run with the patched method. Afterwards the patch is removed again.</param>
         /// <exception cref="Exception">should patching or anything else fail</exception>
         public static Harmony PatchMethodWithoutCleanup(
-            Type targetClass,
-            string targetMethod,
-            Type injectedClass,
-            string injectMethod,
-            Harmony harmony = null
-        )
-        {
+                Type targetClass,
+                string targetMethod,
+                Type injectedClass,
+                string injectMethod,
+                Harmony harmony = null
+        ) {
             const string harmonyId = "TLP.UdonUtils.Tests.Editor";
             var activeHarmony = harmony ?? new Harmony(harmonyId);
 
             var origInfo = AccessTools.Method(targetClass, targetMethod);
             activeHarmony.Patch(
-                origInfo,
-                new HarmonyMethod(injectedClass, injectMethod)
+                    origInfo,
+                    new HarmonyMethod(injectedClass, injectMethod)
             );
             Debug.Log($"Patched {targetMethod} with {injectMethod}");
 

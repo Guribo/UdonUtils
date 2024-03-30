@@ -13,30 +13,24 @@ namespace TLP.UdonUtils.Common
 
         public GameObject gameObjectToToggle;
 
-        private void LateUpdate()
-        {
-            if (Input.GetKeyDown(gameobjectToggle))
-            {
+        private void LateUpdate() {
+            if (Input.GetKeyDown(gameobjectToggle)) {
                 Toggle();
             }
         }
 
-        internal void Toggle()
-        {
-            if (Utilities.IsValid(gameObjectToToggle))
-            {
+        internal void Toggle() {
+            if (Utilities.IsValid(gameObjectToToggle)) {
                 gameObjectToToggle.SetActive(!gameObjectToToggle.activeSelf);
-                var sound = (gameObjectToToggle.activeSelf ? activationSound : deactivationSound);
+                var sound = gameObjectToToggle.activeSelf ? activationSound : deactivationSound;
                 if (Utilities.IsValid(sound)
-                    && Utilities.IsValid(sound.clip))
-                {
+                    && Utilities.IsValid(sound.clip)) {
                     sound.PlayOneShot(sound.clip);
                 }
             }
         }
 
-        public override void Interact()
-        {
+        public override void Interact() {
             Toggle();
         }
     }

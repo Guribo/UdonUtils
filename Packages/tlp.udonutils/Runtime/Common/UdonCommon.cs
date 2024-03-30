@@ -14,21 +14,17 @@ namespace TLP.UdonUtils.Common
         /// <param name="type"></param>
         /// <param name="start"></param>
         /// <returns>the found component or null if none was found</returns>
-        public static Component FindTopComponent(Type type, Transform start)
-        {
-            if (!Utilities.IsValid(start))
-            {
+        public static Component FindTopComponent(Type type, Transform start) {
+            if (!Utilities.IsValid(start)) {
                 return null;
             }
 
             Component topComponent = null;
             var topTransform = start;
 
-            do
-            {
+            do {
                 var behaviour = topTransform.GetComponent(type);
-                if (Utilities.IsValid(behaviour))
-                {
+                if (Utilities.IsValid(behaviour)) {
                     topComponent = behaviour;
                 }
 
@@ -41,33 +37,28 @@ namespace TLP.UdonUtils.Common
         /**
          * O(n) - scales linearly with number of players present, don't use in Update()!
          */
-        public static VRCPlayerApi GetClosestPlayer(ref VRCPlayerApi[] players, Vector3 location)
-        {
+        public static VRCPlayerApi GetClosestPlayer(ref VRCPlayerApi[] players, Vector3 location) {
             int playerCount = VRCPlayerApi.GetPlayerCount();
-            if (players == null || players.Length < playerCount)
-            {
+            if (players == null || players.Length < playerCount) {
                 players = new VRCPlayerApi[playerCount * 2];
             }
 
             VRCPlayerApi.GetPlayers(players);
             VRCPlayerApi closestPlayer = null;
             float closestDistance = float.MaxValue;
-            for (int i = 0; i < playerCount; i++)
-            {
+            for (int i = 0; i < playerCount; i++) {
                 var playerInRange = players[i];
-                if (!Utilities.IsValid(playerInRange))
-                {
+                if (!Utilities.IsValid(playerInRange)) {
                     continue;
                 }
 
                 var distanceVector = location - playerInRange.GetPosition();
                 var projectedDistance = Vector3.ProjectOnPlane(
-                    distanceVector,
-                    playerInRange.GetRotation() * Vector3.up
+                        distanceVector,
+                        playerInRange.GetRotation() * Vector3.up
                 );
                 float projectedDistanceMagnitude = projectedDistance.magnitude;
-                if (projectedDistanceMagnitude < closestDistance)
-                {
+                if (projectedDistanceMagnitude < closestDistance) {
                     closestDistance = projectedDistanceMagnitude;
                     closestPlayer = playerInRange;
                 }
@@ -76,38 +67,32 @@ namespace TLP.UdonUtils.Common
             return closestPlayer;
         }
 
-        public static VRCPlayerApi GetClosestNonLocalPlayer(ref VRCPlayerApi[] players, Vector3 location)
-        {
+        public static VRCPlayerApi GetClosestNonLocalPlayer(ref VRCPlayerApi[] players, Vector3 location) {
             int playerCount = VRCPlayerApi.GetPlayerCount();
-            if (players == null || players.Length < playerCount)
-            {
+            if (players == null || players.Length < playerCount) {
                 players = new VRCPlayerApi[playerCount * 2];
             }
 
             VRCPlayerApi.GetPlayers(players);
             VRCPlayerApi closestPlayer = null;
             float closestDistance = float.MaxValue;
-            for (int i = 0; i < playerCount; i++)
-            {
+            for (int i = 0; i < playerCount; i++) {
                 var playerInRange = players[i];
-                if (!Utilities.IsValid(playerInRange))
-                {
+                if (!Utilities.IsValid(playerInRange)) {
                     continue;
                 }
 
-                if (playerInRange.isLocal)
-                {
+                if (playerInRange.isLocal) {
                     continue;
                 }
 
                 var distanceVector = location - playerInRange.GetPosition();
                 var projectedDistance = Vector3.ProjectOnPlane(
-                    distanceVector,
-                    playerInRange.GetRotation() * Vector3.up
+                        distanceVector,
+                        playerInRange.GetRotation() * Vector3.up
                 );
                 float projectedDistanceMagnitude = projectedDistance.magnitude;
-                if (projectedDistanceMagnitude < closestDistance)
-                {
+                if (projectedDistanceMagnitude < closestDistance) {
                     closestDistance = projectedDistanceMagnitude;
                     closestPlayer = playerInRange;
                 }
@@ -117,20 +102,17 @@ namespace TLP.UdonUtils.Common
         }
 
         public static int GetPlayersInRangeNoAlloc(
-            ref VRCPlayerApi[] players,
-            Vector3 position,
-            float radius,
-            VRCPlayerApi[] outPlayers
-        )
-        {
+                ref VRCPlayerApi[] players,
+                Vector3 position,
+                float radius,
+                VRCPlayerApi[] outPlayers
+        ) {
             int playerCount = VRCPlayerApi.GetPlayerCount();
-            if (players == null || players.Length < playerCount)
-            {
+            if (players == null || players.Length < playerCount) {
                 players = new VRCPlayerApi[playerCount * 2];
             }
 
-            if (outPlayers == null)
-            {
+            if (outPlayers == null) {
                 return 0;
             }
 
@@ -138,18 +120,14 @@ namespace TLP.UdonUtils.Common
 
             int playersFound = 0;
 
-            for (int i = 0; i < playerCount; i++)
-            {
+            for (int i = 0; i < playerCount; i++) {
                 var playerInRange = players[i];
-                if (!Utilities.IsValid(playerInRange))
-                {
+                if (!Utilities.IsValid(playerInRange)) {
                     continue;
                 }
 
-                if (Vector3.Distance(position, playerInRange.GetPosition()) < radius)
-                {
-                    if (outPlayers.Length >= playersFound)
-                    {
+                if (Vector3.Distance(position, playerInRange.GetPosition()) < radius) {
+                    if (outPlayers.Length >= playersFound) {
                         outPlayers[playersFound] = playerInRange;
                         ++playersFound;
                     }
@@ -159,8 +137,7 @@ namespace TLP.UdonUtils.Common
             return playersFound;
         }
 
-        public static string UdonTypeNameShort(string udonTypeName)
-        {
+        public static string UdonTypeNameShort(string udonTypeName) {
             string[] productTypeName = udonTypeName.Split('.');
             return productTypeName.Length > 0 ? productTypeName[productTypeName.Length - 1] : udonTypeName;
         }
@@ -171,36 +148,30 @@ namespace TLP.UdonUtils.Common
         /// <param name="start"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static T[] GetBehavioursInChildren<T>(this Transform start) where T : UdonSharpBehaviour
-        {
+        public static T[] GetBehavioursInChildren<T>(this Transform start) where T : UdonSharpBehaviour {
             var toProcess = new DataList();
             toProcess.Add(start);
             var result = new DataList();
 
-            while (toProcess.Count > 0)
-            {
+            while (toProcess.Count > 0) {
                 var current = (Transform)toProcess[0].Reference;
                 toProcess.RemoveAt(0);
-                if (!Utilities.IsValid(toProcess))
-                {
+                if (!Utilities.IsValid(toProcess)) {
                     continue;
                 }
 
                 var behaviour = current.gameObject.GetComponent<T>();
-                if (Utilities.IsValid(behaviour))
-                {
+                if (Utilities.IsValid(behaviour)) {
                     result.Add(behaviour);
                 }
 
-                for (int i = 0; i < current.childCount; i++)
-                {
+                for (int i = 0; i < current.childCount; i++) {
                     toProcess.Add(current.GetChild(i));
                 }
             }
 
             var outPut = new T[result.Count];
-            for (int i = 0; i < result.Count; i++)
-            {
+            for (int i = 0; i < result.Count; i++) {
                 outPut[i] = (T)result[i].Reference;
             }
 

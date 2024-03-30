@@ -24,39 +24,32 @@ namespace TLP.UdonUtils.Player
 
         private Vector3 _smoothingVelocity;
 
-        public void Start()
-        {
+        public void Start() {
             OwnTransform = transform;
         }
 
-        public override void PostLateUpdate()
-        {
-            if (UseLocalPlayerByDefault)
-            {
+        public override void PostLateUpdate() {
+            if (UseLocalPlayerByDefault) {
                 Player = Networking.LocalPlayer;
             }
 
-            if (!Utilities.IsValid(Player))
-            {
+            if (!Utilities.IsValid(Player)) {
                 Warn("Player is not valid");
                 return;
             }
 
-            if (SmoothTime <= 0f)
-            {
+            if (SmoothTime <= 0f) {
                 OwnTransform.SetPositionAndRotation(Player.GetPosition(), Player.GetRotation());
-            }
-            else
-            {
+            } else {
                 var newPosition = Vector3.SmoothDamp(
-                    OwnTransform.position,
-                    Player.GetPosition(),
-                    ref _smoothingVelocity,
-                    SmoothTime
+                        OwnTransform.position,
+                        Player.GetPosition(),
+                        ref _smoothingVelocity,
+                        SmoothTime
                 );
                 OwnTransform.SetPositionAndRotation(
-                    newPosition,
-                    Player.GetRotation()
+                        newPosition,
+                        Player.GetRotation()
                 );
             }
         }

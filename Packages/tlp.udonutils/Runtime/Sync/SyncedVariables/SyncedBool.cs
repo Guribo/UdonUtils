@@ -22,15 +22,13 @@ namespace TLP.UdonUtils.Sync.SyncedVariables
             set
             {
                 bool valueUnchanged = SyncedValue == value;
-                if (valueUnchanged)
-                {
+                if (valueUnchanged) {
                     return;
                 }
 
                 SyncedValue = value;
 
-                if (Networking.IsOwner(gameObject))
-                {
+                if (Networking.IsOwner(gameObject)) {
                     RequestSerialization();
                 }
 
@@ -39,10 +37,8 @@ namespace TLP.UdonUtils.Sync.SyncedVariables
             get => SyncedValue;
         }
 
-        public override void OnPostSerialization(SerializationResult result)
-        {
-            if (result.success)
-            {
+        public override void OnPostSerialization(SerializationResult result) {
+            if (result.success) {
                 return;
             }
 
@@ -50,35 +46,28 @@ namespace TLP.UdonUtils.Sync.SyncedVariables
         }
 
 
-        internal bool ListenerSetupValid()
-        {
+        internal bool ListenerSetupValid() {
             bool listenersNull = listeners == null;
-            if (listenersNull)
-            {
+            if (listenersNull) {
                 return false;
             }
 
             bool targetVariablesNull = targetFieldNames == null;
-            if (targetVariablesNull)
-            {
+            if (targetVariablesNull) {
                 return false;
             }
 
             return listeners.Length == targetFieldNames.Length;
         }
 
-        internal void NotifyListeners()
-        {
-            if (!ListenerSetupValid())
-            {
+        internal void NotifyListeners() {
+            if (!ListenerSetupValid()) {
                 Debug.LogError("Invalid listener setup");
                 return;
             }
 
-            for (int i = 0; i < listeners.Length; i++)
-            {
-                if (Utilities.IsValid(listeners[i]))
-                {
+            for (int i = 0; i < listeners.Length; i++) {
+                if (Utilities.IsValid(listeners[i])) {
                     listeners[i].SetProgramVariable(targetFieldNames[i], SyncedValue);
                 }
             }

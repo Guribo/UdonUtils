@@ -9,7 +9,6 @@ namespace TLP.UdonUtils.Sources.Time
     public class ConstantTime : TimeSource
     {
         #region Settings
-
         [Tooltip("Constant time returned by Time and TimeAsDouble")]
         [FormerlySerializedAs("Value")]
         public double Seconds;
@@ -20,37 +19,38 @@ namespace TLP.UdonUtils.Sources.Time
         [Tooltip("Constant time returned by FixedDeltaTime")]
         public float FixedDeltaTimeSeconds;
 
+        [Tooltip("Constant time returned by DeltaTime")]
+        public float DeltaTimeSeconds;
         #endregion
 
         #region TimeSource Overrides
-
         /// <summary>
         /// Returns the constant <see cref="Seconds"/>.
         /// </summary>
         /// <returns>Time in seconds</returns>
-        public override float Time()
-        {
+        public override float Time() {
             return (float)Seconds;
         }
 
         /// <returns>the constant <see cref="Seconds"/></returns>
-        public override double TimeAsDouble()
-        {
+        public override double TimeAsDouble() {
             return Seconds;
         }
 
         /// <returns>the constant <see cref="FixedDeltaTimeSeconds"/></returns>
-        public override float FixedDeltaTime()
-        {
+        public override float FixedDeltaTime() {
             return FixedDeltaTimeSeconds;
         }
 
         /// <returns>the constant <see cref="SmoothDeltaTimeSeconds"/></returns>
-        public override float SmoothDeltaTime()
-        {
+        public override float SmoothDeltaTime() {
             return SmoothDeltaTimeSeconds;
         }
 
+        /// <returns>the constant <see cref="DeltaTimeSeconds"/></returns>
+        public override float DeltaTime() {
+            return DeltaTimeSeconds;
+        }
         #endregion
     }
 }

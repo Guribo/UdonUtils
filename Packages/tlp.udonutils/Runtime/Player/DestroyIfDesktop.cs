@@ -15,18 +15,14 @@ namespace TLP.UdonUtils.Player
         [PublicAPI]
         public new const int ExecutionOrder = TlpLogger.ExecutionOrder + 1;
 
-        private void Start()
-        {
+        private void Start() {
             #region TLP_DEBUG
-
 #if TLP_DEBUG
             DebugLog(nameof(Start));
 #endif
-
             #endregion
 
-            if (!Networking.LocalPlayer.IsUserInVR())
-            {
+            if (!Networking.LocalPlayer.IsUserInVR()) {
                 DebugLog($"Destroying {name}");
                 Destroy(gameObject);
             }

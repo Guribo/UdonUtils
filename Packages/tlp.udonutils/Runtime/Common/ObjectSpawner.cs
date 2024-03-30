@@ -8,22 +8,18 @@ namespace TLP.UdonUtils.Common
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class ObjectSpawner : UdonSharpBehaviour
     {
-        public void Start()
-        {
+        public void Start() {
             int playersCount = VRCPlayerApi.GetPlayerCount();
             var players = new VRCPlayerApi[playersCount];
-            foreach (var vrcPlayerApi in VRCPlayerApi.GetPlayers(players))
-            {
+            foreach (var vrcPlayerApi in VRCPlayerApi.GetPlayers(players)) {
                 OnPlayerJoined(vrcPlayerApi);
             }
         }
 
         public GameObject prefab;
 
-        public override void OnPlayerJoined(VRCPlayerApi player)
-        {
-            if (!Utilities.IsValid(player))
-            {
+        public override void OnPlayerJoined(VRCPlayerApi player) {
+            if (!Utilities.IsValid(player)) {
                 return;
             }
 
