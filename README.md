@@ -30,19 +30,22 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
-### [3.0.0-rc.3] - 2024-03-30
+### [3.0.0] - 2024-03-30
 
 #### 🚀 Features
 
+- [**breaking**] Add time sources
+- *(TlpAccurateSyncBehaviour)* Add setup checks to start
 - *(TimeSource)* Add DeltaTime getter, reformat codebase
 
-### [3.0.0-rc.2] - 2024-03-29
+#### ⚙️ Miscellaneous Tasks
 
-#### 🚀 Features
+- Append changelog to readme
+- Prepare release 3.0.0
+- Revert deletion of Testing folder
+- Bump version
 
-- *(TlpAccurateSyncBehaviour)* Add setup checks to start
-
-### [3.0.0-rc.1] - 2024-03-28
+### [2.0.0] - 2023-11-16
 
 #### 🚀 Features
 
@@ -60,7 +63,6 @@ All notable changes to this project will be documented in this file.
 - Add lights and sfx to light, add more visuals, add toggle
 - Create slideshow with buttons
 - Update version
-- [**breaking**] Add time sources
 
 #### 🚜 Refactor
 
@@ -74,12 +76,6 @@ All notable changes to this project will be documented in this file.
 #### 🧪 Testing
 
 - Add some missing method implementations
-
-#### ⚙️ Miscellaneous Tasks
-
-- Append changelog to readme
-- Prepare release 3.0.0
-- Revert deletion of Testing folder
 
 ### [1.1.1] - 2023-10-05
 
