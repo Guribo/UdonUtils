@@ -30,6 +30,12 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [4.0.1] - 2024-04-07
+
+#### 🐛 Bug Fixes
+
+- *(SanityTest)* Correct object name
+
 ### [4.0.0] - 2024-04-07
 
 #### 🚀 Features
