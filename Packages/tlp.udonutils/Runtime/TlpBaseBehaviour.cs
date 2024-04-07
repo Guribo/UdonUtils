@@ -115,22 +115,26 @@ namespace TLP.UdonUtils
         }
 
         public override void OnPreSerialization() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
             DebugLog(nameof(OnPreSerialization));
+#endif
+            #endregion
+
             if (PendingSerializations < 1) {
                 PendingSerializations = 1;
             }
         }
 
         public override void OnPostSerialization(SerializationResult result) {
+            #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnPostSerialization));
+            DebugLog(
+                    $"{nameof(OnPostSerialization)}: {(result.success ? $"Sent {result.byteCount} bytes after {PendingSerializations} send requests" : $"Sending failed, {PendingSerializations} send requests active")}");
 #endif
+            #endregion
+
             if (result.success) {
-#if TLP_DEBUG
-                DebugLog(
-                        $"{nameof(OnPostSerialization)} wrote {result.byteCount} bytes of {PendingSerializations} serialization requests to the network"
-                );
-#endif
                 PendingSerializations = 0;
                 return;
             }
@@ -154,13 +158,13 @@ namespace TLP.UdonUtils
             #endregion
 
             if (!SetupAndValidate()) {
-                ErrorAndDisableGameObject($"Some dependencies are not set up correctly. Deactivating {gameObject.transform.GetPathInScene()}");
+                ErrorAndDisableGameObject(
+                        $"Some dependencies are not set up correctly. Deactivating {gameObject.transform.GetPathInScene()}");
             }
         }
         #endregion
 
         #region Hooks
-
         /// <summary>
         /// Hook that is called during <see cref="Start"/> that shall be used to verify
         /// that e.g. all serialized references are setup correctly.

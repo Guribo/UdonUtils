@@ -9,6 +9,9 @@ using VRC.Udon.Common;
 
 namespace TLP.UdonUtils.Sync
 {
+    /// <summary>
+    /// Base Sync Behaviour for movement prediction based on received values from the current owner
+    /// </summary>
     [DefaultExecutionOrder(ExecutionOrder)]
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public abstract class TlpAccurateSyncBehaviour : TlpBaseBehaviour
@@ -27,38 +30,30 @@ namespace TLP.UdonUtils.Sync
         #endregion
 
         #region NetworkState
-        public double SendTime
-        {
-            get
-            {
-                DebugLog($"Get {nameof(SendTime)} = {SyncedSendTime}s");
-                return SyncedSendTime;
-            }
-            set
-            {
-                DebugLog($"Set {nameof(SendTime)} = {SyncedSendTime}s to {value}s");
-                SyncedSendTime = value;
-                DebugLog($"{nameof(SendTime)} = {SyncedSendTime}s");
-            }
-        }
-
         [UdonSynced]
-        public double SyncedSendTime = double.MinValue;
+        [SerializeField]
+        private double SyncedSendTime = double.MinValue;
 
         #region Working Copy
-        protected internal double WorkingSendTime;
+        protected internal double WorkingSendTime = double.MinValue;
         #endregion
         #endregion
 
         #region Settings
-        public bool UseFixedUpdate;
-
         [Tooltip("0 [s] by default (full prediction), number of seconds that shall be removed from prediction")]
         [Range(0, 1)]
         public float PredictionReduction;
         #endregion
 
         #region Network Events
+        /// <summary>
+        /// Copy the working state to the network state
+        /// </summary>
+        public override void OnPreSerialization() {
+            base.OnPreSerialization();
+            CreateNetworkStateFromWorkingState();
+        }
+
         public override void OnDeserialization(DeserializationResult deserializationResult) {
             base.OnDeserialization(deserializationResult);
             DebugLog($"Latency VRC = {deserializationResult.Latency()} vs own {GetAge()}");
@@ -78,44 +73,6 @@ namespace TLP.UdonUtils.Sync
         }
         #endregion
 
-        #region U# Lifecycle
-        public virtual void Update() {
-            if (UseFixedUpdate) {
-                return;
-            }
-
-            #region TLP_DEBUG
-#if TLP_DEBUG
-            DebugLog(nameof(Update));
-#endif
-            #endregion
-
-            if (Networking.IsOwner(gameObject)) {
-                return;
-            }
-
-            PredictMovement(GetElapsed(), Time.deltaTime);
-        }
-
-        public virtual void FixedUpdate() {
-            if (!UseFixedUpdate) {
-                return;
-            }
-
-            #region TLP_DEBUG
-#if TLP_DEBUG
-            DebugLog(nameof(FixedUpdate));
-#endif
-            #endregion
-
-            if (Networking.IsOwner(gameObject)) {
-                return;
-            }
-
-            PredictMovement(GetElapsed(), Time.fixedDeltaTime);
-        }
-        #endregion
-
         #region Hook Implementations
         protected override bool SetupAndValidate() {
             if (!base.SetupAndValidate()) return false;
@@ -124,12 +81,12 @@ namespace TLP.UdonUtils.Sync
                 return false;
             }
 
-            if (!Utilities.IsValid(Snapshot)) {
-                Error($"{nameof(Snapshot)} not set");
-                return false;
+            if (Utilities.IsValid(Snapshot)) {
+                return true;
             }
 
-            return true;
+            Error($"{nameof(Snapshot)} not set");
+            return false;
         }
         #endregion
 
@@ -144,19 +101,38 @@ namespace TLP.UdonUtils.Sync
         /// </summary>
         /// <param name="receivedSnapshotAge">number of seconds that have passed relative to
         /// <see cref="TimeSource"/> time since the recording of the latest <see cref="SyncedSendTime"/></param>
-        /// <param name="deltaTime">depending on <see cref="UseFixedUpdate"/> it is
-        /// either <see cref="Time.deltaTime"/> or <see cref="Time.fixedDeltaTime"/></param>
+        /// <param name="deltaTime">time since previous update</param>
         protected abstract void PredictMovement(float receivedSnapshotAge, float deltaTime);
 
         protected virtual void CreateWorkingCopyOfNetworkState() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
             DebugLog(nameof(CreateWorkingCopyOfNetworkState));
+#endif
+            #endregion
+
             WorkingSendTime = SyncedSendTime;
+        }
+
+        protected virtual void CreateNetworkStateFromWorkingState() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(CreateNetworkStateFromWorkingState));
+#endif
+            #endregion
+
+            SyncedSendTime = WorkingSendTime;
         }
         #endregion
 
         #region Internal
         internal float GetElapsed() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
             DebugLog(nameof(GetElapsed));
+#endif
+            #endregion
+
             return (float)(GetAge() - PredictionReduction);
         }
 
@@ -171,7 +147,13 @@ namespace TLP.UdonUtils.Sync
         }
 
         internal double GetAge() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
             DebugLog($"{nameof(GetAge)}: {NetworkTime.TimeAsDouble()} - {WorkingSendTime}");
+
+#endif
+            #endregion
+
             return NetworkTime.TimeAsDouble() - WorkingSendTime;
         }
         #endregion

@@ -30,6 +30,21 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [5.0.0] - 2024-04-07
+
+#### 🚀 Features
+
+- *(TlpAccurateSyncBehaviour)* Extract Update methods into new child classes: TlpAccurateSyncBehaviourUpdate/TlpAccurateSyncBehaviourFixedUpdate
+- *(TlpAccurateSyncBehaviour)* [**breaking**] Remove getter for synced send time, make network state private
+
+#### 🧪 Testing
+
+- *(TlpAccurateSyncBehaviour)* Verify update methods provide correct snapshot ages
+
+#### ⚙️ Miscellaneous Tasks
+
+- Bump version
+
 ### [4.0.1] - 2024-04-07
 
 #### 🐛 Bug Fixes
