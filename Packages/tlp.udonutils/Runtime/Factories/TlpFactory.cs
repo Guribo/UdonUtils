@@ -37,15 +37,13 @@ namespace TLP.UdonUtils.Factories
             string factoryTypeName = UdonCommon.UdonTypeNameShort(GetUdonTypeName());
             gameObject.name = string.IsNullOrWhiteSpace(productTypeName)
                     ? factoryTypeName
-                    : $"{factoryTypeName}_for_type_{productTypeName}";
+                    : $"{factoryTypeName}_of_product_{productTypeName}";
         }
 
         private int _failureCount;
 
-        public void Start() {
-#if TLP_DEBUG
-            DebugLog(nameof(Start));
-#endif
+        public override void Start() {
+            base.Start();
 
             if (_initialized) {
                 return;
@@ -73,15 +71,15 @@ namespace TLP.UdonUtils.Factories
 #endif
         }
 
-        public static T GetConcreteFactory<T>(string keyOrUdonTypeName) where T : TlpFactory {
-            string typeName = keyOrUdonTypeName == null ? null : UdonCommon.UdonTypeNameShort(keyOrUdonTypeName);
+        public static T GetConcreteFactory<T>(string productKeyOrUdonTypeName) where T : TlpFactory {
+            string productTypeName = productKeyOrUdonTypeName == null ? null : UdonCommon.UdonTypeNameShort(productKeyOrUdonTypeName);
             string factoryTypeName = UdonCommon.UdonTypeNameShort(GetUdonTypeName<T>());
-            string nameToFind = typeName == null
+            string gameObjectToFind = productTypeName == null
                     ? factoryTypeName
-                    : $"{factoryTypeName}_for_type_{typeName}";
+                    : $"{factoryTypeName}_of_product_{productTypeName}";
 
 #if TLP_DEBUG
-            Debug.Log($"{nameof(GetConcreteFactory)} '{nameToFind}'");
+            Debug.Log($"{nameof(GetConcreteFactory)} '{gameObjectToFind}'");
 #endif
             if (!FindFactoriesGameObject(out var runtimeFactories)) {
                 return null;
@@ -93,13 +91,13 @@ namespace TLP.UdonUtils.Factories
                     continue;
                 }
 
-                if (factory.gameObject.name.Equals(nameToFind, StringComparison.InvariantCultureIgnoreCase)) {
+                if (factory.gameObject.name.Equals(gameObjectToFind, StringComparison.InvariantCultureIgnoreCase)) {
                     return factory;
                 }
             }
 
             Debug.LogError(
-                    $"Factory GameObject '{nameToFind}' with a '{factoryTypeName}' component was not found"
+                    $"GetConcreteFactory '{gameObjectToFind}' with a '{factoryTypeName}' component for product '{productTypeName}' was not found"
             );
             return null;
         }

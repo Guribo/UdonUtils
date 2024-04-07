@@ -1,9 +1,12 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
+using TLP.UdonUtils.Sources;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
 using VRC.SDKBase;
 using VRC.Udon;
+using Object = UnityEngine.Object;
 
 namespace TLP.UdonUtils.Logger
 {
@@ -26,31 +29,36 @@ namespace TLP.UdonUtils.Logger
         [PublicAPI]
         public new const int ExecutionOrder = TlpExecutionOrder.Min;
 
-        private int _startTime;
+        #region Dependencies
+        public TimeSource TimeSource;
+        public FrameCountSource FrameCount;
+        #endregion
 
+
+        #region Settings
         public bool DetailedPlayerInfo = true;
-
         public bool DetailedContextInfo = true;
 
         [Tooltip(
                 "If true will combine all Debug logs of a frame into a single string, can be used to see what has been logged in the entire frame. Can be useful to determine frames with excessive logging."
         )]
         public bool CreateDebugFrameLog;
+        #endregion
 
+        #region State
+        private float _startTime;
         private int _lastFrame = -1;
-        public string DebugLogOfFrame { get; private set; }
-
         private readonly System.Diagnostics.Stopwatch _performanceStopwatch = new System.Diagnostics.Stopwatch();
+        private readonly System.Diagnostics.Stopwatch _frameTimeStopwatch = new System.Diagnostics.Stopwatch();
+        private float _lastLog;
+        #endregion
 
-        public void Start() {
-            _startTime = Networking.GetServerTimeInMilliseconds();
 
-            Info(
-                    $"Starting at server time {_startTime}. Initialization took at least {_performanceStopwatch.Elapsed.TotalMilliseconds}ms."
-            );
+        public void Update() {
+            _frameTimeStopwatch.Restart();
         }
 
-        private int _lastLog;
+        public string DebugLogOfFrame { get; private set; }
 
         protected virtual string Prefix => "[<color=#008000>TLP</color>]";
 
@@ -59,7 +67,8 @@ namespace TLP.UdonUtils.Logger
                 return "";
             }
 
-            int delta = Networking.GetServerTimeInMilliseconds() - _lastLog;
+            if (!Utilities.IsValid(TimeSource)) return "";
+            float delta = TimeSource.Time() - _lastLog;
             _lastLog += delta;
 
 
@@ -87,7 +96,7 @@ namespace TLP.UdonUtils.Logger
             double elapsedAccurate = _performanceStopwatch.Elapsed.TotalMilliseconds;
             _performanceStopwatch.Restart();
             return
-                    $"[<color=#008080>f={Time.frameCount} ntss={Networking.GetServerTimeInMilliseconds() - _startTime}ms nt={Networking.GetServerTimeInMilliseconds()}ms dt={elapsedAccurate:F3}ms</color>][<color=#804040>{(isLocal ? "Local" : "Remote")} owner {playerName}({ownerId}) {(master ? " is Master" : "")}</color>]";
+                    $"[<color=#008080>f={FrameCount.Frame()}({_frameTimeStopwatch.Elapsed.TotalMilliseconds:F3}ms) elapsed={TimeSource.Time() - _startTime:F4}s time={TimeSource.Time():F4}s dt(real)={elapsedAccurate:F3}ms </color>][<color=#804040>{(isLocal ? "Local" : "Remote")} owner {playerName}({ownerId}) {(master ? " is Master" : "")}</color>]";
         }
 
         public virtual void DebugLog(string logPrefix, string message, int executionOrder, Object context) {
@@ -109,10 +118,10 @@ namespace TLP.UdonUtils.Logger
                 return;
             }
 
-            if (Time.frameCount == _lastFrame) {
+            if (FrameCount.Frame() == _lastFrame) {
                 DebugLogOfFrame += $"{completeMessage}\n";
             } else {
-                _lastFrame = Time.frameCount;
+                _lastFrame = FrameCount.Frame();
                 DebugLogOfFrame = $"{completeMessage}\n";
             }
         }
@@ -122,11 +131,11 @@ namespace TLP.UdonUtils.Logger
                 return;
             }
 
-            if (DetailedContextInfo) {
-                Debug.Log($"[INFO]{Prefix}{logPrefix}{GetPlayerInfo(context)} {message}", context);
-            } else {
-                Debug.Log($"[INFO]{GetPlayerInfo(context)} {message}", context);
-            }
+            Debug.Log(
+                    DetailedContextInfo
+                            ? $"[INFO]{Prefix}{logPrefix}{GetPlayerInfo(context)} {message}"
+                            : $"[INFO]{GetPlayerInfo(context)} {message}",
+                    context);
         }
 
         public virtual void Warn(string logPrefix, string message, Object context) {
@@ -134,17 +143,12 @@ namespace TLP.UdonUtils.Logger
                 return;
             }
 
-            if (DetailedContextInfo) {
-                Debug.LogWarning(
-                        $"[<color=#FFFD55>WARN</color>]{Prefix}{logPrefix}{GetPlayerInfo(context)} {message}",
-                        context
-                );
-            } else {
-                Debug.LogWarning(
-                        $"[<color=#FFFD55>WARN</color>]{GetPlayerInfo(context)} {message}",
-                        context
-                );
-            }
+            Debug.LogWarning(
+                    DetailedContextInfo
+                            ? $"[<color=#FFFD55>WARN</color>]{Prefix}{logPrefix}{GetPlayerInfo(context)} {message}"
+                            : $"[<color=#FFFD55>WARN</color>]{GetPlayerInfo(context)} {message}",
+                    context
+            );
         }
 
         public virtual void Error(string logPrefix, string message, Object context) {
@@ -152,17 +156,31 @@ namespace TLP.UdonUtils.Logger
                 return;
             }
 
-            if (DetailedContextInfo) {
-                Debug.LogError(
-                        $"[<color=#EB3324>ERROR</color>]{Prefix}{logPrefix}{GetPlayerInfo(context)} {message}",
-                        context
-                );
-            } else {
-                Debug.LogError(
-                        $"[<color=#EB3324>ERROR</color>]{GetPlayerInfo(context)} {message}",
-                        context
-                );
-            }
+            Debug.LogError(
+                    DetailedContextInfo
+                            ? $"[<color=#EB3324>ERROR</color>]{Prefix}{logPrefix}{GetPlayerInfo(context)} {message}"
+                            : $"[<color=#EB3324>ERROR</color>]{GetPlayerInfo(context)} {message}",
+                    context
+            );
         }
+
+        #region Hook Implementations
+        protected override bool SetupAndValidate() {
+            if (!Utilities.IsValid(TimeSource)) {
+                Error($"{nameof(TimeSource)} is not set");
+                return false;
+            }
+
+            if (!Utilities.IsValid(FrameCount)) {
+                Error($"{nameof(FrameCount)} is not set");
+                return false;
+            }
+
+            if (!base.SetupAndValidate()) return false;
+            _startTime = TimeSource.Time();
+            Info($"Starting at time {_startTime}s.");
+            return true;
+        }
+        #endregion
     }
 }

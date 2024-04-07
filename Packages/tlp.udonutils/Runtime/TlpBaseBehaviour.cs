@@ -145,12 +145,38 @@ namespace TLP.UdonUtils
         }
         #endregion
 
+        #region Unity Lifecycle
+        public virtual void Start() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(Start));
+#endif
+            #endregion
+
+            if (!SetupAndValidate()) {
+                ErrorAndDisableGameObject($"Some dependencies are not set up correctly. Deactivating {gameObject.transform.GetPathInScene()}");
+            }
+        }
+        #endregion
+
+        #region Hooks
+
+        /// <summary>
+        /// Hook that is called during <see cref="Start"/> that shall be used to verify
+        /// that e.g. all serialized references are setup correctly.
+        /// </summary>
+        /// <returns>shall return false if any essential reference is missing</returns>
+        protected virtual bool SetupAndValidate() {
+            return true;
+        }
+        #endregion
+
         #region Logging
         [FormerlySerializedAs("severity")]
         public ELogLevel Severity = ELogLevel.Debug;
 
         private string LOGPrefix =>
-                $"[{ExecutionOrderReadOnly} {gameObject.name}/{UdonCommon.UdonTypeNameShort(GetUdonTypeName())}]";
+                $"[{ExecutionOrderReadOnly} {gameObject.transform.GetPathInScene()}/{UdonCommon.UdonTypeNameShort(GetUdonTypeName())}]";
 
 
         protected TlpLogger Logger { private set; get; }
@@ -311,7 +337,6 @@ namespace TLP.UdonUtils
         #endregion
 
         #region Pool
-        #region UdonPool Interface
         [FormerlySerializedAs("pool")]
         [PublicAPI]
         [HideInInspector]
@@ -360,7 +385,6 @@ namespace TLP.UdonUtils
             DebugLog(nameof(OnPrepareForReturnToPool));
 #endif
         }
-        #endregion
         #endregion
     }
 }

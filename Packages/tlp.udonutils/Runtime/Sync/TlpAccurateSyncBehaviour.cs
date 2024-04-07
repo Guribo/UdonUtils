@@ -13,8 +13,6 @@ namespace TLP.UdonUtils.Sync
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public abstract class TlpAccurateSyncBehaviour : TlpBaseBehaviour
     {
-        public bool Testing;
-
         #region ExecutionOrder
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
@@ -23,14 +21,9 @@ namespace TLP.UdonUtils.Sync
         #endregion
 
         #region Dependencies
-        [SerializeField]
-        protected internal TimeBacklog Backlog;
-
-        [SerializeField]
-        internal TimeSnapshot Snapshot;
-
-        [SerializeField]
-        protected internal TimeSource NetworkTime;
+        public TimeBacklog Backlog;
+        public TimeSnapshot Snapshot;
+        public TimeSource NetworkTime;
         #endregion
 
         #region NetworkState
@@ -70,7 +63,7 @@ namespace TLP.UdonUtils.Sync
             base.OnDeserialization(deserializationResult);
             DebugLog($"Latency VRC = {deserializationResult.Latency()} vs own {GetAge()}");
 
-            if (IsReceivedNetworkStateOutdated()) {
+            if (ReceivedNetworkStateIsOutdated()) {
                 return;
             }
 
@@ -79,32 +72,26 @@ namespace TLP.UdonUtils.Sync
                     Snapshot,
                     (float)WorkingSendTime);
             Backlog.Add(Snapshot, 3f * PredictionReduction);
+
+            // ensure we update as early as possible in the lifecycle of the UdonSharpBehaviour
             PredictMovement(GetElapsed(), 0f);
         }
         #endregion
 
         #region U# Lifecycle
-        public void Start() {
-            if (!Utilities.IsValid(Backlog)) {
-                ErrorAndDisableGameObject($"{nameof(Backlog)} not set");
-            }
-
-            if (!Utilities.IsValid(Snapshot)) {
-                ErrorAndDisableGameObject($"{nameof(Snapshot)} not set");
-            }
-        }
-
         public virtual void Update() {
             if (UseFixedUpdate) {
                 return;
             }
 
+            #region TLP_DEBUG
+#if TLP_DEBUG
             DebugLog(nameof(Update));
+#endif
+            #endregion
 
-            if (!Testing) {
-                if (Networking.IsOwner(gameObject)) {
-                    return;
-                }
+            if (Networking.IsOwner(gameObject)) {
+                return;
             }
 
             PredictMovement(GetElapsed(), Time.deltaTime);
@@ -115,15 +102,34 @@ namespace TLP.UdonUtils.Sync
                 return;
             }
 
+            #region TLP_DEBUG
+#if TLP_DEBUG
             DebugLog(nameof(FixedUpdate));
+#endif
+            #endregion
 
-            if (!Testing) {
-                if (Networking.IsOwner(gameObject)) {
-                    return;
-                }
+            if (Networking.IsOwner(gameObject)) {
+                return;
             }
 
             PredictMovement(GetElapsed(), Time.fixedDeltaTime);
+        }
+        #endregion
+
+        #region Hook Implementations
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) return false;
+            if (!Utilities.IsValid(Backlog)) {
+                Error($"{nameof(Backlog)} not set");
+                return false;
+            }
+
+            if (!Utilities.IsValid(Snapshot)) {
+                Error($"{nameof(Snapshot)} not set");
+                return false;
+            }
+
+            return true;
         }
         #endregion
 
@@ -133,7 +139,14 @@ namespace TLP.UdonUtils.Sync
             timeSnapshot.ServerTime = mostRecentServerTime;
         }
 
-        protected abstract void PredictMovement(float elapsedSinceSent, float deltaTime);
+        /// <summary>
+        /// Hook that allows predicting movement based on elapsed time since the latest received network snapshot.
+        /// </summary>
+        /// <param name="receivedSnapshotAge">number of seconds that have passed relative to
+        /// <see cref="TimeSource"/> time since the recording of the latest <see cref="SyncedSendTime"/></param>
+        /// <param name="deltaTime">depending on <see cref="UseFixedUpdate"/> it is
+        /// either <see cref="Time.deltaTime"/> or <see cref="Time.fixedDeltaTime"/></param>
+        protected abstract void PredictMovement(float receivedSnapshotAge, float deltaTime);
 
         protected virtual void CreateWorkingCopyOfNetworkState() {
             DebugLog(nameof(CreateWorkingCopyOfNetworkState));
@@ -147,8 +160,8 @@ namespace TLP.UdonUtils.Sync
             return (float)(GetAge() - PredictionReduction);
         }
 
-        private bool IsReceivedNetworkStateOutdated() {
-            DebugLog(nameof(IsReceivedNetworkStateOutdated));
+        private bool ReceivedNetworkStateIsOutdated() {
+            DebugLog(nameof(ReceivedNetworkStateIsOutdated));
             if (SyncedSendTime > WorkingSendTime || SyncedSendTime == 0.0) {
                 return false;
             }

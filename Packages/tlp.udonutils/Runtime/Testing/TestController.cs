@@ -56,12 +56,8 @@ namespace TLP.UdonUtils.Testing
         private int _testIndex;
         private bool _pendingNextStep;
 
-        private void Start() {
-            #region TLP_DEBUG
-#if TLP_DEBUG
-            DebugLog(nameof(Start));
-#endif
-            #endregion
+        public override void Start() {
+            base.Start();
 
             if (!InitializeMvc(TestData, TestResultsUi, this, TestDataChangeEvent)) {
                 ErrorAndDisableGameObject($"{LogPrefix} {name}.Start: failed to initialize MVC");

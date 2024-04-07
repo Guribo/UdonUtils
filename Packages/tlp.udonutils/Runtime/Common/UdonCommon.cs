@@ -6,10 +6,13 @@ using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Common
 {
+    /// <summary>
+    /// Common Utilities and extension methods for <see cref="UdonSharpBehaviour"/>s.
+    /// </summary>
     public static class UdonCommon
     {
         /// <summary>
-        /// Finds the component of a given type in the current gameobject hierarchy which is closest to the scene root
+        /// Finds the component of a given type in the current GameObject hierarchy which is closest to the scene root
         /// </summary>
         /// <param name="type"></param>
         /// <param name="start"></param>
@@ -176,6 +179,36 @@ namespace TLP.UdonUtils.Common
             }
 
             return outPut;
+        }
+
+        /// <param name="transform"></param>
+        /// <returns>The path from the scene root to the transform provided,
+        /// returns an empty string if the provided transform is invalid</returns>
+        public static string GetPathInScene(this Transform transform) {
+            if (!Utilities.IsValid(transform)) {
+                return "";
+            }
+
+            string path = "";
+            while (transform != null) {
+                path = transform.name + (path.Length > 0 ? "/" + path : "");
+                transform = transform.parent;
+            }
+
+            return path;
+        }
+
+        /// <param name="transform"></param>
+        /// <returns>The path from the scene root to the component provided,
+        /// returns an empty string if the provided component is invalid</returns>
+        public static string GetComponentPathInScene(this Component component) {
+            if (!Utilities.IsValid(component)) return "";
+            if (component is TlpBaseBehaviour) {
+                return component.transform.GetPathInScene() + "/" +
+                       UdonTypeNameShort(((TlpBaseBehaviour)component).GetUdonTypeName());
+            }
+
+            return component.transform.GetPathInScene() + "/" + component.GetType().Name;
         }
     }
 }

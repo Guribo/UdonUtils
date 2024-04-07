@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using TLP.UdonUtils.Common;
 using TLP.UdonUtils.Logger;
 using UdonSharp;
 using UnityEngine;
@@ -15,17 +16,15 @@ namespace TLP.UdonUtils.Player
         [PublicAPI]
         public new const int ExecutionOrder = TlpLogger.ExecutionOrder + 1;
 
-        private void Start() {
-            #region TLP_DEBUG
-#if TLP_DEBUG
-            DebugLog(nameof(Start));
-#endif
-            #endregion
+        public override void Start() {
+            base.Start();
 
-            if (!Networking.LocalPlayer.IsUserInVR()) {
-                DebugLog($"Destroying {name}");
-                Destroy(gameObject);
+            if (Networking.LocalPlayer.IsUserInVR()) {
+                return;
             }
+
+            DebugLog($"Destroying {transform.GetPathInScene()}");
+            Destroy(gameObject);
         }
     }
 }

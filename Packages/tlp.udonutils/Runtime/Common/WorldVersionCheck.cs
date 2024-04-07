@@ -45,27 +45,33 @@ namespace TLP.UdonUtils.Common
         [FormerlySerializedAs("timestamp")]
         public long Timestamp;
 
+        [FormerlySerializedAs("updateAvailableListeners")]
         [Tooltip("Behaviours to notify when a player with a new world version joins")]
-        public UdonSharpBehaviour[] updateAvailableListeners;
+        public UdonSharpBehaviour[] UpdateAvailableListeners;
 
+        [FormerlySerializedAs("updateAvailableEvent")]
         [Tooltip("Name of the custom event to call on the behaviours in updateAvailableListeners")]
-        public string updateAvailableEvent = "WorldUpdateAvailable";
+        public string UpdateAvailableEvent = "WorldUpdateAvailable";
 
+        [FormerlySerializedAs("versionConflictListeners")]
         [Tooltip("Behaviours to notify when a world version conflict between a joining player and the master occurs")]
-        public UdonSharpBehaviour[] versionConflictListeners;
+        public UdonSharpBehaviour[] VersionConflictListeners;
 
+        [FormerlySerializedAs("versionConflictEvent")]
         [Tooltip("Name of the custom event to call on the behaviours in versionConflictListeners")]
-        public string versionConflictEvent = "VersionConflictOccurred";
+        public string VersionConflictEvent = "VersionConflictOccurred";
 
+        [FormerlySerializedAs("build")]
         [Header("Auto generated/updated on upload")]
         [Tooltip("Is automatically incremented during upload, can be set to an initial value")]
-        public int build;
+        public int Build;
 
-        internal void Start() {
-            Info($"Build: {build} Timestamp: {Timestamp}");
+        public override void Start() {
+            base.Start();
+            Info($"Build: {Build} Timestamp: {Timestamp}");
 
             if (Networking.IsMaster) {
-                SyncedBuild = build;
+                SyncedBuild = Build;
                 RequestSerialization();
             } else {
                 CheckBuildRecency();
@@ -76,7 +82,7 @@ namespace TLP.UdonUtils.Common
             if (Utilities.IsValid(player)
                 && Networking.IsMaster
                 && player.isLocal) {
-                SyncedBuild = build;
+                SyncedBuild = Build;
                 RequestSerialization();
             }
         }
@@ -101,21 +107,21 @@ namespace TLP.UdonUtils.Common
 
         internal void LocalVersionOutOfDate() {
             Warn(
-                    $"The world is {SyncedBuild - build} builds out of date! Please clear your VRChat cache " +
+                    $"The world is {SyncedBuild - Build} builds out of date! Please clear your VRChat cache " +
                     $"and restart the game."
             );
-            NotifyListeners(updateAvailableListeners, updateAvailableEvent);
+            NotifyListeners(UpdateAvailableListeners, UpdateAvailableEvent);
         }
 
         internal void CheckBuildRecency() {
-            bool localPlayerNeedsToUpdate = SyncedBuild > build;
+            bool localPlayerNeedsToUpdate = SyncedBuild > Build;
             if (localPlayerNeedsToUpdate) {
                 LocalVersionOutOfDate();
                 SendCustomNetworkEvent(NetworkEventTarget.All, nameof(RPC_OutOfDatePlayerJoined));
                 return;
             }
 
-            bool worldUpdateAvailable = build > SyncedBuild;
+            bool worldUpdateAvailable = Build > SyncedBuild;
             if (worldUpdateAvailable) {
                 LocalPlayerSkipUpdateNotification = true;
                 SendCustomNetworkEvent(NetworkEventTarget.All, nameof(RPC_VersionUpdateAvailable));
@@ -150,7 +156,7 @@ namespace TLP.UdonUtils.Common
                     $"Consider creating a new instance."
             );
 
-            NotifyListeners(versionConflictListeners, versionConflictEvent);
+            NotifyListeners(VersionConflictListeners, VersionConflictEvent);
         }
 
         #region Listener Notifying
@@ -189,7 +195,7 @@ namespace TLP.UdonUtils.Common
                         $"create a new instance to update if networking issues occur."
                 );
 
-                NotifyListeners(updateAvailableListeners, updateAvailableEvent);
+                NotifyListeners(UpdateAvailableListeners, UpdateAvailableEvent);
             }
 
             HandleVersionConflict(true);

@@ -24,7 +24,8 @@ namespace TLP.UdonUtils.Player
 
         private Vector3 _smoothingVelocity;
 
-        public void Start() {
+        public override void Start() {
+            base.Start();
             OwnTransform = transform;
         }
 

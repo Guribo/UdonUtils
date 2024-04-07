@@ -60,10 +60,8 @@ namespace TLP.UdonUtils.Runtime.Pool
         #endregion
 
         #region Monobehaviour
-        private void Start() {
-#if TLP_DEBUG
-            DebugLog(nameof(Start));
-#endif
+        public override void Start() {
+            base.Start();
             Initialize();
 
             if (DisableAfterInitialization) {
@@ -174,11 +172,13 @@ namespace TLP.UdonUtils.Runtime.Pool
                 UsesRectTransform = Utilities.IsValid(PoolInstancePrefab.GetComponent<RectTransform>());
             }
 
-            if (InitialInstancesPrePooled > 0) {
-                _initiallyCreatedIndex = 0;
-
-                SendCustomEventDelayedFrames(nameof(CreateNextInitialInstance), 1);
+            if (InitialInstancesPrePooled <= 0) {
+                return;
             }
+
+            _initiallyCreatedIndex = 0;
+
+            SendCustomEventDelayedFrames(nameof(CreateNextInitialInstance), 1);
         }
 
         public void CreateNextInitialInstance() {

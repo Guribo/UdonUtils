@@ -1,12 +1,13 @@
-﻿using System;
-using UdonSharp;
+﻿using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
-using VRC.SDKBase;
-using VRC.Udon;
 
 namespace TLP.UdonUtils.Sync
 {
+    /// <summary>
+    /// Allows adding position and rotation snapshots for interpolation.
+    /// Note that the time values must be monotonic rising, otherwise adding will fail.
+    /// </summary>
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class TransformBacklog : TimeBacklog
     {
@@ -16,7 +17,8 @@ namespace TLP.UdonUtils.Sync
         public bool Interpolate(float time, out Vector3 position, out Quaternion rotation) {
             DebugLog($"{nameof(Interpolate)}: {nameof(time)} = {time}s");
             int index = 0;
-            while (index < _timeStamps.Count - 1 && _timeStamps[index].Float < time) {
+            int lastIndex = _timeStamps.Count - 1;
+            while (index < lastIndex && _timeStamps[index].Float < time) {
                 ++index;
             }
 
@@ -35,34 +37,12 @@ namespace TLP.UdonUtils.Sync
                 return false;
             }
 
-            if (index - 1 < 0) {
-                position = Vector3.zero;
-                rotation = Quaternion.identity;
-                return false;
-            }
-
-            if (index < 0 || index >= _timeStamps.Count) {
-                position = Vector3.zero;
-                rotation = Quaternion.identity;
-                return false;
-            }
-
             float timeStampA = _timeStamps[index].Float;
-            float timeStampB = _timeStamps[index - 1].Float;
+            int previousIndex = index - 1;
+            float timeStampB = _timeStamps[previousIndex].Float;
 
-            var positionToken3 = _positionBackLog[index - 1];
-            var rotationToken3 = _rotationBackLog[index - 1];
-            if (positionToken3.Error != DataError.None || rotationToken3.Error != DataError.None) {
-                position = Vector3.zero;
-                rotation = Quaternion.identity;
-                return false;
-            }
-
-            if (Mathf.Abs(timeStampA - timeStampB) < 0.001f) {
-                position = (Vector3)positionToken3.Reference;
-                rotation = (Quaternion)rotationToken3.Reference;
-                return true;
-            }
+            var positionToken3 = _positionBackLog[previousIndex];
+            var rotationToken3 = _rotationBackLog[previousIndex];
 
             float interpolationRatio = Mathf.InverseLerp(
                     timeStampA - Time.timeSinceLevelLoad,
@@ -72,11 +52,6 @@ namespace TLP.UdonUtils.Sync
 
             var positionToken2 = _positionBackLog[index];
             var rotationToken2 = _rotationBackLog[index];
-            if (positionToken2.Error != DataError.None || rotationToken2.Error != DataError.None) {
-                position = Vector3.zero;
-                rotation = Quaternion.identity;
-                return false;
-            }
 
             position = Vector3.Lerp(
                     (Vector3)positionToken2.Reference,
@@ -90,8 +65,11 @@ namespace TLP.UdonUtils.Sync
             return true;
         }
 
-        public override void Add(TimeSnapshot snapshot, float maxAge) {
-            base.Add(snapshot, maxAge);
+        public override bool Add(TimeSnapshot snapshot, float maxAge) {
+            if (!base.Add(snapshot, maxAge)) {
+                return false;
+            }
+
             var transformSnapShot = (TransformSnapshot)snapshot;
 
             _positionBackLog.Add(new DataToken(transformSnapShot.Position));
@@ -106,9 +84,11 @@ namespace TLP.UdonUtils.Sync
 
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"Backlog of transformData: ${_positionBackLog.Count}; {_rotationBackLog.Count}");
+            DebugLog($"Backlog of transformData: {_positionBackLog.Count}; {_rotationBackLog.Count}");
 #endif
             #endregion
+
+            return true;
         }
     }
 }

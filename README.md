@@ -30,6 +30,32 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [4.0.0] - 2024-04-07
+
+#### 🚀 Features
+
+- *(TlpAccurateSyncBehaviour)* Make Start() method virtual
+- *(Sync)* Make dependencies public
+- *(UdonCommon)* Add extension function to get path in the scene of a transform
+- *(UdonCommon)* Add extension function to get path in the scene of a component
+- *(TlpBaseBehaviour)* [**breaking**] Switch to TimeSources, change logging of time and deltas, add SetupAndValidate method and call it in Start(), fix scenes and delete obsolete ones
+- *(TransformBacklog)* Prevent adding of time values from the past, add boolean return value, add tests
+- *(Testing)* Added new example runtime test GameTime vs DeltaTime, restructured Testing folder
+
+#### 🚜 Refactor
+
+- *(TlpAccurateSyncBehaviour)* Add some descriptions
+
+#### 🧪 Testing
+
+- *(TimeBacklog)* Ensure interpolatable check works
+- *(TransformBacklog)* Fix failure due to floating point accuracy
+- *(TransformBacklog)* Fix another floating point accuracy error
+
+#### ⚙️ Miscellaneous Tasks
+
+- Bump version
+
 ### [3.0.0] - 2024-03-30
 
 #### 🚀 Features

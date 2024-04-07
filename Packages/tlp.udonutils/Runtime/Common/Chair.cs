@@ -34,19 +34,6 @@ namespace TLP.UdonUtils.Common
         public UdonEvent OnRemotePlayerExited;
 
         #region UdonSharp Lifecycle
-        public void Start() {
-            #region TLP_DEBUG
-#if TLP_DEBUG
-            DebugLog(nameof(Start));
-#endif
-            #endregion
-
-            _station = (VRCStation)gameObject.GetComponent(typeof(VRCStation));
-            if (!Utilities.IsValid(_station)) {
-                ErrorAndDisableComponent($"{name} is missing a {nameof(VRCStation)} component");
-            }
-        }
-
         public void OnDisable() {
             #region TLP_DEBUG
 #if TLP_DEBUG
@@ -224,6 +211,21 @@ namespace TLP.UdonUtils.Common
             } else {
                 OnRemotePlayerExited.Raise(this);
             }
+        }
+        #endregion
+
+
+        #region Hook Implementations
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) return false;
+
+            _station = (VRCStation)gameObject.GetComponent(typeof(VRCStation));
+            if (!Utilities.IsValid(_station)) {
+                Error($"{name} is missing a {nameof(VRCStation)} component");
+                return false;
+            }
+
+            return true;
         }
         #endregion
     }

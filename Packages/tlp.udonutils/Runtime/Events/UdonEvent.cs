@@ -51,12 +51,8 @@ namespace TLP.UdonUtils.Events
             }
         }
 
-        public void Start() {
-            #region TLP_DEBUG
-#if TLP_DEBUG
-            DebugLog(nameof(Start));
-#endif
-            #endregion
+        public override void Start() {
+            base.Start();
 
             if (RaiseOnStart) {
                 Raise(this);

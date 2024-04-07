@@ -25,7 +25,8 @@ namespace TLP.UdonUtils.Player
 
         protected Transform OwnTransform;
 
-        public void Start() {
+        public override void Start() {
+            base.Start();
             if (UseLocalPlayerByDefault) {
                 Player = Networking.LocalPlayer;
             }

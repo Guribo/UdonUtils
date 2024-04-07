@@ -824,13 +824,13 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: updateAvailableListeners
+      Data: UpdateAvailableListeners
     - Name: $v
       Entry: 7
       Data: 53|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
-      Data: updateAvailableListeners
+      Data: UpdateAvailableListeners
     - Name: <UserType>k__BackingField
       Entry: 7
       Data: 54|System.RuntimeType, mscorlib
@@ -866,10 +866,16 @@ MonoBehaviour:
       Data: 56|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name: 
       Entry: 12
-      Data: 1
+      Data: 2
     - Name: 
       Entry: 7
-      Data: 57|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+      Data: 57|UnityEngine.Serialization.FormerlySerializedAsAttribute, UnityEngine.CoreModule
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 58|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
       Data: Behaviours to notify when a player with a new world version joins
@@ -893,16 +899,16 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: updateAvailableEvent
+      Data: UpdateAvailableEvent
     - Name: $v
       Entry: 7
-      Data: 58|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 59|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
-      Data: updateAvailableEvent
+      Data: UpdateAvailableEvent
     - Name: <UserType>k__BackingField
       Entry: 7
-      Data: 59|System.RuntimeType, mscorlib
+      Data: 60|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
       Data: System.String, mscorlib
@@ -911,7 +917,7 @@ MonoBehaviour:
       Data: 
     - Name: <SystemType>k__BackingField
       Entry: 9
-      Data: 59
+      Data: 60
     - Name: <SyncMode>k__BackingField
       Entry: 7
       Data: System.Nullable`1[[UdonSharp.UdonSyncMode, UdonSharp.Runtime]], mscorlib
@@ -926,13 +932,19 @@ MonoBehaviour:
       Data: true
     - Name: _fieldAttributes
       Entry: 7
-      Data: 60|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 61|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name: 
       Entry: 12
-      Data: 1
+      Data: 2
     - Name: 
       Entry: 7
-      Data: 61|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+      Data: 62|UnityEngine.Serialization.FormerlySerializedAsAttribute, UnityEngine.CoreModule
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 63|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
       Data: Name of the custom event to call on the behaviours in updateAvailableListeners
@@ -956,13 +968,13 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: versionConflictListeners
+      Data: VersionConflictListeners
     - Name: $v
       Entry: 7
-      Data: 62|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 64|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
-      Data: versionConflictListeners
+      Data: VersionConflictListeners
     - Name: <UserType>k__BackingField
       Entry: 9
       Data: 54
@@ -983,13 +995,19 @@ MonoBehaviour:
       Data: true
     - Name: _fieldAttributes
       Entry: 7
-      Data: 63|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 65|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name: 
       Entry: 12
-      Data: 1
+      Data: 2
     - Name: 
       Entry: 7
-      Data: 64|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+      Data: 66|UnityEngine.Serialization.FormerlySerializedAsAttribute, UnityEngine.CoreModule
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 67|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
       Data: Behaviours to notify when a world version conflict between a joining
@@ -1014,19 +1032,19 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: versionConflictEvent
+      Data: VersionConflictEvent
     - Name: $v
       Entry: 7
-      Data: 65|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 68|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
-      Data: versionConflictEvent
+      Data: VersionConflictEvent
     - Name: <UserType>k__BackingField
       Entry: 9
-      Data: 59
+      Data: 60
     - Name: <SystemType>k__BackingField
       Entry: 9
-      Data: 59
+      Data: 60
     - Name: <SyncMode>k__BackingField
       Entry: 7
       Data: System.Nullable`1[[UdonSharp.UdonSyncMode, UdonSharp.Runtime]], mscorlib
@@ -1041,13 +1059,19 @@ MonoBehaviour:
       Data: true
     - Name: _fieldAttributes
       Entry: 7
-      Data: 66|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 69|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name: 
       Entry: 12
-      Data: 1
+      Data: 2
     - Name: 
       Entry: 7
-      Data: 67|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+      Data: 70|UnityEngine.Serialization.FormerlySerializedAsAttribute, UnityEngine.CoreModule
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 71|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
       Data: Name of the custom event to call on the behaviours in versionConflictListeners
@@ -1071,13 +1095,13 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: build
+      Data: Build
     - Name: $v
       Entry: 7
-      Data: 68|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
+      Data: 72|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
-      Data: build
+      Data: Build
     - Name: <UserType>k__BackingField
       Entry: 9
       Data: 3
@@ -1098,13 +1122,19 @@ MonoBehaviour:
       Data: true
     - Name: _fieldAttributes
       Entry: 7
-      Data: 69|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
+      Data: 73|System.Collections.Generic.List`1[[System.Attribute, mscorlib]], mscorlib
     - Name: 
       Entry: 12
-      Data: 2
+      Data: 3
     - Name: 
       Entry: 7
-      Data: 70|UnityEngine.HeaderAttribute, UnityEngine.CoreModule
+      Data: 74|UnityEngine.Serialization.FormerlySerializedAsAttribute, UnityEngine.CoreModule
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 75|UnityEngine.HeaderAttribute, UnityEngine.CoreModule
     - Name: header
       Entry: 1
       Data: Auto generated/updated on upload
@@ -1113,7 +1143,7 @@ MonoBehaviour:
       Data: 
     - Name: 
       Entry: 7
-      Data: 71|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
+      Data: 76|UnityEngine.TooltipAttribute, UnityEngine.CoreModule
     - Name: tooltip
       Entry: 1
       Data: Is automatically incremented during upload, can be set to an initial
