@@ -30,6 +30,12 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [5.1.0] - 2024-04-11
+
+#### 🚀 Features
+
+- *(Prefabs)* Add ui prefabs and fonts
+
 ### [5.0.0] - 2024-04-07
 
 #### 🚀 Features
