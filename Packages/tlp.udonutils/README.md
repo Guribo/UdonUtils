@@ -30,6 +30,12 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [5.2.1] - 2024-04-13
+
+#### 🐛 Bug Fixes
+
+- Split get scene path functions and fix C## error in test utils
+
 ### [5.2.0] - 2024-04-13
 
 #### 🚀 Features

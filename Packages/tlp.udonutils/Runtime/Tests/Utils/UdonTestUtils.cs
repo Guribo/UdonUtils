@@ -98,22 +98,22 @@ namespace TLP.UdonUtils.Tests.Utils
                 VRCPlayerApi._GetPlayerId = api => _vrcPlayerToPlayer[api].ID;
                 VRCPlayerApi._GetPosition = player => player.gameObject.transform.position;
                 VRCPlayerApi._GetRotation = player => player.gameObject.transform.rotation;
-                VRCPlayerApi._GetTrackingData = (player, _) =>
+                VRCPlayerApi._GetTrackingData = (player, type) =>
                         new VRCPlayerApi.TrackingData(player.GetPosition(), player.GetRotation());
                 VRCPlayerApi._GetPlayerById = i => _idToPlayer.ContainsKey(i) ? _idToPlayer[i].VrcPlayerApi : null;
 
-                VRCPlayerApi._SetVoiceGain = (_, _) => { };
-                VRCPlayerApi._SetVoiceLowpass = (_, _) => { };
+                VRCPlayerApi._SetVoiceGain = (api, f) => { };
+                VRCPlayerApi._SetVoiceLowpass = (api, f) => { };
                 VRCPlayerApi._SetVoiceDistanceFar = (api, value) => _vrcPlayerToPlayer[api].VoiceRangeFar = value;
-                VRCPlayerApi._SetVoiceDistanceNear = (_, _) => { };
-                VRCPlayerApi._SetVoiceVolumetricRadius = (_, _) => { };
+                VRCPlayerApi._SetVoiceDistanceNear = (api, f) => { };
+                VRCPlayerApi._SetVoiceVolumetricRadius = (api, f) => { };
 
-                VRCPlayerApi._SetAvatarAudioGain = (_, _) => { };
-                VRCPlayerApi._SetAvatarAudioCustomCurve = (_, _) => { };
-                VRCPlayerApi._SetAvatarAudioFarRadius = (_, _) => { };
-                VRCPlayerApi._SetAvatarAudioNearRadius = (_, _) => { };
-                VRCPlayerApi._SetAvatarAudioForceSpatial = (_, _) => { };
-                VRCPlayerApi._SetAvatarAudioVolumetricRadius = (_, _) => { };
+                VRCPlayerApi._SetAvatarAudioGain = (api, f) => { };
+                VRCPlayerApi._SetAvatarAudioCustomCurve = (api, f) => { };
+                VRCPlayerApi._SetAvatarAudioFarRadius = (api, f) => { };
+                VRCPlayerApi._SetAvatarAudioNearRadius = (api, f) => { };
+                VRCPlayerApi._SetAvatarAudioForceSpatial = (api, f) => { };
+                VRCPlayerApi._SetAvatarAudioVolumetricRadius = (api, f) => { };
 
                 VRCPlayerApi._CombatGetCurrentHitpoints = (api) => _vrcPlayerToPlayer[api].HitPoints;
                 VRCPlayerApi._CombatSetCurrentHitpoints = (api, f) => _vrcPlayerToPlayer[api].HitPoints = f;

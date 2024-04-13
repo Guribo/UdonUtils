@@ -203,12 +203,17 @@ namespace TLP.UdonUtils.Common
         /// returns an empty string if the provided component is invalid</returns>
         public static string GetComponentPathInScene(this Component component) {
             if (!Utilities.IsValid(component)) return "";
-            if (component is TlpBaseBehaviour) {
-                return component.transform.GetPathInScene() + "/" +
-                       UdonTypeNameShort(((TlpBaseBehaviour)component).GetUdonTypeName());
-            }
-
             return component.transform.GetPathInScene() + "/" + component.GetType().Name;
+        }
+
+        /// <param name="transform"></param>
+        /// <returns>The path from the scene root to the script provided,
+        /// returns an empty string if the provided component is invalid</returns>
+        public static string GetScriptPathInScene(this UdonSharpBehaviour component) {
+            if (!Utilities.IsValid(component)) return "";
+
+                return component.transform.GetPathInScene() + "/" +
+                       UdonTypeNameShort(component.GetUdonTypeName());
         }
     }
 }
