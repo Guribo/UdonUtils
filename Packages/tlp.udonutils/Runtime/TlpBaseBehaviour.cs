@@ -180,7 +180,7 @@ namespace TLP.UdonUtils
         public ELogLevel Severity = ELogLevel.Debug;
 
         private string LOGPrefix =>
-                $"[{ExecutionOrderReadOnly} {gameObject.transform.GetPathInScene()}/{UdonCommon.UdonTypeNameShort(GetUdonTypeName())}]";
+                $"[{ExecutionOrderReadOnly} {this.GetComponentPathInScene()}]";
 
 
         protected TlpLogger Logger { private set; get; }

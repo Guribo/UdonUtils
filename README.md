@@ -30,6 +30,12 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [5.2.0] - 2024-04-13
+
+#### 🚀 Features
+
+- *(testing)* Add base scripts for easy unit testing
+
 ### [5.1.0] - 2024-04-11
 
 #### 🚀 Features

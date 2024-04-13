@@ -3,7 +3,7 @@ using System;
 using HarmonyLib;
 using UnityEngine;
 
-namespace TLP.UdonUtils.Rendering
+namespace TLP.UdonUtils.Runtime.Tests.Utils
 {
     public static class ReflectionUtils
     {
