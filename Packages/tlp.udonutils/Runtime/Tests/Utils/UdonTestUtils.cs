@@ -1,3 +1,4 @@
+#if !COMPILER_UDONSHARP && UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using UdonSharp;
@@ -257,3 +258,4 @@ namespace TLP.UdonUtils.Tests.Utils
         }
     }
 }
+#endif

@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+#if !COMPILER_UDONSHARP && UNITY_EDITOR
 using System;
 using HarmonyLib;
 using UnityEngine;

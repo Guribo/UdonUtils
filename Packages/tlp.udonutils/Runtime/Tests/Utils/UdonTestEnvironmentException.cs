@@ -1,3 +1,4 @@
+#if !COMPILER_UDONSHARP && UNITY_EDITOR
 using System;
 using System.Runtime.Serialization;
 using JetBrains.Annotations;
@@ -21,3 +22,4 @@ namespace TLP.UdonUtils.Tests.Utils
         }
     }
 }
+#endif

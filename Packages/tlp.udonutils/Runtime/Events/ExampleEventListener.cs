@@ -8,10 +8,17 @@ namespace TLP.UdonUtils.Events
         [SerializeField]
         private UdonEvent UdonEvent;
 
-        private void Start() {
-            if (!UdonEvent.AddListenerVerified(this, nameof(UdonEventFunctionName))) {
-                Error($"Failed to listen to {nameof(UdonEvent)}");
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
             }
+
+            if (UdonEvent.AddListenerVerified(this, nameof(UdonEventFunctionName))) {
+                return true;
+            }
+
+            Error($"Failed to listen to {nameof(UdonEvent)}");
+            return false;
         }
 
         public override void OnEvent(string eventName) {
