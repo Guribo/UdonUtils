@@ -30,6 +30,12 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [5.2.2] - 2024-04-14
+
+#### 🐛 Bug Fixes
+
+- *(Logging)* Fix logs not mentioning script name correctly
+
 ### [5.2.1] - 2024-04-13
 
 #### 🐛 Bug Fixes

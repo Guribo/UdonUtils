@@ -179,8 +179,7 @@ namespace TLP.UdonUtils
         [FormerlySerializedAs("severity")]
         public ELogLevel Severity = ELogLevel.Debug;
 
-        private string LOGPrefix =>
-                $"[{ExecutionOrderReadOnly} {this.GetComponentPathInScene()}]";
+        private string LOGPrefix => $"[{ExecutionOrderReadOnly} {this.GetScriptPathInScene()}]";
 
 
         protected TlpLogger Logger { private set; get; }
