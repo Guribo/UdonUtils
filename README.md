@@ -30,6 +30,12 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [5.2.4] - 2024-04-14
+
+#### 🐛 Bug Fixes
+
+- *(VrcNetworkTime)* Ensure that there is a single point of truth throughout a given frame for VRChats network time
+
 ### [5.2.3] - 2024-04-14
 
 #### 🐛 Bug Fixes
