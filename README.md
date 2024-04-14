@@ -30,6 +30,12 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [5.3.0] - 2024-04-14
+
+#### 🚀 Features
+
+- *(TlpNetworkTime)* Add ExactError property
+
 ### [5.2.4] - 2024-04-14
 
 #### 🐛 Bug Fixes

@@ -166,6 +166,11 @@ namespace TLP.UdonUtils.Sources.Time
                     DriftCompensationRate * _offsetSampleCount / Samples
             );
         }
+
+        /// <summary>
+        /// Current delta to the provided network time: (real network time - TLP network time)
+        /// </summary>
+        public double ExactError { get; private set; }
         #endregion
 
         #region Internal
@@ -193,6 +198,7 @@ namespace TLP.UdonUtils.Sources.Time
                 return;
             }
 
+            ExactError = NetworkTime.TimeAsDouble() - (GameTime.TimeAsDouble() + GetGameTimeOffset());
             _frameLastUpdated = FrameCount.Frame();
 
 #if TLP_DEBUG
