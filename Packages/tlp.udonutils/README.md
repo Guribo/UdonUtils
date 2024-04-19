@@ -30,6 +30,13 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [6.0.0] - 2024-04-19
+
+#### 🚀 Features
+
+- *(TlpNetworkTime)* Add ExactError property and instant Drift compensation with DriftThreshold
+- *(Sync)* [**breaking**] Change network timestamp resolution from float to double
+
 ### [5.3.0] - 2024-04-14
 
 #### 🚀 Features

@@ -1,4 +1,3 @@
-using System;
 using JetBrains.Annotations;
 using TLP.UdonUtils.Extensions;
 using TLP.UdonUtils.Sources;
@@ -24,9 +23,17 @@ namespace TLP.UdonUtils.Sync
         #endregion
 
         #region Dependencies
+        [Tooltip("Container for received snapshot data for inter-/extrapolation")]
         public TimeBacklog Backlog;
+
+        [Tooltip("Container for a received network snapshot")]
         public TimeSnapshot Snapshot;
+
+        [Tooltip("The network time as provided by e.g. TlpNetworkTime")]
         public TimeSource NetworkTime;
+
+        [Tooltip("The game time as provided by e.g. Time.timeSinceLevelLoad.")]
+        public TimeSource GameTime;
         #endregion
 
         #region NetworkState
@@ -35,7 +42,7 @@ namespace TLP.UdonUtils.Sync
         private double SyncedSendTime = double.MinValue;
 
         #region Working Copy
-        protected internal double WorkingSendTime = double.MinValue;
+        public double WorkingSendTime = double.MinValue;
         #endregion
         #endregion
 
@@ -65,8 +72,8 @@ namespace TLP.UdonUtils.Sync
             CreateWorkingCopyOfNetworkState();
             RecordSnapshot(
                     Snapshot,
-                    (float)WorkingSendTime);
-            Backlog.Add(Snapshot, 3f * PredictionReduction);
+                    WorkingSendTime);
+            Backlog.Add(Snapshot, 3 * PredictionReduction);
 
             // ensure we update as early as possible in the lifecycle of the UdonSharpBehaviour
             PredictMovement(GetElapsed(), 0f);
@@ -76,6 +83,17 @@ namespace TLP.UdonUtils.Sync
         #region Hook Implementations
         protected override bool SetupAndValidate() {
             if (!base.SetupAndValidate()) return false;
+
+            if (!Utilities.IsValid(GameTime)) {
+                Error($"{nameof(GameTime)} not set");
+                return false;
+            }
+
+            if (!Utilities.IsValid(NetworkTime)) {
+                Error($"{nameof(NetworkTime)} not set");
+                return false;
+            }
+
             if (!Utilities.IsValid(Backlog)) {
                 Error($"{nameof(Backlog)} not set");
                 return false;
@@ -91,7 +109,7 @@ namespace TLP.UdonUtils.Sync
         #endregion
 
         #region Hooks
-        protected virtual void RecordSnapshot(TimeSnapshot timeSnapshot, float mostRecentServerTime) {
+        protected virtual void RecordSnapshot(TimeSnapshot timeSnapshot, double mostRecentServerTime) {
             DebugLog($"{nameof(RecordSnapshot)}: {nameof(mostRecentServerTime)} = {mostRecentServerTime}s");
             timeSnapshot.ServerTime = mostRecentServerTime;
         }

@@ -236,8 +236,9 @@ MonoBehaviour:
   NetworkTime: {fileID: 3759389701109780624}
   FrameCount: {fileID: 6967571258415020094}
   Samples: 256
-  AutoAdjustSampleCount: 1
-  SamplingDuration: 2
+  AutoAdjustSampleCount: 0
+  SamplingDuration: 5
+  DriftThreshold: 0.05000000074505806
 --- !u!114 &8746002016925906261
 MonoBehaviour:
   m_ObjectHideFlags: 0

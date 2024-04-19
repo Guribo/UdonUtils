@@ -440,7 +440,7 @@ MonoBehaviour:
       Data: 30|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: System.Single, mscorlib
+      Data: System.Double, mscorlib
     - Name: 
       Entry: 8
       Data: 

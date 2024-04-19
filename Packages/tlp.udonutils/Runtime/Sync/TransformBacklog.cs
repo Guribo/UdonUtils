@@ -1,6 +1,10 @@
-﻿using UdonSharp;
+﻿using System;
+using TLP.UdonUtils.Sources.Time;
+using UdonSharp;
 using UnityEngine;
+using UnityEngine.Serialization;
 using VRC.SDK3.Data;
+using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Sync
 {
@@ -18,7 +22,7 @@ namespace TLP.UdonUtils.Sync
             DebugLog($"{nameof(Interpolate)}: {nameof(time)} = {time}s");
             int index = 0;
             int lastIndex = _timeStamps.Count - 1;
-            while (index < lastIndex && _timeStamps[index].Float < time) {
+            while (index < lastIndex && _timeStamps[index].Double < time) {
                 ++index;
             }
 
@@ -37,17 +41,17 @@ namespace TLP.UdonUtils.Sync
                 return false;
             }
 
-            float timeStampA = _timeStamps[index].Float;
+            double timeStampA = _timeStamps[index].Double;
             int previousIndex = index - 1;
-            float timeStampB = _timeStamps[previousIndex].Float;
+            double timeStampB = _timeStamps[previousIndex].Double;
 
             var positionToken3 = _positionBackLog[previousIndex];
             var rotationToken3 = _rotationBackLog[previousIndex];
 
             float interpolationRatio = Mathf.InverseLerp(
-                    timeStampA - Time.timeSinceLevelLoad,
-                    timeStampB - Time.timeSinceLevelLoad,
-                    time - Time.timeSinceLevelLoad
+                    0f,
+                    (float)(timeStampB - timeStampA),
+                    (float)(time - timeStampA)
             );
 
             var positionToken2 = _positionBackLog[index];
@@ -65,7 +69,7 @@ namespace TLP.UdonUtils.Sync
             return true;
         }
 
-        public override bool Add(TimeSnapshot snapshot, float maxAge) {
+        public override bool Add(TimeSnapshot snapshot, double maxAge) {
             if (!base.Add(snapshot, maxAge)) {
                 return false;
             }

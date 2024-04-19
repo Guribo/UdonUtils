@@ -20,7 +20,7 @@ namespace TLP.UdonUtils.Sync
                 return;
             }
 
-            PredictMovement(GetElapsed(), Time.fixedDeltaTime);
+            PredictMovement(GetElapsed(), GameTime.FixedDeltaTime());
         }
         #endregion
     }
