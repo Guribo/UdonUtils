@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: TestGameTimeVsDeltaTime
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 2ca44091b1ff76846a13041f0c977bba,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 9c341850c7f1bdd4c9ae387ce71e6693,
     type: 2}
   udonAssembly: 
   assemblyError: 

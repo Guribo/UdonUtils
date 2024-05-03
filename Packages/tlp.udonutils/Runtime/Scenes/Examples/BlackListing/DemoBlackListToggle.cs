@@ -24,6 +24,16 @@ public class DemoBlackListToggle : TlpBaseBehaviour
     public PlayerBlackList PlayerBlackList;
 
     public void OnEnable() {
+        if (!Utilities.IsValid(WhiteListButton)) {
+            ErrorAndDisableGameObject($"{nameof(WhiteListButton)} is not set");
+            return;
+        }
+
+        if (!Utilities.IsValid(BlackListButton)) {
+            ErrorAndDisableGameObject($"{nameof(BlackListButton)} is not set");
+            return;
+        }
+
         WhiteListButton.gameObject.SetActive(PlayerBlackList.IsBlackListed(Networking.LocalPlayer.DisplayNameSafe()));
         BlackListButton.gameObject.SetActive(PlayerBlackList.IsWhiteListed(Networking.LocalPlayer.DisplayNameSafe()));
     }

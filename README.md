@@ -30,6 +30,20 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [6.1.1] - 2024-05-03
+
+#### 🚀 Features
+
+- *(Physics)* Add PhysicsUtils class with function CalculateAccelerationAndVelocity from positions
+
+#### 🐛 Bug Fixes
+
+- *(DemoBlackListToggle)* Add check for unset White-/Blacklist buttons
+
+#### ⚙️ Miscellaneous Tasks
+
+- Prevent creating new branches on Github
+
 ### [6.0.0] - 2024-04-19
 
 #### 🚀 Features
