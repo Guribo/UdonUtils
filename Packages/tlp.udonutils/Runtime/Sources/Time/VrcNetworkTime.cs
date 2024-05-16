@@ -1,4 +1,5 @@
-﻿using TLP.UdonUtils.Common;
+﻿using System.Diagnostics;
+using TLP.UdonUtils.Common;
 using UnityEngine;
 using VRC.SDKBase;
 
@@ -16,11 +17,13 @@ namespace TLP.UdonUtils.Sources.Time
             }
 
             string existingInstance = Networking.LocalPlayer.GetPlayerTag(nameof(VrcNetworkTime));
-            if (!string.IsNullOrEmpty(existingInstance) && existingInstance != this.GetScriptPathInScene()) {
-                ErrorAndDisableGameObject($"Another instance of {nameof(VrcNetworkTime)} already exists: {existingInstance}");
+            string idString = GetInstanceID().ToString();
+
+            if (!string.IsNullOrEmpty(existingInstance) && existingInstance != idString) {
+                ErrorAndDisableGameObject($"Another instance of {nameof(VrcNetworkTime)} already exists: {idString} (this) != {existingInstance} (other)");
                 return false;
             }
-            Networking.LocalPlayer.SetPlayerTag(nameof(VrcNetworkTime), this.GetScriptPathInScene());
+            Networking.LocalPlayer.SetPlayerTag(nameof(VrcNetworkTime), idString);
             return true;
         }
 

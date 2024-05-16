@@ -1,4 +1,6 @@
 ﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Events;
+using TLP.UdonUtils.Extensions;
 using TLP.UdonUtils.Logger;
 using UdonSharp;
 using UnityEngine;
@@ -24,71 +26,123 @@ namespace TLP.UdonUtils.Common
         [PublicAPI]
         public new const int ExecutionOrder = TlpLogger.ExecutionOrder + 1;
 
-        [FormerlySerializedAs("syncedBuild")]
+        #region State
+
+        [Header("Auto generated/updated on scene save")]
+
+
+        [FormerlySerializedAs("timestamp")]
+        public long Timestamp;
+        [FormerlySerializedAs("build")]
+        [Tooltip("Is automatically incremented during upload, can be set to an initial value")]
+        public int Build;
+
+        internal bool InstanceCompromised;
+        internal bool LocalPlayerSkipUpdateNotification;
+        internal int LocalVersionConflicts;
+        #endregion
+
+        #region Synced State
+        [FormerlySerializedAs("syncedTotalVersionConflicts")]
         [UdonSynced]
-        public int SyncedBuild;
+        [HideInInspector]
+        public int SyncedTotalVersionConflicts;
 
         [FormerlySerializedAs("syncedInstanceCompromised")]
         [UdonSynced]
         [HideInInspector]
         public bool SyncedInstanceCompromised;
 
-        [FormerlySerializedAs("syncedTotalVersionConflicts")]
+        [FormerlySerializedAs("syncedBuild")]
         [UdonSynced]
-        [HideInInspector]
-        public int SyncedTotalVersionConflicts;
+        public int SyncedBuild;
+        #endregion
 
-        internal bool InstanceCompromised;
-        internal bool LocalPlayerSkipUpdateNotification;
-        internal int LocalVersionConflicts;
+        #region Events
+        public const string UpdateAvailableEventName = "WorldUpdateAvailable";
+        public const string VersionConflictEventName = "VersionConflictOccurred";
 
-        [FormerlySerializedAs("timestamp")]
-        public long Timestamp;
+        [Header("Events")]
+        [Tooltip("Event to raise when a new world update is available")]
+        public UdonEvent UpdateAvailableEvent;
 
-        [FormerlySerializedAs("updateAvailableListeners")]
-        [Tooltip("Behaviours to notify when a player with a new world version joins")]
-        public UdonSharpBehaviour[] UpdateAvailableListeners;
+        [Tooltip("Event to raise when world version conflict between a joining player and the master occurs")]
+        public UdonEvent VersionConflictOccurredEvent;
+        #endregion
 
-        [FormerlySerializedAs("updateAvailableEvent")]
-        [Tooltip("Name of the custom event to call on the behaviours in updateAvailableListeners")]
-        public string UpdateAvailableEvent = "WorldUpdateAvailable";
 
-        [FormerlySerializedAs("versionConflictListeners")]
-        [Tooltip("Behaviours to notify when a world version conflict between a joining player and the master occurs")]
-        public UdonSharpBehaviour[] VersionConflictListeners;
+        #region Overrides
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
+            }
 
-        [FormerlySerializedAs("versionConflictEvent")]
-        [Tooltip("Name of the custom event to call on the behaviours in versionConflictListeners")]
-        public string VersionConflictEvent = "VersionConflictOccurred";
+            if (!Utilities.IsValid(UpdateAvailableEvent)) {
+                ErrorAndDisableGameObject($"{nameof(UpdateAvailableEvent)} not set");
+                return false;
+            }
 
-        [FormerlySerializedAs("build")]
-        [Header("Auto generated/updated on upload")]
-        [Tooltip("Is automatically incremented during upload, can be set to an initial value")]
-        public int Build;
+            if (UpdateAvailableEvent.ListenerMethod != UpdateAvailableEventName) {
+                Warn(
+                        $"{nameof(UpdateAvailableEvent)}.{nameof(UdonEvent.ListenerMethod)} " +
+                        $"needed to be changed to '{UpdateAvailableEventName}'");
+                UpdateAvailableEvent.ListenerMethod = UpdateAvailableEventName;
+            }
 
-        public override void Start() {
-            base.Start();
+
+            if (!Utilities.IsValid(VersionConflictOccurredEvent)) {
+                ErrorAndDisableGameObject($"{nameof(VersionConflictOccurredEvent)} not set");
+                return false;
+            }
+
+            if (VersionConflictOccurredEvent.ListenerMethod != VersionConflictEventName) {
+                Warn(
+                        $"{nameof(VersionConflictOccurredEvent)}.{nameof(UdonEvent.ListenerMethod)} " +
+                        $"needed to be changed to '{VersionConflictEventName}'");
+                VersionConflictOccurredEvent.ListenerMethod = VersionConflictEventName;
+            }
+
             Info($"Build: {Build} Timestamp: {Timestamp}");
 
             if (Networking.IsMaster) {
                 SyncedBuild = Build;
                 RequestSerialization();
             } else {
-                CheckBuildRecency();
+                // ensure that other scripts have this frame start listening to the events.
+                // Otherwise, we might fire the events without any listeners due to incorrect execution order.
+                SendCustomEventDelayedFrames(nameof(Delayed_CheckBuildRecency), 1);
             }
+
+            return true;
         }
 
+        #region Networking
         public override void OnOwnershipTransferred(VRCPlayerApi player) {
-            if (Utilities.IsValid(player)
-                && Networking.IsMaster
-                && player.isLocal) {
-                SyncedBuild = Build;
-                RequestSerialization();
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog($"{nameof(OnOwnershipTransferred)}: {player.ToStringSafe()}");
+#endif
+            #endregion
+
+            if (!player.IsMasterSafe() || !player.isLocal) {
+                return;
             }
+
+            SyncedBuild = Build;
+            RequestSerialization();
         }
 
         public override bool OnOwnershipRequest(VRCPlayerApi requestingPlayer, VRCPlayerApi requestedOwner) {
-            return Networking.IsMaster;
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(
+                    $"{nameof(OnOwnershipTransferred)}: from {requestingPlayer.ToStringSafe()} " +
+                    $"to {requestedOwner.ToStringSafe()}; " +
+                    $"{(requestedOwner.IsMasterSafe() ? "Allowed" : "Denied")}");
+#endif
+            #endregion
+
+            return requestedOwner.IsMasterSafe();
         }
 
         public override void OnDeserialization(DeserializationResult deserializationResult) {
@@ -102,18 +156,56 @@ namespace TLP.UdonUtils.Common
                 return;
             }
 
-            CheckBuildRecency();
+            Delayed_CheckBuildRecency();
+        }
+        #endregion
+        #endregion
+
+
+        #region RPCs
+        public void RPC_VersionUpdateAvailable() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(RPC_VersionUpdateAvailable));
+#endif
+            #endregion
+
+            if (!LocalPlayerSkipUpdateNotification) {
+                Warn(
+                        $"A player with a new build of the world joined. Please re-join the instance or " +
+                        $"create a new instance to update if networking issues occur."
+                );
+
+                UpdateAvailableEvent.Raise(this);
+            }
+
+            HandleVersionConflict(true);
         }
 
-        internal void LocalVersionOutOfDate() {
+        public void RPC_OutOfDatePlayerJoined() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(RPC_OutOfDatePlayerJoined));
+#endif
+            #endregion
+
             Warn(
-                    $"The world is {SyncedBuild - Build} builds out of date! Please clear your VRChat cache " +
-                    $"and restart the game."
+                    $"A player with an old build of the world joined. It may be required to create a new " +
+                    $"instance if networking issues occur."
             );
-            NotifyListeners(UpdateAvailableListeners, UpdateAvailableEvent);
-        }
 
-        internal void CheckBuildRecency() {
+            HandleVersionConflict(true);
+        }
+        #endregion
+
+        #region Internal
+        public void Delayed_CheckBuildRecency() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(Delayed_CheckBuildRecency));
+#endif
+            #endregion
+
             bool localPlayerNeedsToUpdate = SyncedBuild > Build;
             if (localPlayerNeedsToUpdate) {
                 LocalVersionOutOfDate();
@@ -133,7 +225,27 @@ namespace TLP.UdonUtils.Common
             }
         }
 
+        internal void LocalVersionOutOfDate() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(LocalVersionOutOfDate));
+#endif
+            #endregion
+
+            Warn(
+                    $"The world is {SyncedBuild - Build} builds out of date! Please clear your VRChat cache " +
+                    $"and restart the game."
+            );
+            UpdateAvailableEvent.Raise(this);
+        }
+
         internal void HandleVersionConflict(bool locallyDetected) {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(HandleVersionConflict));
+#endif
+            #endregion
+
             InstanceCompromised = true;
 
             if (locallyDetected) {
@@ -149,65 +261,13 @@ namespace TLP.UdonUtils.Common
                 RequestSerialization();
             }
 
-
             Warn(
                     $"There was {SyncedTotalVersionConflicts} version conflicts in this instance " +
                     $"({LocalVersionConflicts} conflicts were detected locally). " +
                     $"Consider creating a new instance."
             );
 
-            NotifyListeners(VersionConflictListeners, VersionConflictEvent);
-        }
-
-        #region Listener Notifying
-        internal bool ListenerSetupValid(UdonSharpBehaviour[] listeners, string target) {
-            bool listenersNull = listeners == null;
-            if (listenersNull) {
-                return false;
-            }
-
-            return !string.IsNullOrWhiteSpace(target);
-        }
-
-        internal void NotifyListeners(UdonSharpBehaviour[] listeners, string target) {
-            if (!ListenerSetupValid(listeners, target)) {
-                Error($"Invalid listener setup for listener target '{target}'");
-                return;
-            }
-
-            for (int i = 0; i < listeners.Length; i++) {
-                var listener = listeners[i];
-                if (!Utilities.IsValid(listener)) {
-                    Warn($"Invalid listener for target '{target}' at position {i}");
-                    continue;
-                }
-
-                listener.SendCustomEvent(target);
-            }
-        }
-        #endregion
-
-        #region RPCs
-        public void RPC_VersionUpdateAvailable() {
-            if (!LocalPlayerSkipUpdateNotification) {
-                Warn(
-                        $"A player with a new build of the world joined. Please re-join the instance or " +
-                        $"create a new instance to update if networking issues occur."
-                );
-
-                NotifyListeners(UpdateAvailableListeners, UpdateAvailableEvent);
-            }
-
-            HandleVersionConflict(true);
-        }
-
-        public void RPC_OutOfDatePlayerJoined() {
-            Warn(
-                    $"A player with an old build of the world joined. It may be required to create a new " +
-                    $"instance if networking issues occur."
-            );
-
-            HandleVersionConflict(true);
+            VersionConflictOccurredEvent.Raise(this);
         }
         #endregion
     }

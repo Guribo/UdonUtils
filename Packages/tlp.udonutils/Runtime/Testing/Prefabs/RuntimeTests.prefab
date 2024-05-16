@@ -102,6 +102,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: TestGameTimeVsDeltaTime
       objectReference: {fileID: 0}
+    - target: {fileID: 5127434479091838505, guid: 963eaaba3bfb0674590391301c7b7c54,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5127434479091838505, guid: 963eaaba3bfb0674590391301c7b7c54,
+        type: 3}
+      propertyPath: serializedProgramAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 9c341850c7f1bdd4c9ae387ce71e6693,
+        type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -123,10 +134,20 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 586703431722825328, guid: b13378a0e8f5b7443baeded36b11ea55,
         type: 3}
+      propertyPath: Severity
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 586703431722825328, guid: b13378a0e8f5b7443baeded36b11ea55,
+        type: 3}
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 586703431722825328, guid: b13378a0e8f5b7443baeded36b11ea55,
         type: 3}
+    - target: {fileID: 995060757064604782, guid: b13378a0e8f5b7443baeded36b11ea55,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 4557761332333211302, guid: b13378a0e8f5b7443baeded36b11ea55,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -279,7 +300,7 @@ PrefabInstance:
     - target: {fileID: 2518306520423424678, guid: d706b8f578d80d04a9c7a47d440e0780,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.00051630696
+      value: 0.00001722503
       objectReference: {fileID: 0}
     - target: {fileID: 2899761474043010495, guid: d706b8f578d80d04a9c7a47d440e0780,
         type: 3}
@@ -350,8 +371,19 @@ PrefabInstance:
     - target: {fileID: 4322088892186426121, guid: d706b8f578d80d04a9c7a47d440e0780,
         type: 3}
       propertyPath: m_Size
-      value: 0.84686065
+      value: 0.9999923
       objectReference: {fileID: 0}
+    - target: {fileID: 5923404556466132619, guid: d706b8f578d80d04a9c7a47d440e0780,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5923404556466132619, guid: d706b8f578d80d04a9c7a47d440e0780,
+        type: 3}
+      propertyPath: serializedProgramAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 5bc12ebcf7f3a0d42bdab552f5064b50,
+        type: 2}
     - target: {fileID: 6947666588682784398, guid: d706b8f578d80d04a9c7a47d440e0780,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -418,6 +450,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: TestMenuRoot
       objectReference: {fileID: 0}
+    - target: {fileID: 7345900874189439178, guid: d706b8f578d80d04a9c7a47d440e0780,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7345900874189439178, guid: d706b8f578d80d04a9c7a47d440e0780,
+        type: 3}
+      propertyPath: serializedProgramAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 448b888d725171342ad51fee130599ed,
+        type: 2}
     - target: {fileID: 8400690616190524418, guid: d706b8f578d80d04a9c7a47d440e0780,
         type: 3}
       propertyPath: m_AnchorMax.x

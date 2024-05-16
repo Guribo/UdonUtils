@@ -9,6 +9,7 @@ using UnityEngine.Serialization;
 using VRC.SDKBase;
 using VRC.Udon.Common;
 using Debug = UnityEngine.Debug;
+using Object = UnityEngine.Object;
 
 namespace TLP.UdonUtils
 {
@@ -47,6 +48,39 @@ namespace TLP.UdonUtils
         protected const int InvalidPlayer = -1;
         protected const int NoUser = InvalidPlayer;
         public const string TlpLoggerGameObjectName = "TLP_Logger";
+        #endregion
+
+        #region Settings
+        [Header("TLP/Networking")]
+        /// <summary>
+        /// If true and a serialization request fails it will automatically try
+        /// to send again in the next frame until it succeeds.
+        /// Only applies to owned objects and manual sync.
+        /// </summary>
+        [Tooltip(
+                "If true and a serialization request fails it will automatically try " +
+                "to send again in the next frame until it succeeds. " +
+                "Only applies to owned objects and manual sync.")]
+        public bool AutoRetrySendOnFailure = true;
+
+        [Header("TLP/Logging")]
+        /// <summary>
+        /// What kind of logs of this behavior shall be produced.
+        /// Selected severity includes all more severe levels.
+        /// Example: selecting 'Warning' also allows 'Error' and 'Assertion' messages to appear.
+        /// Note: 'Debug' messages are filtered out by default, even when selected.
+        /// Add the compiler definition 'TLP_DEBUG' in the Unity player settings to enable them.
+        /// This should only ever be used for debugging (performance suffers)!
+        /// </summary>
+        [FormerlySerializedAs("severity")]
+        [Tooltip(
+                "What kind of logs of this behavior shall be produced. " +
+                "Selected severity includes all more severe levels. " +
+                "Example: selecting 'Warning' also allows 'Error' and 'Assertion' messages to appear.\n" +
+                "Note:\n'Debug' messages are filtered out by default, even when selected. " +
+                "Add the compiler definition 'TLP_DEBUG' in the Unity player settings to enable them. " +
+                "This should only ever be used for debugging (performance suffers)!")]
+        public ELogLevel Severity = ELogLevel.Debug;
         #endregion
 
         #region Networking
@@ -139,7 +173,9 @@ namespace TLP.UdonUtils
                 return;
             }
 
-            MarkNetworkDirty();
+            if (AutoRetrySendOnFailure) {
+                MarkNetworkDirty();
+            }
         }
 
         public override void OnDeserialization(DeserializationResult deserializationResult) {
@@ -159,7 +195,8 @@ namespace TLP.UdonUtils
 
             if (!SetupAndValidate()) {
                 ErrorAndDisableGameObject(
-                        $"Some dependencies are not set up correctly. Deactivating {gameObject.transform.GetPathInScene()}");
+                        $"Some dependencies are not set up correctly. " +
+                        $"Deactivating GameObject '{this.GetComponentPathInScene()}'");
             }
         }
         #endregion
@@ -171,14 +208,17 @@ namespace TLP.UdonUtils
         /// </summary>
         /// <returns>shall return false if any essential reference is missing</returns>
         protected virtual bool SetupAndValidate() {
-            return true;
+            if (GetLogger()) {
+                return true;
+            }
+
+            Debug.LogError($"{LOGPrefix} : No {nameof(TlpLogger)} found. Please add the Prefab 'TLP_Logger' to your scene.");
+            return false;
         }
         #endregion
 
         #region Logging
-        [FormerlySerializedAs("severity")]
-        public ELogLevel Severity = ELogLevel.Debug;
-
+        private bool _hadLogger;
         private string LOGPrefix => $"[{ExecutionOrderReadOnly} {this.GetScriptPathInScene()}]";
 
 
@@ -257,12 +297,19 @@ namespace TLP.UdonUtils
 
             var logger = GameObject.Find(TlpLoggerGameObjectName);
             if (!Utilities.IsValid(logger)) {
-                Debug.LogError(LOGPrefix + " : Logger does not exist in the scene or is already destroyed", this);
+                if (_hadLogger) {
+#if TLP_DEBUG
+                    Debug.LogWarning($"{LOGPrefix} : Logger is already destroyed", this);
+#endif
+                } else {
+                    Debug.LogWarning($"{LOGPrefix} : GameObject '{TlpLoggerGameObjectName}' not found", this);
+                }
+
                 return false;
             }
 
             Logger = logger.GetComponent<TlpLogger>();
-
+            _hadLogger = true;
             return Utilities.IsValid(Logger);
         }
 
@@ -280,7 +327,7 @@ namespace TLP.UdonUtils
         /// <param name="context">Object which is relevant to the condition failing, usually a behaviour or GameObject</param>
         /// <returns>The value of condition</returns>
         [Obsolete("Use Assert(bool condition, string message) instead")]
-        protected bool Assert(bool condition, string message, UnityEngine.Object context) {
+        protected bool Assert(bool condition, string message, Object context) {
 #if !TLP_DEBUG
             return condition;
 #else

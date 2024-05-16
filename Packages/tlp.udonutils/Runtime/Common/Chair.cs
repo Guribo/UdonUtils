@@ -1,6 +1,4 @@
-﻿using System;
-using JetBrains.Annotations;
-using TLP.UdonUtils.Events;
+﻿using TLP.UdonUtils.Events;
 using TLP.UdonUtils.Extensions;
 using TLP.UdonUtils.Sync;
 using UnityEngine;

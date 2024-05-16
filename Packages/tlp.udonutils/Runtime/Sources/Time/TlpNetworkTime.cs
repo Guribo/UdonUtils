@@ -5,6 +5,7 @@ using TLP.UdonUtils.Logger;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
+using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Sources.Time
 {
@@ -38,9 +39,20 @@ namespace TLP.UdonUtils.Sources.Time
         private const int MaxDynamicSamples = 1000;
 
         /// <summary>
+        /// Lower limit of dynamic samples to prevent too few samples.
+        /// </summary>
+        private const int MinDynamicSamples = 10;
+
+        /// <summary>
         /// correct drift at half the speed to prevent overshoot/offset oscillation
         /// </summary>
         private const double DriftCompensationRate = 0.5;
+
+        /// <summary>
+        /// If the delta time ever gets lower then this it means that GameTime is most certainly drifting relative
+        /// to real time, making sampling worthless. Used to determine when we should use the RealNetworkTime instead.
+        /// </summary>
+        private const float MaxDeltaTime = 1f / 12f;
         #endregion
 
         #region Dependencies
@@ -73,26 +85,24 @@ namespace TLP.UdonUtils.Sources.Time
         /// Larger values increase time stability but decrease drift compensation speed.
         /// Is not used when AutoAdjustSampleCount is enabled.
         /// </summary>
-        [SerializeField]
         [Range(1, 1000)]
         [Tooltip(
                 "For how many frames that RealNetworkTime shall be sampled before correcting for drift. "
                 + "Larger values increase time stability but decrease drift compensation speed. "
                 + "Is not used when AutoAdjustSampleCount is enabled."
         )]
-        internal int Samples = 256;
+        public int Samples = 256;
 
         /// <summary>
         /// When enabled the number of samples is derived from the current framerate and the <see cref="SamplingDuration"/> variable
         /// to achieve a near constant drift compensation speed.
         /// </summary>
-        [SerializeField]
         [Tooltip(
                 "When enabled the number of samples is derived from "
                 + "the current framerate and the SamplingDuration variable to "
                 + "achieve a near constant drift compensation speed."
         )]
-        internal bool AutoAdjustSampleCount;
+        public bool AutoAdjustSampleCount;
 
         /// <summary>
         /// Only used when <see cref="AutoAdjustSampleCount"/> is enabled.
@@ -105,15 +115,15 @@ namespace TLP.UdonUtils.Sources.Time
                 "Only used when AutoAdjustSampleCount is enabled. "
                 + "Dictates how many seconds drift compensation needs on average to reduce the drift by half, independent of framerate."
         )]
-        internal float SamplingDuration = 3f;
+        public float SamplingDuration = 2.5f;
 
         [SerializeField]
         [Tooltip(
                 "If the difference between RealNetworkTime and TlpNetworkTime exceeds this value, "
                 + "the TlpNetworkTime is forcefully updated to the RealNetworkTime instead of slowly drifting towards it. "
                 + "This is useful to compensate for network drift caused by e.g. avatars being loaded.")]
-        [Range(0.05f, 0.5f)]
-        internal double DriftThreshold = 0.05;
+        [Range(0f, 1f)]
+        internal double DriftThreshold = 0.5f;
         #endregion
 
         #region State
@@ -136,11 +146,10 @@ namespace TLP.UdonUtils.Sources.Time
         private double _previousAverageOffset;
 
         /// <summary>
-        /// delta that is applied to the <see cref="_averageOffset"/> to correct for drift over the
+        /// Delta to the <see cref="RealNetworkTime"/> that is used correct for drift over the
         /// next <see cref="Samples"/> frames
         /// </summary>
-        private double _offsetDriftCompensation;
-
+        public double AverageError { get; private set; }
 
         /// <summary>
         /// Number of  <see cref="RealNetworkTime"/> samples currently collected, resets every time
@@ -156,11 +165,38 @@ namespace TLP.UdonUtils.Sources.Time
 
         #region U# Lifecycle
         public void OnEnable() {
-            Initialize();
+            if (DependenciesValid()) {
+                ForceSynchronizeTime();
+            }
         }
 
         public void Update() {
             UpdateTime();
+        }
+        #endregion
+
+        #region Base Overrides
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
+            }
+
+            if (!DependenciesValid()) {
+                return false;
+            }
+
+            string existingInstance = Networking.LocalPlayer.GetPlayerTag(nameof(TlpNetworkTime));
+            string idString = GetInstanceID().ToString();
+
+            if (!string.IsNullOrEmpty(existingInstance) && existingInstance != idString) {
+                ErrorAndDisableGameObject(
+                        $"Another instance of {nameof(TlpNetworkTime)} already exists: {idString} (this) != {existingInstance} (other)");
+                return false;
+            }
+
+            Networking.LocalPlayer.SetPlayerTag(nameof(TlpNetworkTime), idString);
+
+            return true;
         }
         #endregion
 
@@ -216,13 +252,53 @@ namespace TLP.UdonUtils.Sources.Time
         /// Current delta to the provided network time: (<see cref="RealNetworkTime"/> - <see cref="TlpNetworkTime"/>)
         /// </summary>
         public double ExactError { get; private set; }
+
+        /// <summary>
+        /// Exact server time used as the latest sample
+        /// </summary>
+        public double SampledRealServerTime { get; internal set; }
+
+        /// <summary>
+        /// Searches for the gameobject TLP_NetworkTime in the scene in order to get its TLPNetworkTime component
+        /// </summary>
+        /// <returns>the found component or null if not found</returns>
+        public static TlpNetworkTime GetInstance() {
+            var instance = GameObject.Find("TLP_NetworkTime");
+            if (instance) {
+                return instance.GetComponent<TlpNetworkTime>();
+            }
+
+            Debug.LogError("GameObject called 'TLP_NetworkTime' not found");
+            return null;
+        }
         #endregion
 
         #region Internal
+        /// <returns>True if all dependencies are set</returns>
+        private bool DependenciesValid() {
+            if (!Utilities.IsValid(GameTime)) {
+                Error($"{nameof(GameTime)} is not set");
+                return false;
+            }
+
+            if (!Utilities.IsValid(RealNetworkTime)) {
+                Error($"{nameof(RealNetworkTime)} is not set");
+                return false;
+            }
+
+            if (!Utilities.IsValid(FrameCount)) {
+                Error($"{nameof(FrameCount)} is not set");
+                return false;
+            }
+
+            return true;
+        }
+
         /// <summary>
-        /// Ensures that initially the current delta between game time and network time is used and sampling is reset.
+        /// Ensures that the current delta between game time and network time is used and sampling is reset.
         /// </summary>
-        internal void Initialize() {
+        internal void ForceSynchronizeTime() {
+            SampledRealServerTime = RealNetworkTime.TimeAsDouble();
             _incompleteAverageOffset = GetNetworkGameTimeDelta();
             _previousAverageOffset = _incompleteAverageOffset;
             _averageOffset = _incompleteAverageOffset;
@@ -231,6 +307,7 @@ namespace TLP.UdonUtils.Sources.Time
 
         /// <summary>
         /// samples the frame time deltas to calculate a running average time offset between the game and network
+        /// <remarks>Do not call in FixedUpdate() if you are using dynamic sampling!</remarks>
         /// </summary>
         internal void UpdateTime() {
             #region TLP_DEBUG
@@ -244,21 +321,17 @@ namespace TLP.UdonUtils.Sources.Time
             }
 
             _frameLastUpdated = FrameCount.Frame();
-
-#if TLP_DEBUG
-            PrintDebugInfo();
-#endif
-
-            ExactError = RealNetworkTime.TimeAsDouble() - (GameTime.TimeAsDouble() + GetGameTimeOffset());
-            if (Math.Abs(ExactError) > DriftThreshold) {
-                Initialize();
-                return;
+            SampledRealServerTime = RealNetworkTime.TimeAsDouble();
+            ExactError = SampledRealServerTime - (GameTime.TimeAsDouble() + GetGameTimeOffset());
+            if (Math.Abs(ExactError) > DriftThreshold || GameTime.DeltaTime() >= MaxDeltaTime) {
+                ForceSynchronizeTime();
+                ExactError = 0f;
             }
 
             _incompleteAverageOffset += GetNetworkGameTimeDelta() / Samples;
             ++_offsetSampleCount;
 
-            if (_offsetSampleCount != Samples) {
+            if (_offsetSampleCount < Samples) {
                 return;
             }
 
@@ -266,14 +339,19 @@ namespace TLP.UdonUtils.Sources.Time
             ResetSampling();
         }
 
+        ///<brief>
+        /// ensure that every call to this method returns the same value throughout the entire frame
+        /// </brief>
         /// <returns>The network time based on game
-        /// time with an over time calculated offset and drift compensation"</returns>
+        /// time with an over time calculated offset and drift compensation</returns>
         private double GetNetworkTime() {
-            // ensure that every call to this method returns the same value throughout the entire frame
-            if (!UpdatedThisFrame()) {
-                UpdateTime();
+            if (UnityEngine.Time.inFixedTimeStep || UpdatedThisFrame()) {
+                // don't update in FixedUpdate as it can be called
+                // multiple times per frame and has a different delta time
+                return GameTime.TimeAsDouble() + GetGameTimeOffset();
             }
 
+            UpdateTime();
             return GameTime.TimeAsDouble() + GetGameTimeOffset();
         }
 
@@ -284,7 +362,7 @@ namespace TLP.UdonUtils.Sources.Time
         /// </summary>
         private void EvaluateError() {
             _previousAverageOffset = GetGameTimeOffset();
-            _offsetDriftCompensation = _incompleteAverageOffset - _averageOffset;
+            AverageError = _incompleteAverageOffset - _averageOffset;
             _averageOffset = _incompleteAverageOffset;
         }
 
@@ -297,25 +375,17 @@ namespace TLP.UdonUtils.Sources.Time
             _incompleteAverageOffset = 0;
             _offsetSampleCount = 0;
 
-            if (AutoAdjustSampleCount && GameTime.SmoothDeltaTime() > 0) {
-                Samples = Mathf.CeilToInt(
-                        Mathf.Min(MaxDynamicSamples, SamplingDuration / GameTime.SmoothDeltaTime())
+            float deltaTime = GameTime.SmoothDeltaTime();
+            if (AutoAdjustSampleCount && deltaTime > 0) {
+                Samples = Mathf.RoundToInt(
+                        Mathf.Clamp(SamplingDuration / deltaTime, MinDynamicSamples, MaxDynamicSamples)
                 );
             }
         }
 
-        private void PrintDebugInfo() {
-            Info(
-                    $"Server time vrc = {RealNetworkTime.TimeAsDouble():F6}; "
-                    + $"Tlp server time = {GetNetworkTime():F6}; "
-                    + $"Error = {(Samples - _offsetSampleCount) * _offsetDriftCompensation / Samples:F6}; "
-                    + $" Corrective drift = {_offsetDriftCompensation / Samples:F6}"
-            );
-        }
-
         /// <returns>result of subtracting the game time from the network time</returns>
         private double GetNetworkGameTimeDelta() {
-            return RealNetworkTime.TimeAsDouble() - GameTime.TimeAsDouble();
+            return SampledRealServerTime - GameTime.TimeAsDouble();
         }
 
         /// <returns>true if the current frame has already been updated</returns>

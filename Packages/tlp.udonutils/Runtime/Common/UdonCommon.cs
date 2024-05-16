@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Annotations;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
@@ -212,8 +213,8 @@ namespace TLP.UdonUtils.Common
         public static string GetScriptPathInScene(this UdonSharpBehaviour component) {
             if (!Utilities.IsValid(component)) return "";
 
-                return component.transform.GetPathInScene() + "/" +
-                       UdonTypeNameShort(component.GetUdonTypeName());
+            return component.transform.GetPathInScene() + "/" +
+                   UdonTypeNameShort(component.GetUdonTypeName());
         }
     }
 }

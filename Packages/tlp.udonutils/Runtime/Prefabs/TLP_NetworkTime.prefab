@@ -16,7 +16,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &8475378688283818269
 Transform:
@@ -55,6 +55,7 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 5535978497935687114}
+  AutoRetrySendOnFailure: 1
   Severity: 5
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
@@ -101,7 +102,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &8982171669905613240
 Transform:
@@ -140,6 +141,7 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 2376605018204848362}
+  AutoRetrySendOnFailure: 1
   Severity: 5
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
@@ -186,7 +188,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 4294967295
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &7353425252576164752
 Transform:
@@ -228,17 +230,18 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 8746002016925906261}
+  AutoRetrySendOnFailure: 1
   Severity: 3
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
   PoolableInUse: 0
   GameTime: {fileID: 2489428065805156332}
-  NetworkTime: {fileID: 3759389701109780624}
+  RealNetworkTime: {fileID: 3759389701109780624}
   FrameCount: {fileID: 6967571258415020094}
   Samples: 256
-  AutoAdjustSampleCount: 0
+  AutoAdjustSampleCount: 1
   SamplingDuration: 5
-  DriftThreshold: 0.05000000074505806
+  DriftThreshold: 0.5
 --- !u!114 &8746002016925906261
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -281,7 +284,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &7215862794324405508
 Transform:
@@ -320,6 +323,7 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 2384157939049116648}
+  AutoRetrySendOnFailure: 1
   Severity: 5
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}

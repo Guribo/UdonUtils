@@ -1,7 +1,8 @@
 ﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Events;
+using TMPro;
 using UdonSharp;
 using UnityEngine;
-using UnityEngine.UI;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Examples
@@ -12,64 +13,129 @@ namespace TLP.UdonUtils.Examples
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class WorldVersionEventListener : TlpBaseBehaviour
     {
-        public Canvas canvas;
-        public Text updateAvailableText;
-        public Text versionConflictText;
+        #region Dependencies
+        public Canvas Canvas;
+        public TextMeshProUGUI UpdateAvailableText;
+        public TextMeshProUGUI VersionConflictText;
 
-        public float notificationTimeout = 20f;
+        [Header("Events")]
+        [Tooltip("Event raised when a new world update is available")]
+        public UdonEvent UpdateAvailableEvent;
 
-        internal float HidingUiTime;
+        [Tooltip("Event raised when world version conflict between a joining player and the master occurred")]
+        public UdonEvent VersionConflictOccurredEvent;
+        #endregion
+
+        #region Settings
+        public float NotificationTimeout = 20f;
+        #endregion
+
+        #region State
+        internal float NextUiHidingTime;
+        #endregion
+
+        #region Overrides
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
+            }
+
+            if (!Utilities.IsValid(Canvas)) {
+                ErrorAndDisableGameObject($"{nameof(Canvas)} not set");
+                return false;
+            }
+
+            if (!Utilities.IsValid(UpdateAvailableText)) {
+                ErrorAndDisableGameObject($"{nameof(UpdateAvailableText)} not set");
+                return false;
+            }
+
+            if (!Utilities.IsValid(VersionConflictText)) {
+                ErrorAndDisableGameObject($"{nameof(VersionConflictText)} not set");
+                return false;
+            }
+
+            if (!Utilities.IsValid(UpdateAvailableEvent)) {
+                ErrorAndDisableGameObject($"{nameof(UpdateAvailableEvent)} not set");
+                return false;
+            }
+
+            if (!Utilities.IsValid(VersionConflictOccurredEvent)) {
+                ErrorAndDisableGameObject($"{nameof(VersionConflictOccurredEvent)} not set");
+                return false;
+            }
+
+            if (!UpdateAvailableEvent.AddListenerVerified(this, nameof(WorldUpdateAvailable))) {
+                ErrorAndDisableGameObject($"Failed to listen to {nameof(UpdateAvailableEvent)}");
+                return false;
+            }
+
+            if (!VersionConflictOccurredEvent.AddListenerVerified(this, nameof(VersionConflictOccurred))) {
+                ErrorAndDisableGameObject($"Failed to listen to {nameof(VersionConflictOccurredEvent)}");
+                return false;
+            }
+
+            if (NotificationTimeout <= 0) {
+                Warn(
+                        $"{nameof(NotificationTimeout)} <= 0; World version conflict notifications will be shown indefinitely");
+            }
+
+            return true;
+        }
+
+        public override void OnEvent(string eventName) {
+            switch (eventName) {
+                case nameof(WorldUpdateAvailable):
+                    WorldUpdateAvailable();
+                    return;
+                case nameof(VersionConflictOccurred):
+                    VersionConflictOccurred();
+                    return;
+                default:
+                    base.OnEvent(eventName);
+                    break;
+            }
+        }
+        #endregion
 
         [PublicAPI]
         public void WorldUpdateAvailable() {
-            DebugLog("Yay! Update available!");
-            if (Utilities.IsValid(canvas)) {
-                canvas.gameObject.SetActive(true);
-            }
+            Warn("World update available!");
+            Canvas.gameObject.SetActive(true);
 
-            if (Utilities.IsValid(canvas)) {
-                updateAvailableText.gameObject.SetActive(true);
-            }
+            UpdateAvailableText.gameObject.SetActive(true);
 
             ScheduleNotificationTimeout();
         }
 
         [PublicAPI]
         public void VersionConflictOccurred() {
-            DebugLog("Yay! UDON Networking might break now!");
-            if (Utilities.IsValid(canvas)) {
-                canvas.gameObject.SetActive(true);
-            }
+            Warn("World versions differ. Udon Networking might break now.");
+            Canvas.gameObject.SetActive(true);
+            VersionConflictText.gameObject.SetActive(true);
 
-            if (Utilities.IsValid(canvas)) {
-                versionConflictText.gameObject.SetActive(true);
+            if (NotificationTimeout > 0) {
+                ScheduleNotificationTimeout();
             }
-
-            ScheduleNotificationTimeout();
         }
 
-        private void ScheduleNotificationTimeout() {
-            HidingUiTime = Time.unscaledTime + notificationTimeout;
-            SendCustomEventDelayedSeconds(nameof(HideNotifications), notificationTimeout);
-        }
 
         [PublicAPI]
         public void HideNotifications() {
-            if (HidingUiTime - Time.unscaledTime > 0.1f * notificationTimeout) {
+            if (NextUiHidingTime - Time.timeSinceLevelLoad > 0.1f * NotificationTimeout) {
                 return;
             }
 
-            if (Utilities.IsValid(canvas)) {
-                canvas.gameObject.SetActive(false);
-            }
-
-            if (Utilities.IsValid(canvas)) {
-                versionConflictText.gameObject.SetActive(false);
-            }
-
-            if (Utilities.IsValid(canvas)) {
-                updateAvailableText.gameObject.SetActive(false);
-            }
+            Canvas.gameObject.SetActive(false);
+            VersionConflictText.gameObject.SetActive(false);
+            UpdateAvailableText.gameObject.SetActive(false);
         }
+
+        #region Internal
+        private void ScheduleNotificationTimeout() {
+            NextUiHidingTime = Time.timeSinceLevelLoad + NotificationTimeout;
+            SendCustomEventDelayedSeconds(nameof(HideNotifications), NotificationTimeout);
+        }
+        #endregion
     }
 }

@@ -13,6 +13,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using VRC.SDKBase;
 using Object = UnityEngine.Object;
+using Assert = UnityEngine.Assertions.Assert;
 
 namespace TLP.UdonUtils.Editor.Tests
 {
@@ -29,10 +30,7 @@ namespace TLP.UdonUtils.Editor.Tests
             var assembly = Assembly.GetAssembly(typeof(UnityEditor.Editor));
             var type = assembly.GetType("UnityEditor.LogEntries");
             var method = type.GetMethod("Clear");
-            if (method == null) {
-                Assert.Fail("Editor log clear method not found");
-            }
-
+            Assert.IsNotNull(method, "Editor log clear method not found");
             method.Invoke(new object(), null);
         }
 
@@ -101,6 +99,11 @@ namespace TLP.UdonUtils.Editor.Tests
             LogAssert.Expect(LogType.Error, new Regex(".*" + message + ".*"));
         }
 
+        protected static void ExpectAssert(string message) {
+            ExpectError(message);
+            LogAssert.Expect(LogType.Assert, new Regex(".*" + message + ".*"));
+        }
+
         protected static void ExpectWarning(string message) {
             LogAssert.Expect(LogType.Warning, new Regex(".*" + message + ".*"));
         }
@@ -121,6 +124,19 @@ namespace TLP.UdonUtils.Editor.Tests
             }
 
             return gameObject;
+        }
+
+        public void AreApproximatelyEqual(Vector3 a, Vector3 b, float delta = 1e-5f) {
+            bool ok = false;
+            try {
+                Assert.AreApproximatelyEqual(a.x, b.x, delta);
+                Assert.AreApproximatelyEqual(a.y, b.y, delta);
+                Assert.AreApproximatelyEqual(a.z, b.z, delta);
+                ok = true;
+            }
+            finally {
+                if (!ok) Debug.LogError($"{a} != {b}");
+            }
         }
     }
 }

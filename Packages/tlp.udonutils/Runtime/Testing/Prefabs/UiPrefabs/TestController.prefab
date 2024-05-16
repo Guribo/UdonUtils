@@ -27,12 +27,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 970849051665201942}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5032971961616006222}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &586703431722825328
 MonoBehaviour:
@@ -56,7 +57,8 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 1447671729501662144}
-  Severity: 5
+  AutoRetrySendOnFailure: 1
+  Severity: 3
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
   PoolableInUse: 0
@@ -110,7 +112,8 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 995060757064604782}
-  Severity: 5
+  AutoRetrySendOnFailure: 1
+  Severity: 3
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
   PoolableInUse: 0
@@ -167,13 +170,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5032971960780333323}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5032971961820441075}
   m_Father: {fileID: 5032971961616006222}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5032971961616006219
 GameObject:
@@ -200,14 +204,15 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5032971961616006219}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8135773640318356883}
   - {fileID: 5032971960780333320}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5032971961616006217
 MonoBehaviour:
@@ -231,6 +236,7 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 5032971961616006216}
+  AutoRetrySendOnFailure: 1
   Severity: 5
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
@@ -277,6 +283,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 5032971960780333320}
     m_Modifications:
     - target: {fileID: 806011468073781489, guid: 1ce0fe2ccd1731342bd3be581c8fcc8d,
@@ -351,6 +358,9 @@ PrefabInstance:
       objectReference: {fileID: 3613588836771114520, guid: 1ce0fe2ccd1731342bd3be581c8fcc8d,
         type: 3}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1ce0fe2ccd1731342bd3be581c8fcc8d, type: 3}
 --- !u!4 &5032971961820441075 stripped
 Transform:

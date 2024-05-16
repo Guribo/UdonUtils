@@ -1,4 +1,5 @@
 using TLP.UdonUtils.Extensions;
+using TLP.UdonUtils.Runtime.Physics;
 using TLP.UdonUtils.Sources;
 using UdonSharp;
 using UnityEngine;
@@ -14,14 +15,22 @@ namespace TLP.UdonUtils.Physics
     public class RigidbodyVelocityProvider : VelocityProvider
     {
         #region Dependencies
-        [SerializeField]
-        internal Rigidbody ToTrack;
+        public Rigidbody ToTrack;
 
         [SerializeField]
         internal TimeSource TimeSource;
         #endregion
 
+        #region Settings
+        [Tooltip(
+                "Turnrate in degrees/second considered circular movement. " +
+                "Lower values increase the chance for motion to be considered circular.")]
+        [Range(5, 90)]
+        public float CircularTurnThreshold = 15f;
+        #endregion
+
         #region State
+        private float _circleTurnRate;
         private Vector3 _position;
         private Quaternion _rotation;
         #endregion
@@ -33,7 +42,7 @@ namespace TLP.UdonUtils.Physics
                     trackTransform.position,
                     ToTrack.velocity,
                     TimeSource.FixedDeltaTime(),
-                    TimeSource.Time()
+                    TimeSource.TimeAsDouble()
             );
 
             _UpdateRotationSnapshot(
@@ -41,6 +50,7 @@ namespace TLP.UdonUtils.Physics
                     ToTrack.angularVelocity,
                     TimeSource.FixedDeltaTime()
             );
+
 #if TLP_DEBUG
             UpdateDebugEditorValues();
 #endif
@@ -48,14 +58,15 @@ namespace TLP.UdonUtils.Physics
         #endregion
 
         #region Public
-        public override float GetLatestSnapShot(
+        public override double GetLatestSnapShot(
                 out Vector3 position,
                 out Vector3 velocity,
                 out Vector3 acceleration,
                 out Quaternion rotation,
                 out Vector3 angularVelocity,
                 out Vector3 angularAcceleration,
-                out Transform relativeTo
+                out Transform relativeTo,
+                out float circleAngularVelocityDegrees
         ) {
             #region TLP_DEBUG
 #if TLP_DEBUG
@@ -70,6 +81,7 @@ namespace TLP.UdonUtils.Physics
             angularVelocity = _angularVelocity[2];
             angularAcceleration = _angularAcceleration[2];
             relativeTo = RelativeTo;
+            circleAngularVelocityDegrees = _circleTurnRate;
 
             return _accelerationTime[2];
         }
@@ -84,6 +96,7 @@ namespace TLP.UdonUtils.Physics
             _angularVelocity[2] = RelativeTo.InverseTransformVector(angularVelocity);
             _angularAcceleration[2] = (_angularVelocity[2] - _angularVelocity[1]) / deltaTime;
 
+
             _rotation = RelativeTo.rotation.normalized.GetDeltaAToB(worldRotation.normalized).normalized;
         }
         #endregion
@@ -91,9 +104,9 @@ namespace TLP.UdonUtils.Physics
         #region Internal
         internal void _UpdatePositionSnapshot(
                 Vector3 worldPosition,
-                Vector3 rigidbodyVelocity,
+                Vector3 rigidBodyVelocity,
                 float deltaTime,
-                float time
+                double time
         ) {
             _velocity[0] = _velocity[1];
             _velocity[1] = _velocity[2];
@@ -101,8 +114,19 @@ namespace TLP.UdonUtils.Physics
             _acceleration[0] = _acceleration[1];
             _acceleration[1] = _acceleration[2];
 
-            _velocity[2] = RelativeTo.InverseTransformVector(rigidbodyVelocity);
-            _acceleration[2] = (_velocity[2] - _velocity[1]) / deltaTime;
+            _velocity[2] = RelativeTo.InverseTransformVector(rigidBodyVelocity);
+
+            _acceleration[2] = ConstantLinearAcceleration.Acceleration2(_velocity[1], _velocity[2], deltaTime);
+
+            if (!ConstantCircularVelocity.IsCircularMovement(
+                        _velocity[2],
+                        _velocity[1],
+                        deltaTime,
+                        out _circleTurnRate,
+                        CircularTurnThreshold,
+                        0.003f)) {
+                _circleTurnRate = 0;
+            }
 
             _velocityTime[2] = time;
             _accelerationTime[2] = time;

@@ -38,16 +38,17 @@ namespace TLP.UdonUtils.Physics
             _position[2] = RelativeTo.InverseTransformPoint(ToTrack.position);
 
             // central difference method to calculate velocity (adds 1 frame of age)
-            _velocityTime[2] = TimeSource.Time() - TimeSource.FixedDeltaTime();
-            _velocity[2] = (_position[2] - _position[0]) / (2 * Time.fixedDeltaTime);
+            float fixedDeltaTime = TimeSource.FixedDeltaTime();
+            _velocityTime[2] = TimeSource.TimeAsDouble() - fixedDeltaTime;
+            _velocity[2] = (_position[2] - _position[0]) / (2 * fixedDeltaTime);
 
             // central difference method to calculate velocity (adds a second frame of age)
             _accelerationTime[2] = _velocityTime[1];
 
-            float delta = _velocityTime[2] - _velocityTime[0];
+            double delta = _velocityTime[2] - _velocityTime[0];
 
             if (delta != 0) {
-                _acceleration[2] = (_velocity[2] - _velocity[0]) / delta;
+                _acceleration[2] = (_velocity[2] - _velocity[0]) / (float)delta;
             }
 
 #if TLP_DEBUG
@@ -69,14 +70,15 @@ namespace TLP.UdonUtils.Physics
             }
         }
 
-        public override float GetLatestSnapShot(
+        public override double GetLatestSnapShot(
                 out Vector3 position,
                 out Vector3 velocity,
                 out Vector3 acceleration,
                 out Quaternion rotation,
                 out Vector3 angularVelocity,
                 out Vector3 angularAcceleration,
-                out Transform relativeTo
+                out Transform relativeTo,
+                out float circleAngularVelocityDegrees
         ) {
             position = _position[0];
             velocity = _velocity[1];
@@ -85,6 +87,7 @@ namespace TLP.UdonUtils.Physics
             angularVelocity = Vector3.zero;
             angularAcceleration = Vector3.zero;
             relativeTo = RelativeTo;
+            circleAngularVelocityDegrees = 0;
 
             return _accelerationTime[2];
         }

@@ -1,11 +1,11 @@
-﻿using System;
+﻿using System.Diagnostics;
 using JetBrains.Annotations;
 using TLP.UdonUtils.Sources;
 using UdonSharp;
 using UnityEngine;
-using UnityEngine.Serialization;
 using VRC.SDKBase;
 using VRC.Udon;
+using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
 namespace TLP.UdonUtils.Logger
@@ -48,8 +48,8 @@ namespace TLP.UdonUtils.Logger
         #region State
         private float _startTime;
         private int _lastFrame = -1;
-        private readonly System.Diagnostics.Stopwatch _performanceStopwatch = new System.Diagnostics.Stopwatch();
-        private readonly System.Diagnostics.Stopwatch _frameTimeStopwatch = new System.Diagnostics.Stopwatch();
+        private readonly Stopwatch _performanceStopwatch = new Stopwatch();
+        private readonly Stopwatch _frameTimeStopwatch = new Stopwatch();
         private float _lastLog;
         #endregion
 
@@ -67,7 +67,10 @@ namespace TLP.UdonUtils.Logger
                 return "";
             }
 
-            if (!Utilities.IsValid(TimeSource)) return "";
+            if (!Utilities.IsValid(TimeSource)) {
+                return "";
+            }
+
             float delta = TimeSource.Time() - _lastLog;
             _lastLog += delta;
 
@@ -176,7 +179,10 @@ namespace TLP.UdonUtils.Logger
                 return false;
             }
 
-            if (!base.SetupAndValidate()) return false;
+            if (!base.SetupAndValidate()) {
+                return false;
+            }
+
             _startTime = TimeSource.Time();
             Info($"Starting at time {_startTime}s.");
             return true;

@@ -1,5 +1,7 @@
+using System;
 using JetBrains.Annotations;
 using TLP.UdonUtils.Extensions;
+using TLP.UdonUtils.Runtime.Physics;
 using TLP.UdonUtils.Sources;
 using UdonSharp;
 using UnityEngine;
@@ -34,15 +36,27 @@ namespace TLP.UdonUtils.Sync
 
         [Tooltip("The game time as provided by e.g. Time.timeSinceLevelLoad.")]
         public TimeSource GameTime;
+
+        public bool ShowDebugTrails = true;
+        public GameObject DebugTrailReceived;
+        public GameObject DebugTrailSmoothPrediction;
+        public GameObject DebugTrailRawPrediction;
         #endregion
 
         #region NetworkState
         [UdonSynced]
-        [SerializeField]
-        private double SyncedSendTime = double.MinValue;
+        [NonSerialized]
+        public double SyncedSendTime = double.MinValue;
 
         #region Working Copy
+        [NonSerialized]
         public double WorkingSendTime = double.MinValue;
+
+        [NonSerialized]
+        public double ReceiveTime = double.MinValue;
+
+        [NonSerialized]
+        public double Latency;
         #endregion
         #endregion
 
@@ -63,8 +77,6 @@ namespace TLP.UdonUtils.Sync
 
         public override void OnDeserialization(DeserializationResult deserializationResult) {
             base.OnDeserialization(deserializationResult);
-            DebugLog($"Latency VRC = {deserializationResult.Latency()} vs own {GetAge()}");
-
             if (ReceivedNetworkStateIsOutdated()) {
                 return;
             }
@@ -74,6 +86,11 @@ namespace TLP.UdonUtils.Sync
                     Snapshot,
                     WorkingSendTime);
             Backlog.Add(Snapshot, 3 * PredictionReduction);
+
+            Latency = GetAge();
+#if TLP_DEBUG
+            DebugLog($"Latency VRC = {deserializationResult.Latency():F6} vs own {Latency:F6}");
+#endif
 
             // ensure we update as early as possible in the lifecycle of the UdonSharpBehaviour
             PredictMovement(GetElapsed(), 0f);
@@ -110,7 +127,12 @@ namespace TLP.UdonUtils.Sync
 
         #region Hooks
         protected virtual void RecordSnapshot(TimeSnapshot timeSnapshot, double mostRecentServerTime) {
+            #region TLP_DEBUG
+#if TLP_DEBUG
             DebugLog($"{nameof(RecordSnapshot)}: {nameof(mostRecentServerTime)} = {mostRecentServerTime}s");
+#endif
+            #endregion
+
             timeSnapshot.ServerTime = mostRecentServerTime;
         }
 
@@ -120,7 +142,7 @@ namespace TLP.UdonUtils.Sync
         /// <param name="receivedSnapshotAge">number of seconds that have passed relative to
         /// <see cref="TimeSource"/> time since the recording of the latest <see cref="SyncedSendTime"/></param>
         /// <param name="deltaTime">time since previous update</param>
-        protected abstract void PredictMovement(float receivedSnapshotAge, float deltaTime);
+        protected abstract void PredictMovement(double receivedSnapshotAge, float deltaTime);
 
         protected virtual void CreateWorkingCopyOfNetworkState() {
             #region TLP_DEBUG
@@ -129,6 +151,7 @@ namespace TLP.UdonUtils.Sync
 #endif
             #endregion
 
+            ReceiveTime = NetworkTime.TimeAsDouble();
             WorkingSendTime = SyncedSendTime;
         }
 
@@ -144,23 +167,34 @@ namespace TLP.UdonUtils.Sync
         #endregion
 
         #region Internal
-        internal float GetElapsed() {
+        internal double GetElapsed() {
             #region TLP_DEBUG
 #if TLP_DEBUG
             DebugLog(nameof(GetElapsed));
 #endif
             #endregion
 
-            return (float)(GetAge() - PredictionReduction);
+            return GetAge() - PredictionReduction;
         }
 
         private bool ReceivedNetworkStateIsOutdated() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
             DebugLog(nameof(ReceivedNetworkStateIsOutdated));
-            if (SyncedSendTime > WorkingSendTime || SyncedSendTime == 0.0) {
+#endif
+            #endregion
+
+            if (SyncedSendTime > WorkingSendTime) {
+                #region TLP_DEBUG
+#if TLP_DEBUG
+                DebugLog($"Valid {nameof(SyncedSendTime)} received: {SyncedSendTime:F6} > {WorkingSendTime:F6}");
+#endif
+                #endregion
+
                 return false;
             }
 
-            Warn($"Received outdated {nameof(SyncedSendTime)} = {SyncedSendTime}s");
+            Warn($"Received outdated {nameof(SyncedSendTime)}: {SyncedSendTime:F6} <=  {WorkingSendTime:F6}");
             return true;
         }
 
@@ -173,6 +207,68 @@ namespace TLP.UdonUtils.Sync
             #endregion
 
             return NetworkTime.TimeAsDouble() - WorkingSendTime;
+        }
+        #endregion
+
+        #region Public
+        /// <param name="position"></param>
+        /// <param name="velocity"></param>
+        /// <param name="acceleration"></param>
+        /// <param name="angularVelocityRad"></param>
+        /// <param name="rotation"></param>
+        /// <param name="circleAngularVelocityDegrees"></param>
+        /// <param name="circleThreshold">threshold in degrees, if circleAngularVelocityDegrees is greater prediction occurs on a circle</param>
+        /// <param name="elapsed"></param>
+        /// <param name="newPosition"></param>
+        /// <param name="newVelocity"></param>
+        /// <param name="newRotation"></param>
+        public static void PredictState(
+                Vector3 position,
+                Vector3 velocity,
+                Vector3 acceleration,
+                Vector3 angularVelocityRad,
+                Quaternion rotation,
+                float circleAngularVelocityDegrees,
+                float circleThreshold,
+                double elapsed,
+                out Vector3 newPosition,
+                out Vector3 newVelocity,
+                out Quaternion newRotation
+        ) {
+            if (circleAngularVelocityDegrees > circleThreshold) {
+                newPosition = ConstantCircularVelocity.PositionOnCircle(
+                        position,
+                        velocity,
+                        acceleration,
+                        circleAngularVelocityDegrees,
+                        (float)elapsed,
+                        out newVelocity,
+                        out var rotationDelta);
+            } else {
+                newPosition = ConstantLinearAcceleration.Position(
+                        position,
+                        velocity,
+                        acceleration,
+                        (float)elapsed);
+                newVelocity = ConstantLinearAcceleration.Velocity(
+                        velocity,
+                        acceleration,
+                        (float)elapsed);
+            }
+
+            Quaternion.Euler(angularVelocityRad).ToAngleAxis(
+                    out float syncedTurnRateRadians,
+                    out var syncedTurnAxis
+            );
+
+            // conversion to degrees is done AFTER the axis is created, otherwise huge errors are introduced from euler angles
+            float predictedTurnDelta = (float)(syncedTurnRateRadians * elapsed * Mathf.Rad2Deg);
+            var syncedAngularVelocityDegrees = predictedTurnDelta * syncedTurnAxis;
+
+            var rawDeltaRotation = Quaternion.AngleAxis(predictedTurnDelta, syncedTurnAxis);
+
+            // apply deltaRotation in world space
+            newRotation = rawDeltaRotation * rotation.normalized;
         }
         #endregion
     }

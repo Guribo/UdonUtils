@@ -6,13 +6,19 @@ Contains the base scripts/tools for TLP packages as well as prefabs and potentia
 
 Please note that there is no explicit documentation available. The code is changing less frequently now and relatively stableand where it made sense there is some documentation in the code.
 
-# Dependencies
+## Installation
 
- - VRChat Creator Companion
-	- VRC World SDK
- - [Cyan.PlayerObjectPool](https://cyanlaser.github.io/CyanPlayerObjectPool/) - repository needs to be added to VCC manually first via `Add to VCC` Button!
- 
- 
+1. Install VRChat World SDK 3.6
+2. Install CyanPlayerObjectPool: https://cyanlaser.github.io/CyanPlayerObjectPool/
+3. Install TLP UdonUtils: https://guribo.github.io/TLP/
+
+## Setup
+
+1. Add `TLP_Essentials` prefab to your scene to get the core components
+   1. TLPLogger - *for logging anything TLP related*
+   2. WorldVersionCheck - *Warns users if a player with a new world version joins*
+   3. TLPNetworkTime - *Much more accurate VRC network time provider (sub-millisecond accuracy)*
+
 ## Versioning
 
 This package is versioned using [Semantic Version](https://semver.org/).
@@ -29,6 +35,17 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 ## Changelog
 
 All notable changes to this project will be documented in this file.
+
+### [7.0.0] - 2024-05-16
+
+#### 🚀 Features
+
+- [**breaking**] Upgrade logging, world version check, split/extend physics based prediction utils, increase accuracy of TLP network time to double, improved overall accuracy/robustness in low performance situations, added latency checker, various prefab and scene updates
+- Add GetInstance function to TlpNetworkTime, expose various variables, add basic usage documentation
+
+#### ⚙️ Miscellaneous Tasks
+
+- Update test scene
 
 ### [6.1.2] - 2024-05-10
 

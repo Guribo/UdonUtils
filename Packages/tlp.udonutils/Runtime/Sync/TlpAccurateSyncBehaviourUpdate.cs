@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using VRC.SDKBase;
+﻿using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Sync
 {
@@ -20,7 +19,7 @@ namespace TLP.UdonUtils.Sync
                 return;
             }
 
-            PredictMovement(GetElapsed(), Time.deltaTime);
+            PredictMovement(GetElapsed(), GameTime.DeltaTime());
         }
         #endregion
     }

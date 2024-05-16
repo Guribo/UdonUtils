@@ -18,9 +18,7 @@ namespace TLP.UdonUtils.Physics
         [PublicAPI]
         public new const int ExecutionOrder = TlpExecutionOrder.UiEnd + 1;
 
-
-        [SerializeField]
-        protected internal Transform RelativeTo;
+        public Transform RelativeTo;
 
         /// <summary>
         /// moving average: most recent 2 values
@@ -35,8 +33,8 @@ namespace TLP.UdonUtils.Physics
 
         protected internal Vector3[] _acceleration = new Vector3[3];
         protected Vector3[] _velocity = new Vector3[3];
-        protected float[] _velocityTime = new float[3];
-        protected float[] _accelerationTime = new float[3];
+        protected double[] _velocityTime = new double[3];
+        protected double[] _accelerationTime = new double[3];
         protected Vector3[] _angularVelocity = new Vector3[3];
         protected internal Vector3[] _angularAcceleration = new Vector3[3];
 
@@ -93,14 +91,15 @@ namespace TLP.UdonUtils.Physics
         private float DebugAgeAcceleration;
 
         protected void UpdateDebugEditorValues() {
-            float time = GetLatestSnapShot(
+            double time = GetLatestSnapShot(
                     out var position,
                     out var velocity,
                     out var acceleration,
                     out var _unused,
                     out var __unused,
                     out var ___unused,
-                    out var unused
+                    out var unused,
+                    out var ____unused
             );
             DebugVelocity = velocity.magnitude;
             DebugAccelerationInGs = acceleration.magnitude / 9.81f;
@@ -108,14 +107,15 @@ namespace TLP.UdonUtils.Physics
             DebugAccelerationInGs3x = AccelerationAvg3.magnitude / 9.81f;
         }
 #endif
-        public abstract float GetLatestSnapShot(
+        public abstract double GetLatestSnapShot(
                 out Vector3 position,
                 out Vector3 velocity,
                 out Vector3 acceleration,
                 out Quaternion rotation,
                 out Vector3 angularVelocity,
                 out Vector3 angularAcceleration,
-                out Transform relativeTo
+                out Transform relativeTo,
+                out float circleAngularVelocityDegrees
         );
     }
 }

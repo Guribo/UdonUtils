@@ -25,13 +25,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7146073118054049630}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 10}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2379024670821954868}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6947666588682784398
 MonoBehaviour:
@@ -55,7 +56,8 @@ MonoBehaviour:
     PrefabModifications: []
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 7345900874189439178}
-  Severity: 5
+  AutoRetrySendOnFailure: 1
+  Severity: 3
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
   PoolableInUse: 0
@@ -92,6 +94,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 7146073118054049629}
     m_Modifications:
     - target: {fileID: 1711029453239877153, guid: 35c94401a6fc51848b296cf017c164b2,
@@ -132,7 +135,7 @@ PrefabInstance:
     - target: {fileID: 4744860875553947781, guid: 35c94401a6fc51848b296cf017c164b2,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.020874545
+      value: 0.0001287582
       objectReference: {fileID: 0}
     - target: {fileID: 4767075559095277335, guid: 35c94401a6fc51848b296cf017c164b2,
         type: 3}
@@ -255,6 +258,11 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6104643433950299123, guid: 35c94401a6fc51848b296cf017c164b2,
+        type: 3}
+      propertyPath: m_PresetInfoIsWorld
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6394678957900471259, guid: 35c94401a6fc51848b296cf017c164b2,
         type: 3}
       propertyPath: m_AnchorMax.x
@@ -268,7 +276,7 @@ PrefabInstance:
     - target: {fileID: 6399851813772155178, guid: 35c94401a6fc51848b296cf017c164b2,
         type: 3}
       propertyPath: m_Size
-      value: 0.99963844
+      value: 0.999947
       objectReference: {fileID: 0}
     - target: {fileID: 8068367645899776678, guid: 35c94401a6fc51848b296cf017c164b2,
         type: 3}
@@ -296,6 +304,9 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 35c94401a6fc51848b296cf017c164b2, type: 3}
 --- !u!224 &2379024670821954868 stripped
 RectTransform:
