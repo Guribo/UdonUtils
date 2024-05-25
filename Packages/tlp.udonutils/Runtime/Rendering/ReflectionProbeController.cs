@@ -2,7 +2,7 @@
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Rendering
+namespace TLP.UdonUtils.Runtime.Rendering
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class ReflectionProbeController : TlpBaseBehaviour

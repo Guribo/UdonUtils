@@ -1,10 +1,9 @@
-using TLP.UdonUtils.Extensions;
-using TLP.UdonUtils.Runtime.Physics;
-using TLP.UdonUtils.Sources;
+using TLP.UdonUtils.Runtime.Extensions;
+using TLP.UdonUtils.Runtime.Sources;
 using UdonSharp;
 using UnityEngine;
 
-namespace TLP.UdonUtils.Physics
+namespace TLP.UdonUtils.Runtime.Physics
 {
     /// <summary>
     /// uses rigidbody velocity and calculates acceleration after everything that can affect physics of objects which

@@ -3,7 +3,7 @@ using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Common
+namespace TLP.UdonUtils.Runtime.Common
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public abstract class Comparer : TlpBaseBehaviour

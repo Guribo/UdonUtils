@@ -2,7 +2,7 @@
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Sync
+namespace TLP.UdonUtils.Runtime.Sync
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     public class OwnerOnly : UdonSharpBehaviour

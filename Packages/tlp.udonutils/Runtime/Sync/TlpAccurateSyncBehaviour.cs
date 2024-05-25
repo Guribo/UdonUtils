@@ -1,14 +1,14 @@
 using System;
 using JetBrains.Annotations;
-using TLP.UdonUtils.Extensions;
+using TLP.UdonUtils.Runtime.Extensions;
 using TLP.UdonUtils.Runtime.Physics;
-using TLP.UdonUtils.Sources;
+using TLP.UdonUtils.Runtime.Sources;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon.Common;
 
-namespace TLP.UdonUtils.Sync
+namespace TLP.UdonUtils.Runtime.Sync
 {
     /// <summary>
     /// Base Sync Behaviour for movement prediction based on received values from the current owner
@@ -263,8 +263,6 @@ namespace TLP.UdonUtils.Sync
 
             // conversion to degrees is done AFTER the axis is created, otherwise huge errors are introduced from euler angles
             float predictedTurnDelta = (float)(syncedTurnRateRadians * elapsed * Mathf.Rad2Deg);
-            var syncedAngularVelocityDegrees = predictedTurnDelta * syncedTurnAxis;
-
             var rawDeltaRotation = Quaternion.AngleAxis(predictedTurnDelta, syncedTurnAxis);
 
             // apply deltaRotation in world space

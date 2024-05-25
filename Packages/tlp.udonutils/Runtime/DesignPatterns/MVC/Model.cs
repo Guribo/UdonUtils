@@ -1,9 +1,9 @@
 ﻿using JetBrains.Annotations;
-using TLP.UdonUtils.Events;
+using TLP.UdonUtils.Runtime.Events;
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.DesignPatterns.MVC
+namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 {
     [DefaultExecutionOrder(ExecutionOrder)]
     public abstract class Model : MvcBase

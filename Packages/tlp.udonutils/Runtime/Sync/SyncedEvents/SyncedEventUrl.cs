@@ -3,7 +3,7 @@ using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Sync.SyncedEvents
+namespace TLP.UdonUtils.Runtime.Sync.SyncedEvents
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     [DefaultExecutionOrder(ExecutionOrder)]

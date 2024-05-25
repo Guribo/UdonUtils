@@ -1,9 +1,9 @@
 #if !COMPILER_UDONSHARP && UNITY_EDITOR
-using TLP.UdonUtils.Events;
+using TLP.UdonUtils.Runtime.Events;
 using UnityEngine.Serialization;
 using VRC.Udon.Common.Enums;
 
-namespace TLP.UdonUtils.EditorOnly
+namespace TLP.UdonUtils.Runtime.EditorOnly
 {
     public class MockEvent : UdonEvent
     {

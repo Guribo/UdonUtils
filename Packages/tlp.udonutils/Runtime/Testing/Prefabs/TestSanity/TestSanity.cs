@@ -1,4 +1,4 @@
-﻿using TLP.UdonUtils.Testing;
+﻿using TLP.UdonUtils.Runtime.Testing;
 
 /// <summary>
 /// Empty test that should always pass.

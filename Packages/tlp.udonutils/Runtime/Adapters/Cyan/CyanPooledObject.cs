@@ -1,10 +1,14 @@
 ﻿using JetBrains.Annotations;
+using UnityEngine.Serialization;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Adapters.Cyan
+namespace TLP.UdonUtils.Runtime.Adapters.Cyan
 {
     public class CyanPooledObject : TlpBaseBehaviour
     {
+        [FormerlySerializedAs("cyanPoolAdapter")]
+        public CyanPoolAdapter CyanPoolAdapter;
+
         /// <summary>
         /// Who is the current owner of this object. Null if object is not currently in use. 
         /// </summary>
@@ -33,7 +37,5 @@ namespace TLP.UdonUtils.Adapters.Cyan
             DebugLog(nameof(_OnCleanup));
 #endif
         }
-
-        public CyanPoolAdapter cyanPoolAdapter;
     }
 }

@@ -1,11 +1,11 @@
 ﻿using JetBrains.Annotations;
-using TLP.UdonUtils.Events;
+using TLP.UdonUtils.Runtime.Events;
 using TMPro;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Examples
+namespace TLP.UdonUtils.Runtime.Examples
 {
     /// <summary>
     /// Example of a UdonBehaviour that can get notified when a player with a different world version joined.

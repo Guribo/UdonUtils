@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Player
+namespace TLP.UdonUtils.Runtime.Player
 {
     /// <summary>
     /// Adjusts the volume of an AudioSource based on the configured curve and the distance to the player head.

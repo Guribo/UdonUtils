@@ -4,7 +4,7 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon.Common;
 
-namespace TLP.UdonUtils.Sync.SyncedVariables
+namespace TLP.UdonUtils.Runtime.Sync.SyncedVariables
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     [Obsolete("Use sync Events instead", false)]

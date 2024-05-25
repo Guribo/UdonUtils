@@ -2,7 +2,7 @@
 using UdonSharp;
 using UnityEngine;
 
-namespace TLP.UdonUtils.Player
+namespace TLP.UdonUtils.Runtime.Player
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     [DefaultExecutionOrder(ExecutionOrder)]

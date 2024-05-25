@@ -2,7 +2,7 @@
 
 using UnityEngine;
 
-namespace TLP.UdonUtils.EditorOnly
+namespace TLP.UdonUtils.Runtime.EditorOnly
 {
     public class UsageNote : MonoBehaviour
     {

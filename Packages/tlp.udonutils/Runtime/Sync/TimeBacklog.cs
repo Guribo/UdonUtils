@@ -2,7 +2,7 @@ using System;
 using UdonSharp;
 using VRC.SDK3.Data;
 
-namespace TLP.UdonUtils.Sync
+namespace TLP.UdonUtils.Runtime.Sync
 {
     /// <summary>
     /// Container for received snapshot data for inter-/extrapolation

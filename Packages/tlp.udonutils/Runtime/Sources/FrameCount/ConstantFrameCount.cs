@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace TLP.UdonUtils.Sources.FrameCount
+namespace TLP.UdonUtils.Runtime.Sources.FrameCount
 {
     /// <summary>
     /// Implementation of the <see cref="FrameCountSource"/>

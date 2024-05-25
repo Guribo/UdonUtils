@@ -1,7 +1,7 @@
 ﻿using JetBrains.Annotations;
-using TLP.UdonUtils.Events;
-using TLP.UdonUtils.Extensions;
-using TLP.UdonUtils.Logger;
+using TLP.UdonUtils.Runtime.Events;
+using TLP.UdonUtils.Runtime.Extensions;
+using TLP.UdonUtils.Runtime.Logger;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -9,7 +9,7 @@ using VRC.SDKBase;
 using VRC.Udon.Common;
 using VRC.Udon.Common.Interfaces;
 
-namespace TLP.UdonUtils.Common
+namespace TLP.UdonUtils.Runtime.Common
 {
     /// <summary>
     /// 1. Notifies other behaviours when a player with an old/new version of the current world
@@ -69,7 +69,6 @@ namespace TLP.UdonUtils.Common
         [Tooltip("Event to raise when world version conflict between a joining player and the master occurs")]
         public UdonEvent VersionConflictOccurredEvent;
         #endregion
-
 
         #region Overrides
         protected override bool SetupAndValidate() {
@@ -160,7 +159,6 @@ namespace TLP.UdonUtils.Common
         }
         #endregion
         #endregion
-
 
         #region RPCs
         public void RPC_VersionUpdateAvailable() {

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace TLP.UdonUtils.Sources.FrameCount
+namespace TLP.UdonUtils.Runtime.Sources.FrameCount
 {
     /// <summary>
     /// Implementation of <see cref="FrameCountSource"/>

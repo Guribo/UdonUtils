@@ -3,7 +3,7 @@ using System;
 using System.Runtime.Serialization;
 using JetBrains.Annotations;
 
-namespace TLP.UdonUtils.Tests.Utils
+namespace TLP.UdonUtils.Runtime.Tests.Utils
 {
     public class UdonTestEnvironmentException : Exception
     {

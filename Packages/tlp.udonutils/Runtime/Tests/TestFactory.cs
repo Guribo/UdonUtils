@@ -1,7 +1,7 @@
-using TLP.UdonUtils.Factories;
+using TLP.UdonUtils.Runtime.Factories;
 using UnityEngine;
 
-namespace TLP.UdonUtils.Tests
+namespace TLP.UdonUtils.Runtime.Tests
 {
     public class TestFactory : TlpFactory
     {

@@ -7,7 +7,7 @@ using UnityEngine.Assertions;
 using VRC.SDKBase;
 using Object = UnityEngine.Object;
 
-namespace TLP.UdonUtils.Tests.Utils
+namespace TLP.UdonUtils.Runtime.Tests.Utils
 {
     public static class UdonTestUtils
     {

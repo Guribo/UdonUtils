@@ -1,9 +1,9 @@
-﻿using TLP.UdonUtils.Common;
+﻿using TLP.UdonUtils.Runtime.Common;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Factories
+namespace TLP.UdonUtils.Runtime.Factories
 {
     /// <summary>
     /// Factory that creates new clones of a provided GameObject with <see cref="UdonSharpBehaviour"/> on it.

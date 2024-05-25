@@ -1,8 +1,8 @@
-using TLP.UdonUtils.Sources;
+using TLP.UdonUtils.Runtime.Sources;
 using UdonSharp;
 using UnityEngine;
 
-namespace TLP.UdonUtils.Physics
+namespace TLP.UdonUtils.Runtime.Physics
 {
     /// <summary>
     /// calculates velocity and acceleration after everything that can affect locations and physics of objects which

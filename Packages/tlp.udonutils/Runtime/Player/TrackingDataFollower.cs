@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Player
+namespace TLP.UdonUtils.Runtime.Player
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     [DefaultExecutionOrder(ExecutionOrder)]

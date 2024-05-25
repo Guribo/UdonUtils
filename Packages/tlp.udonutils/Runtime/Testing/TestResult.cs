@@ -1,12 +1,9 @@
-﻿using System;
-using TLP.UdonUtils;
-using TLP.UdonUtils.Testing;
+﻿using TLP.UdonUtils;
+using TLP.UdonUtils.Runtime.Testing;
 using TMPro;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
-using VRC.SDKBase;
-using VRC.Udon;
 
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
 public class TestResult : TlpBaseBehaviour

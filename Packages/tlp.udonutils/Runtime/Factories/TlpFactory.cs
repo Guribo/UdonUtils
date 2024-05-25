@@ -1,12 +1,12 @@
 using System;
 using JetBrains.Annotations;
-using TLP.UdonUtils.Common;
-using TLP.UdonUtils.Logger;
+using TLP.UdonUtils.Runtime.Common;
+using TLP.UdonUtils.Runtime.Logger;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Factories
+namespace TLP.UdonUtils.Runtime.Factories
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     [DefaultExecutionOrder(ExecutionOrder)]

@@ -1,12 +1,12 @@
 using JetBrains.Annotations;
-using TLP.UdonUtils.Events;
-using TLP.UdonUtils.Extensions;
+using TLP.UdonUtils.Runtime.Events;
+using TLP.UdonUtils.Runtime.Extensions;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 using Time = UnityEngine.Time;
 
-namespace TLP.UdonUtils.Sync
+namespace TLP.UdonUtils.Runtime.Sync
 {
     /// <summary>
     /// Gives every player an equal chance to send something, ownership is controlled by the current master

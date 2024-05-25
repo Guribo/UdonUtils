@@ -5,7 +5,7 @@ using UnityEngine;
 using VRC.SDK3.Data;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Common
+namespace TLP.UdonUtils.Runtime.Common
 {
     /// <summary>
     /// Common Utilities and extension methods for <see cref="UdonSharpBehaviour"/>s.

@@ -1,6 +1,6 @@
 ﻿using UdonSharp;
 
-namespace TLP.UdonUtils.Sources
+namespace TLP.UdonUtils.Runtime.Sources
 {
     /// <summary>
     /// Base class for time sources.

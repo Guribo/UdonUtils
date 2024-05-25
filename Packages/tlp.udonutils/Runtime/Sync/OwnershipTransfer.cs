@@ -1,5 +1,5 @@
-using TLP.UdonUtils.Common;
-using TLP.UdonUtils.Extensions;
+using TLP.UdonUtils.Runtime.Common;
+using TLP.UdonUtils.Runtime.Extensions;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Components;
@@ -7,7 +7,7 @@ using VRC.SDKBase;
 using VRC.Udon;
 using VRCStation = VRC.SDKBase.VRCStation;
 
-namespace TLP.UdonUtils.Sync
+namespace TLP.UdonUtils.Runtime.Sync
 {
     public static class OwnershipTransfer
     {

@@ -1,14 +1,15 @@
 ﻿using System.Diagnostics;
 using JetBrains.Annotations;
-using TLP.UdonUtils.Sources;
+using TLP.UdonUtils.Runtime.Sources;
 using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.Data;
 using VRC.SDKBase;
 using VRC.Udon;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
-namespace TLP.UdonUtils.Logger
+namespace TLP.UdonUtils.Runtime.Logger
 {
     public enum ELogLevel
     {
@@ -43,6 +44,26 @@ namespace TLP.UdonUtils.Logger
                 "If true will combine all Debug logs of a frame into a single string, can be used to see what has been logged in the entire frame. Can be useful to determine frames with excessive logging."
         )]
         public bool CreateDebugFrameLog;
+
+        [SerializeField]
+        [Tooltip(
+                "If anything added only these scripts are allowed to log via this logger (will be skipped if also in blacklist)")]
+        internal UdonSharpBehaviour[] WhiteList;
+
+        [SerializeField]
+        [Tooltip("Any script added here will not log anything via this logger")]
+        internal UdonSharpBehaviour[] BlackList;
+
+        /// <summary>
+        /// If not empty only these scripts in here are allowed to use this Logger,
+        /// if they are also in the RuntimeBlackList they won't log either.
+        /// </summary>
+        public readonly DataDictionary RuntimeWhiteList = new DataDictionary();
+
+        /// <summary>
+        /// Any script in this list is not allowed to log using this Logger.
+        /// </summary>
+        public readonly DataDictionary RuntimeBlackList = new DataDictionary();
         #endregion
 
         #region State
@@ -107,6 +128,8 @@ namespace TLP.UdonUtils.Logger
                 return;
             }
 
+            if (!AllowedToLog(context)) return;
+
             string completeMessage;
             if (DetailedContextInfo) {
                 completeMessage =
@@ -134,6 +157,7 @@ namespace TLP.UdonUtils.Logger
                 return;
             }
 
+            if (!AllowedToLog(context)) return;
             Debug.Log(
                     DetailedContextInfo
                             ? $"[INFO]{Prefix}{logPrefix}{GetPlayerInfo(context)} {message}"
@@ -146,6 +170,7 @@ namespace TLP.UdonUtils.Logger
                 return;
             }
 
+            if (!AllowedToLog(context)) return;
             Debug.LogWarning(
                     DetailedContextInfo
                             ? $"[<color=#FFFD55>WARN</color>]{Prefix}{logPrefix}{GetPlayerInfo(context)} {message}"
@@ -159,6 +184,7 @@ namespace TLP.UdonUtils.Logger
                 return;
             }
 
+            if (!AllowedToLog(context)) return;
             Debug.LogError(
                     DetailedContextInfo
                             ? $"[<color=#EB3324>ERROR</color>]{Prefix}{logPrefix}{GetPlayerInfo(context)} {message}"
@@ -183,9 +209,32 @@ namespace TLP.UdonUtils.Logger
                 return false;
             }
 
+            UpdateBlackAndWhiteListLookup();
+
             _startTime = TimeSource.Time();
             Info($"Starting at time {_startTime}s.");
             return true;
+        }
+        #endregion
+
+        #region Internal
+        private void UpdateBlackAndWhiteListLookup() {
+            if (WhiteList != null) {
+                foreach (var udonSharpBehaviour in WhiteList) {
+                    RuntimeWhiteList[udonSharpBehaviour] = true;
+                }
+            }
+
+            if (BlackList != null) {
+                foreach (var udonSharpBehaviour in BlackList) {
+                    RuntimeBlackList[udonSharpBehaviour] = true;
+                }
+            }
+        }
+
+        private bool AllowedToLog(Object context) {
+            return context != null && (RuntimeWhiteList.Count == 0 || RuntimeWhiteList.ContainsKey(context)) &&
+                   (RuntimeBlackList.Count == 0 || !RuntimeBlackList.ContainsKey(context));
         }
         #endregion
     }

@@ -1,7 +1,7 @@
-using TLP.UdonUtils.Events;
+using TLP.UdonUtils.Runtime.Events;
 using UnityEngine;
 
-namespace TLP.UdonUtils.DesignPatterns.MVC
+namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 {
     public abstract class MvcBase : TlpBaseBehaviour
     {

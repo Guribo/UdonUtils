@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TLP.UdonUtils.Sync
+namespace TLP.UdonUtils.Runtime.Sync
 {
     public class TransformSnapshot : TimeSnapshot
     {

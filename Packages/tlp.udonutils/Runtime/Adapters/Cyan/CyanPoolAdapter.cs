@@ -1,11 +1,17 @@
 ﻿using Cyan.PlayerObjectPool;
 using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Extensions;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.Serialization;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Adapters.Cyan
+namespace TLP.UdonUtils.Runtime.Adapters.Cyan
 {
+    /// <summary>
+    /// Adapter that allows retrieving objects from the CyanPlayerObjectPool
+    /// with having to reference it directly.
+    /// </summary>
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     [DefaultExecutionOrder(ExecutionOrder)]
     public class CyanPoolAdapter : TlpBaseBehaviour
@@ -16,30 +22,46 @@ namespace TLP.UdonUtils.Adapters.Cyan
         [PublicAPI]
         public new const int ExecutionOrder = TlpExecutionOrder.DefaultEnd;
 
-        public CyanPlayerObjectAssigner cyanPlayerObjectAssigner;
+        [FormerlySerializedAs("cyanPlayerObjectAssigner")]
+        public CyanPlayerObjectAssigner CyanPlayerObjectAssigner;
 
         public virtual Component[] PooledUdon() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
             DebugLog(nameof(PooledUdon));
-            if (Utilities.IsValid(cyanPlayerObjectAssigner)) {
-                return cyanPlayerObjectAssigner.pooledUdon;
+#endif
+            #endregion
+
+            if (Utilities.IsValid(CyanPlayerObjectAssigner)) {
+                return CyanPlayerObjectAssigner.pooledUdon;
             }
 
             return new Component[0];
         }
 
         public virtual Component GetPlayerPooledUdon(VRCPlayerApi player) {
-            DebugLog($"{nameof(GetPlayerPooledUdon)} ({player.displayName})");
-            if (Utilities.IsValid(cyanPlayerObjectAssigner)) {
-                return cyanPlayerObjectAssigner._GetPlayerPooledUdon(player);
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog($"{nameof(GetPlayerPooledUdon)} for player {player.ToStringSafe()}");
+#endif
+            #endregion
+
+            if (Utilities.IsValid(CyanPlayerObjectAssigner)) {
+                return CyanPlayerObjectAssigner._GetPlayerPooledUdon(player);
             }
 
             return null;
         }
 
         public virtual GameObject GetPlayerPooledObject(VRCPlayerApi player) {
-            DebugLog($"{nameof(GetPlayerPooledObject)} ({player.displayName})");
-            if (Utilities.IsValid(cyanPlayerObjectAssigner)) {
-                return cyanPlayerObjectAssigner._GetPlayerPooledObject(player);
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog($"{nameof(GetPlayerPooledObject)} for player {player.ToStringSafe()}");
+#endif
+            #endregion
+
+            if (Utilities.IsValid(CyanPlayerObjectAssigner)) {
+                return CyanPlayerObjectAssigner._GetPlayerPooledObject(player);
             }
 
             return null;

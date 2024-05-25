@@ -3,7 +3,7 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
 
-namespace TLP.UdonUtils.Adapters.Cyan
+namespace TLP.UdonUtils.Runtime.Adapters.Cyan
 {
     public class CyanPoolEventListener : TlpBaseBehaviour
     {

@@ -2,7 +2,7 @@
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Player
+namespace TLP.UdonUtils.Runtime.Player
 {
     /// <summary>
     /// Updates the far voice range of all players every time a player leaves or joins the world.

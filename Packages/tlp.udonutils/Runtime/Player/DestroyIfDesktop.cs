@@ -1,11 +1,11 @@
 using JetBrains.Annotations;
-using TLP.UdonUtils.Common;
-using TLP.UdonUtils.Logger;
+using TLP.UdonUtils.Runtime.Common;
+using TLP.UdonUtils.Runtime.Logger;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Player
+namespace TLP.UdonUtils.Runtime.Player
 {
     [DefaultExecutionOrder(ExecutionOrder)]
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]

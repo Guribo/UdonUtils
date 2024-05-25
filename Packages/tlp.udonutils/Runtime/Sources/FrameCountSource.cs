@@ -1,6 +1,6 @@
 ﻿using UdonSharp;
 
-namespace TLP.UdonUtils.Sources
+namespace TLP.UdonUtils.Runtime.Sources
 {
     /// <summary>
     /// Base class for frame counts that allows being independent of Unity.

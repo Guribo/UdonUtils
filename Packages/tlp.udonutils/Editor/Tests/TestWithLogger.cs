@@ -5,8 +5,8 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using NUnit.Framework;
-using TLP.UdonUtils.Logger;
-using TLP.UdonUtils.Tests.Utils;
+using TLP.UdonUtils.Runtime.Logger;
+using TLP.UdonUtils.Runtime.Tests.Utils;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -136,6 +136,23 @@ namespace TLP.UdonUtils.Editor.Tests
             }
             finally {
                 if (!ok) Debug.LogError($"{a} != {b}");
+            }
+        }
+
+        /// <summary>
+        /// Yields null in edit mode test until the give amount of time has elapsed (realtime)
+        /// </summary>
+        /// <code>
+        /// // Example usage:
+        /// yield return EditorTestWaitForSeconds(2);
+        /// </code>
+        /// <param name="duration"></param>
+        /// <returns>yield return null</returns>
+        public static IEnumerator EditorTestWaitForSeconds(float duration) {
+            Debug.Assert(!Application.isPlaying, "Use WaitForSeconds instead in PlaymodeTests");
+            float time = Time.realtimeSinceStartup;
+            while (Time.realtimeSinceStartup - time < duration) {
+                yield return null;
             }
         }
     }

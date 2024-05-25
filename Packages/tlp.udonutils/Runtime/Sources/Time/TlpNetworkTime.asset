@@ -21,7 +21,7 @@ MonoBehaviour:
   compiledVersion: 2
   behaviourSyncMode: 1
   hasInteractEvent: 0
-  scriptID: -7931351535817394089
+  scriptID: 1419386277658642190
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
@@ -136,7 +136,7 @@ MonoBehaviour:
       Data: 8|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: TLP.UdonUtils.Logger.ELogLevel, TLP.UdonUtils.Runtime
+      Data: TLP.UdonUtils.Runtime.Logger.ELogLevel, TLP.UdonUtils.Runtime
     - Name: 
       Entry: 8
       Data: 
@@ -325,7 +325,7 @@ MonoBehaviour:
       Data: 19|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: TLP.UdonUtils.Logger.TlpLogger, TLP.UdonUtils.Runtime
+      Data: TLP.UdonUtils.Runtime.Logger.TlpLogger, TLP.UdonUtils.Runtime
     - Name: 
       Entry: 8
       Data: 
@@ -583,7 +583,7 @@ MonoBehaviour:
       Data: 38|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: TLP.UdonUtils.Sources.TimeSource, TLP.UdonUtils.Runtime
+      Data: TLP.UdonUtils.Runtime.Sources.TimeSource, TLP.UdonUtils.Runtime
     - Name: 
       Entry: 8
       Data: 
@@ -721,7 +721,7 @@ MonoBehaviour:
       Data: 48|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: TLP.UdonUtils.Sources.FrameCountSource, TLP.UdonUtils.Runtime
+      Data: TLP.UdonUtils.Runtime.Sources.FrameCountSource, TLP.UdonUtils.Runtime
     - Name: 
       Entry: 8
       Data: 

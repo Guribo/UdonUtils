@@ -2,7 +2,7 @@ using JetBrains.Annotations;
 using UdonSharp;
 using UnityEngine;
 
-namespace TLP.UdonUtils.Events
+namespace TLP.UdonUtils.Runtime.Events
 {
     [DefaultExecutionOrder(ExecutionOrder)]
     [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]

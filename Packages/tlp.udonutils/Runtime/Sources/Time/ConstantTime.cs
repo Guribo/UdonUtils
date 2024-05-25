@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace TLP.UdonUtils.Sources.Time
+namespace TLP.UdonUtils.Runtime.Sources.Time
 {
     /// <summary>
     /// <see cref="TimeSource"/> that always returns the same value.

@@ -2,7 +2,7 @@
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Physics
+namespace TLP.UdonUtils.Runtime.Physics
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     public class CenterOfMass : UdonSharpBehaviour

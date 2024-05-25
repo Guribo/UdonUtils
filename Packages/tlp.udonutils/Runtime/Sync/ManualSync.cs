@@ -4,7 +4,7 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon.Common;
 
-namespace TLP.UdonUtils.Sync
+namespace TLP.UdonUtils.Runtime.Sync
 {
     [Obsolete("Use NetworkTransform intead")]
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]

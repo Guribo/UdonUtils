@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
-using TLP.UdonUtils.Common;
-using TLP.UdonUtils.Factories;
+using TLP.UdonUtils.Runtime.Common;
+using TLP.UdonUtils.Runtime.Factories;
 using UnityEngine;
 using VRC.SDKBase;
 

@@ -1,7 +1,7 @@
 using JetBrains.Annotations;
-using TLP.UdonUtils.Extensions;
-using TLP.UdonUtils.Sync;
-using TLP.UdonUtils.Sync.SyncedEvents;
+using TLP.UdonUtils.Runtime.Extensions;
+using TLP.UdonUtils.Runtime.Sync;
+using TLP.UdonUtils.Runtime.Sync.SyncedEvents;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
@@ -9,7 +9,7 @@ using VRC.SDK3.StringLoading;
 using VRC.SDKBase;
 using VRC.Udon;
 
-namespace TLP.UdonUtils.Player
+namespace TLP.UdonUtils.Runtime.Player
 {
     [DefaultExecutionOrder(ExecutionOrder)]
     [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
@@ -642,18 +642,18 @@ namespace TLP.UdonUtils.Player
 
             if (IsBlackListed(player.DisplayNameSafe())) {
                 DebugLog($"{player.DisplayNameSafe()} is blacklisted by {name}");
-                Assert(AddToWhiteList(player.DisplayNameSafe()), "Failed to whitelist player", this);
-                Assert(IsWhiteListed(player.DisplayNameSafe()), "Player not whitelisted after manually adding", this);
-                Assert(ResetToDefault(player.DisplayNameSafe()), "Failed to reset player", this);
-                Assert(IsBlackListed(player.DisplayNameSafe()), "Player not blacklisted again after resetting", this);
+                Assert(AddToWhiteList(player.DisplayNameSafe()), "Failed to whitelist player");
+                Assert(IsWhiteListed(player.DisplayNameSafe()), "Player not whitelisted after manually adding");
+                Assert(ResetToDefault(player.DisplayNameSafe()), "Failed to reset player");
+                Assert(IsBlackListed(player.DisplayNameSafe()), "Player not blacklisted again after resetting");
             }
 
             if (IsWhiteListed(player.DisplayNameSafe())) {
                 DebugLog($"{player.DisplayNameSafe()} is whitelisted by {name}");
-                Assert(AddToBlackList(player.DisplayNameSafe()), "Failed to blacklist player", this);
-                Assert(IsBlackListed(player.DisplayNameSafe()), "Player not blacklisted after manually adding", this);
-                Assert(ResetToDefault(player.DisplayNameSafe()), "Failed to reset player", this);
-                Assert(IsWhiteListed(player.DisplayNameSafe()), "Player not whitelisted again after resetting", this);
+                Assert(AddToBlackList(player.DisplayNameSafe()), "Failed to blacklist player");
+                Assert(IsBlackListed(player.DisplayNameSafe()), "Player not blacklisted after manually adding");
+                Assert(ResetToDefault(player.DisplayNameSafe()), "Failed to reset player");
+                Assert(IsWhiteListed(player.DisplayNameSafe()), "Player not whitelisted again after resetting");
             }
         }
 #endif

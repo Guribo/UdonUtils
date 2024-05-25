@@ -1,5 +1,5 @@
 ﻿using JetBrains.Annotations;
-using TLP.UdonUtils.Extensions;
+using TLP.UdonUtils.Runtime.Extensions;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
@@ -67,7 +67,6 @@ namespace TLP.UdonUtils.Runtime.Common
         // map of URLs to Texture2Ds
         private readonly DataDictionary _downloadedImages = new DataDictionary();
         #endregion
-
 
         #region Udon Lifecycle
         private void OnEnable() {

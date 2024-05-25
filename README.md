@@ -36,6 +36,18 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [8.0.0] - 2024-05-25
+
+#### 🚀 Features
+
+- Add Stopwatch TimeSource
+- *(TimeSource)* [**breaking**] Custom ntp servertime synchronization, move Runtime files to TLP.UdonUtils.Runtime namespace
+- Add quaternion compression utils
+
+#### 🚜 Refactor
+
+- Remove unused code
+
 ### [7.0.0] - 2024-05-16
 
 #### 🚀 Features

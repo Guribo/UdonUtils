@@ -1,13 +1,12 @@
-﻿using System;
-using JetBrains.Annotations;
-using TLP.UdonUtils.DesignPatterns.MVC;
-using TLP.UdonUtils.Events;
-using TLP.UdonUtils.Extensions;
+﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.DesignPatterns.MVC;
+using TLP.UdonUtils.Runtime.Events;
+using TLP.UdonUtils.Runtime.Extensions;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Testing
+namespace TLP.UdonUtils.Runtime.Testing
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     [DefaultExecutionOrder(ExecutionOrder)]

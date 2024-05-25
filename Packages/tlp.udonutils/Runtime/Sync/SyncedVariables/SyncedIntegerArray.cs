@@ -4,7 +4,7 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon.Common;
 
-namespace TLP.UdonUtils.Sync.SyncedVariables
+namespace TLP.UdonUtils.Runtime.Sync.SyncedVariables
 {
     /// <summary>
     /// Component which is used to synchronize a value on demand independently from high continuous synced udon

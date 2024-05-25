@@ -1,6 +1,6 @@
-using TLP.UdonUtils.DesignPatterns.MVC;
+using TLP.UdonUtils.Runtime.DesignPatterns.MVC;
 
-namespace TLP.UdonUtils.EditorOnly
+namespace TLP.UdonUtils.Runtime.EditorOnly
 {
     public class MockModel : Model
     {

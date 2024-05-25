@@ -1,10 +1,10 @@
 using JetBrains.Annotations;
-using TLP.UdonUtils.Events;
+using TLP.UdonUtils.Runtime.Events;
 using UdonSharp;
 using UnityEngine;
 using VRC.Udon.Common;
 
-namespace TLP.UdonUtils.Sync.SyncedEvents
+namespace TLP.UdonUtils.Runtime.Sync.SyncedEvents
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     [DefaultExecutionOrder(ExecutionOrder)]

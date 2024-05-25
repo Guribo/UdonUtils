@@ -1,4 +1,4 @@
-﻿using TLP.UdonUtils.DesignPatterns.MVC;
+﻿using TLP.UdonUtils.Runtime.DesignPatterns.MVC;
 using UdonSharp;
 using VRC.SDK3.Data;
 

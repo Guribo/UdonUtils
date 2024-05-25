@@ -1,9 +1,6 @@
-﻿using System.Diagnostics;
-using TLP.UdonUtils.Common;
-using UnityEngine;
-using VRC.SDKBase;
+﻿using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Sources.Time
+namespace TLP.UdonUtils.Runtime.Sources.Time
 {
     /// <summary>
     /// Implementation of <see cref="TimeSource"/>

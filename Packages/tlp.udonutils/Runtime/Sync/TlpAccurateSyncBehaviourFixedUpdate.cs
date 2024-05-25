@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Sync
+namespace TLP.UdonUtils.Runtime.Sync
 {
     /// <summary>
     /// Variant that predicts movement based on <see cref="FixedUpdate"/>

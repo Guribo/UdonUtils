@@ -1,6 +1,6 @@
 using VRC.Udon.Common;
 
-namespace TLP.UdonUtils.Extensions
+namespace TLP.UdonUtils.Runtime.Extensions
 {
     public static class NetworkUtils
     {

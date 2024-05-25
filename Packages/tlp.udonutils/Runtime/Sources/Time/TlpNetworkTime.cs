@@ -1,13 +1,13 @@
 ﻿using System;
 using JetBrains.Annotations;
-using TLP.UdonUtils.Extensions;
-using TLP.UdonUtils.Logger;
+using TLP.UdonUtils.Runtime.Extensions;
+using TLP.UdonUtils.Runtime.Logger;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Sources.Time
+namespace TLP.UdonUtils.Runtime.Sources.Time
 {
     /// <summary>
     /// Implementation of <see cref="TimeSource"/> that synchronizes network and game clocks by continuously sampling

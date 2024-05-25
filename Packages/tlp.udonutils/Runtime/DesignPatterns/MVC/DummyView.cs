@@ -1,6 +1,6 @@
 using UdonSharp;
 
-namespace TLP.UdonUtils.DesignPatterns.MVC
+namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class DummyView : View

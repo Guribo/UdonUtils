@@ -1,9 +1,9 @@
 ﻿using System;
-using TLP.UdonUtils.Sync.SyncedEvents;
+using TLP.UdonUtils.Runtime.Sync.SyncedEvents;
 using UdonSharp;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Player
+namespace TLP.UdonUtils.Runtime.Player
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public class PlayerList : SyncedEventIntArray
@@ -23,7 +23,8 @@ namespace TLP.UdonUtils.Player
         public bool AddPlayer(VRCPlayerApi player) {
             int validPlayers = ConsolidatePlayerIds(Players);
 
-            if (!Assert(Utilities.IsValid(player), "Player invalid", this)) {
+            if (!Utilities.IsValid(player)) {
+                Error("Player invalid");
                 ResizePlayerArray(validPlayers);
                 return false;
             }
@@ -153,6 +154,7 @@ namespace TLP.UdonUtils.Player
         }
 
         #region BubbleSort
+        // TODO move to some utils
         internal void BubbleSort(int[] array) {
             int arrayLength = array.Length;
             for (int i = 0; i < arrayLength; i++) {
@@ -220,7 +222,6 @@ namespace TLP.UdonUtils.Player
         }
         #endregion
 
-
         #region Merge Sort
         public static void MergeSort(int[] array) {
             int n = array.Length;
@@ -264,6 +265,7 @@ namespace TLP.UdonUtils.Player
         #endregion
 
         #region Iterative QuickSort
+        // TODO move to some utils
         private static void IterativeQuickSort(int[] arr, int left, int right) {
             int[] stack = new int[right - left + 1];
             int top = -1;
@@ -289,6 +291,7 @@ namespace TLP.UdonUtils.Player
             }
         }
 
+// TODO move to some utils
         private static int Partition(int[] arr, int left, int right) {
             int pivot = arr[right];
             int i = left - 1;
@@ -305,6 +308,7 @@ namespace TLP.UdonUtils.Player
             return i + 1;
         }
 
+// TODO move to some utils
         private static void Swap(int[] arr, int i, int j) {
             int temp = arr[i];
             arr[i] = arr[j];

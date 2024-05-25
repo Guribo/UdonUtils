@@ -1,4 +1,4 @@
-﻿namespace TLP.UdonUtils.Sources.Time
+﻿namespace TLP.UdonUtils.Runtime.Sources.Time
 {
     /// <summary>
     /// Implementation of <see cref="TimeSource"/>

@@ -5,7 +5,7 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon.Common.Enums;
 
-namespace TLP.UdonUtils.Events
+namespace TLP.UdonUtils.Runtime.Events
 {
     [DefaultExecutionOrder(ExecutionOrder)]
     [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]

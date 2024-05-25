@@ -1,9 +1,9 @@
 ﻿using JetBrains.Annotations;
-using TLP.UdonUtils.Sync;
+using TLP.UdonUtils.Runtime.Sync;
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Common
+namespace TLP.UdonUtils.Runtime.Common
 {
     public class ChairProxy : TlpBaseBehaviour
     {

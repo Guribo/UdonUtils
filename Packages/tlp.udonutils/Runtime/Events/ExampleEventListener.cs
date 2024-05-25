@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace TLP.UdonUtils.Events
+namespace TLP.UdonUtils.Runtime.Events
 {
     public class ExampleEventListener : TlpBaseBehaviour
     {

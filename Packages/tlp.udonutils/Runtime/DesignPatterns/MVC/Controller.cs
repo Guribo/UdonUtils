@@ -2,7 +2,7 @@
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.DesignPatterns.MVC
+namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 {
     /// <summary>
     /// The controller in the MVC pattern is responsible for receiving user input and updating the model and view

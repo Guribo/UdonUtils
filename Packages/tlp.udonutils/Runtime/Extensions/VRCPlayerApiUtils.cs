@@ -1,7 +1,7 @@
 using JetBrains.Annotations;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Extensions
+namespace TLP.UdonUtils.Runtime.Extensions
 {
     public static class VrcPlayerApiUtils
     {

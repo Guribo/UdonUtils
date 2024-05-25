@@ -3,7 +3,7 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon.Common;
 
-namespace TLP.UdonUtils.Player
+namespace TLP.UdonUtils.Runtime.Player
 {
     [DefaultExecutionOrder(50_000 + -500)]
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]

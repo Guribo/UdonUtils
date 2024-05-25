@@ -113,10 +113,13 @@ namespace TLP.UdonUtils.Runtime.Physics
                 float deltaTime
         ) {
             var previousVelocity = rigidBody.VelocityCorrect(previousAcceleration, previousDeltaTime);
-            var distanceFromPreviousVelocity = previousVelocity * Time.fixedDeltaTime;
-            var distanceFromCurrentAcceleration = 0.5f * Time.fixedDeltaTime * Time.fixedDeltaTime * acceleration;
-            var distanceToTravel = distanceFromCurrentAcceleration + distanceFromPreviousVelocity;
-            rigidBody.velocity = distanceToTravel / Time.fixedDeltaTime;
+            var distanceFromPreviousVelocity = previousVelocity * deltaTime;
+            var distanceFromCurrentAcceleration = 0.5f * deltaTime * deltaTime * acceleration;
+            if (deltaTime != 0) {
+                var distanceToTravel = distanceFromCurrentAcceleration + distanceFromPreviousVelocity;
+                rigidBody.velocity = distanceToTravel / deltaTime;
+            }
+
             previousAcceleration = acceleration;
         }
 
@@ -134,7 +137,7 @@ namespace TLP.UdonUtils.Runtime.Physics
                 Vector3 previousAcceleration,
                 float previousDeltaTime
         ) {
-            return rigidBody.velocity + 0.5f * Time.fixedDeltaTime * previousAcceleration;
+            return rigidBody.velocity + 0.5f * previousDeltaTime * previousAcceleration;
         }
     }
 }

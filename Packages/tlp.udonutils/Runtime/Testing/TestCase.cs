@@ -3,7 +3,7 @@ using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Testing
+namespace TLP.UdonUtils.Runtime.Testing
 {
     public enum TestCaseStatus
     {

@@ -1,12 +1,8 @@
-﻿using System;
-using TLP.UdonUtils.Sources.Time;
-using UdonSharp;
+﻿using UdonSharp;
 using UnityEngine;
-using UnityEngine.Serialization;
 using VRC.SDK3.Data;
-using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Sync
+namespace TLP.UdonUtils.Runtime.Sync
 {
     /// <summary>
     /// Allows adding position and rotation snapshots for interpolation.

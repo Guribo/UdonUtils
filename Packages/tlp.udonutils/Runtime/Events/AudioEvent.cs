@@ -1,7 +1,7 @@
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace TLP.UdonUtils.Events
+namespace TLP.UdonUtils.Runtime.Events
 {
     [DefaultExecutionOrder(ExecutionOrder)]
     public class AudioEvent : UdonEvent

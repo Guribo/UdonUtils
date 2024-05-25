@@ -1,11 +1,11 @@
-﻿using TLP.UdonUtils.Events;
-using TLP.UdonUtils.Extensions;
-using TLP.UdonUtils.Sync;
+﻿using TLP.UdonUtils.Runtime.Events;
+using TLP.UdonUtils.Runtime.Extensions;
+using TLP.UdonUtils.Runtime.Sync;
 using UnityEngine;
 using UnityEngine.Serialization;
 using VRC.SDKBase;
 
-namespace TLP.UdonUtils.Common
+namespace TLP.UdonUtils.Runtime.Common
 {
     [RequireComponent(typeof(VRC.SDK3.Components.VRCStation))]
     public class Chair : TlpBaseBehaviour
@@ -83,7 +83,6 @@ namespace TLP.UdonUtils.Common
         }
         #endregion
 
-
         #region VRC Station Events
         public override void OnStationEntered(VRCPlayerApi player) {
 #if TLP_DEBUG
@@ -137,7 +136,6 @@ namespace TLP.UdonUtils.Common
             NotifyRemotePlayerExited(player);
         }
         #endregion
-
 
         #region Public API
         public VRCPlayerApi GetSeatedPlayer() {
