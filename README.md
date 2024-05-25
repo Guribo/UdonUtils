@@ -36,6 +36,20 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [8.1.0] - 2024-05-25
+
+#### 🚀 Features
+
+- *(TlpAccurateSyncbehaviour)* Use float instead of double for timestamp
+
+#### 🐛 Bug Fixes
+
+- Move missed base files to TLP.UdonUtils.Runtime namespace
+
+#### ⚙️ Miscellaneous Tasks
+
+- Bump version
+
 ### [8.0.0] - 2024-05-25
 
 #### 🚀 Features

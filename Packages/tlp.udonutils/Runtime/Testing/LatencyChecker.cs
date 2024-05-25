@@ -1,4 +1,4 @@
-﻿using TLP.UdonUtils;
+﻿using TLP.UdonUtils.Runtime;
 using TLP.UdonUtils.Runtime.Sources.Time;
 using TMPro;
 using UdonSharp;

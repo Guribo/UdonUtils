@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using NUnit.Framework;
+using TLP.UdonUtils.Runtime;
 using TLP.UdonUtils.Runtime.Logger;
 using TLP.UdonUtils.Runtime.Tests.Utils;
 using UnityEditor;

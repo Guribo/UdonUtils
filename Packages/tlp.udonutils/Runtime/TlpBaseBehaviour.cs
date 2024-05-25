@@ -11,7 +11,7 @@ using VRC.Udon.Common;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
-namespace TLP.UdonUtils
+namespace TLP.UdonUtils.Runtime
 {
     /// <summary>
     /// UdonSharpBehaviour Lifecycle<br/>

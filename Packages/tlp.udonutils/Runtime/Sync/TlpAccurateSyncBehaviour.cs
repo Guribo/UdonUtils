@@ -46,7 +46,7 @@ namespace TLP.UdonUtils.Runtime.Sync
         #region NetworkState
         [UdonSynced]
         [NonSerialized]
-        public double SyncedSendTime = double.MinValue;
+        public float SyncedSendTime = float.MinValue;
 
         #region Working Copy
         [NonSerialized]
@@ -162,7 +162,7 @@ namespace TLP.UdonUtils.Runtime.Sync
 #endif
             #endregion
 
-            SyncedSendTime = WorkingSendTime;
+            SyncedSendTime = (float) WorkingSendTime;
         }
         #endregion
 

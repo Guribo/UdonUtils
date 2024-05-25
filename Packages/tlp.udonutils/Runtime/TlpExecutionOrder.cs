@@ -1,4 +1,4 @@
-namespace TLP.UdonUtils
+namespace TLP.UdonUtils.Runtime
 {
     public static class TlpExecutionOrder
     {
