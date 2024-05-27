@@ -36,6 +36,12 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [8.1.1] - 2024-05-27
+
+#### 🐛 Bug Fixes
+
+- *(NtpTime)* Fix new master not maintaining current time offset when old master leaves
+
 ### [8.1.0] - 2024-05-25
 
 #### 🚀 Features

@@ -88,7 +88,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         public override void OnPreSerialization() {
             base.OnPreSerialization();
 
-            WorkingRequestSendTime = TimeSource.Time();
+            WorkingRequestSendTime = GetRawTime();
 #if TLP_DEBUG
             Warn($"Client requesting: {nameof(WorkingRequestSendTime)}: {WorkingRequestSendTime:F9}");
 #endif
@@ -97,17 +97,42 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
 
         public override void OnDeserialization(DeserializationResult deserializationResult) {
             base.OnDeserialization(deserializationResult);
+            if (!Networking.IsMaster) {
+                return;
+            }
+
+            if (!Server.OwnNtpClient) {
+                return;
+            }
+
+            float receiveTime = Server.OwnNtpClient.GetAdjustedLocalTime();
 #if TLP_DEBUG
             Warn(
-                    $"Client request arrived: {nameof(RequestSendTime)}: {RequestSendTime:F9}, receive time: {TimeSource.Time():F9} ");
+                    $"Client request arrived: {nameof(RequestSendTime)}: {RequestSendTime:F9}, receive time: {receiveTime:F9} ");
 #endif
-            if (!Server.AddRequest(this)) {
+            if (!Server.AddRequest(this, receiveTime)) {
                 Error("Failed to add request to server");
             }
         }
         #endregion
 
         #region Public
+        /// <returns>Returns the local time + offset if master
+        /// and only the local time if not master</returns>
+        public float GetTime() {
+            if (Networking.IsMaster) {
+                return GetAdjustedLocalTime();
+            }
+
+            return TimeSource.Time();
+        }
+
+        /// <returns>the local time without offset</returns>
+        public float GetRawTime() {
+            return TimeSource.Time();
+        }
+
+        /// <returns>the local time + offset</returns>
         public float GetAdjustedLocalTime() {
             return TimeSource.Time() + ClockOffset;
         }
@@ -119,10 +144,20 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
 #endif
             #endregion
 
-            NextRequestTime += 0.5f * RequestInterval;
+            NextRequestTime += 0.1f * RequestInterval;
         }
 
         public bool UpdateOffset(float requestReceiveTime, float responseSendTime, float responseReceiveTime) {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            Info(
+                    $"{nameof(WorkingRequestSendTime)}: {WorkingRequestSendTime:F5}; " +
+                    $"{nameof(requestReceiveTime)}: {requestReceiveTime:F5}; " +
+                    $"{nameof(responseSendTime)}: {responseSendTime:F5}; " +
+                    $"{nameof(responseReceiveTime)}: {responseReceiveTime:F5}");
+#endif
+            #endregion
+
             float ping = GetDelta(WorkingRequestSendTime, requestReceiveTime, responseSendTime, responseReceiveTime);
             if (ping < 0f) {
                 AdjustRequestTiming();

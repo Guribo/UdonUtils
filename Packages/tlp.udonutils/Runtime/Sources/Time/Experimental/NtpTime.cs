@@ -23,13 +23,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time.Experimental
                 return float.MinValue;
             }
 
-            if (!Utilities.IsValid(NtpServer)) {
-                return NtpClient.GetAdjustedLocalTime();
-            }
-
-            return Networking.IsOwner(NtpServer.gameObject)
-                    ? NtpServer.GetTime()
-                    : NtpClient.GetAdjustedLocalTime();
+            return NtpClient.GetAdjustedLocalTime();
         }
 
         protected override bool SetupAndValidate() {

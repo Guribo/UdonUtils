@@ -1,4 +1,5 @@
 ﻿using System;
+using BestHTTP.SecureProtocol.Org.BouncyCastle.Ocsp;
 using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Adapters.Cyan;
 using TLP.UdonUtils.Runtime.Common;
@@ -78,14 +79,6 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         #endregion
 
         #region Public
-        public float GetTime() {
-            if (!OwnNtpClient) {
-                return float.MinValue;
-            }
-
-            return OwnNtpClient.TimeSource.Time();
-        }
-
         public bool GetLatestClientRequest(NtpClient client, out float requestTime, out float receiveTime) {
             if (!ClientsRequestTimes.ContainsKey(client)) {
                 requestTime = 0f;
@@ -98,9 +91,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
             return true;
         }
 
-        public bool AddRequest(NtpClient client) {
-            float receiveTime = GetTime();
-
+        public bool AddRequest(NtpClient client, float receiveTime) {
             int clientIndex;
             if (!Utilities.IsValid(client)) {
                 return false;
@@ -146,6 +137,19 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         #endregion
 
         #region Lifecycle
+        public override void OnPlayerLeft(VRCPlayerApi player) {
+            base.OnPlayerLeft(player);
+
+            RequestReceiveTimes = new float[1];
+            ClientOwners = new int[1];
+            ResponseSendTime = 0;
+            ClientIndices.Clear();
+            Clients.Clear();
+            WorkingClientOwners = new int[1];
+            WorkingRequestReceiveTimes = new float[1];
+            WorkingResponseSentTime = 0;
+        }
+
         public void Update() {
             var localPlayer = Networking.LocalPlayer;
             if (!localPlayer.IsMasterSafe()) {
@@ -160,24 +164,28 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
                 Networking.SetOwner(localPlayer, gameObject);
             }
 
-            if (GetTime() < _nextRequestTime) {
+            if (OwnNtpClient.GetRawTime() < _nextRequestTime) {
                 return;
             }
 
             MarkNetworkDirty();
             RequestSerialization();
-            _nextRequestTime = GetTime() + OwnNtpClient.RequestInterval;
+            _nextRequestTime = OwnNtpClient.GetRawTime() + OwnNtpClient.RequestInterval;
         }
         #endregion
 
         #region Network Events
         public override void OnPreSerialization() {
             base.OnPreSerialization();
+            if (!Utilities.IsValid(OwnNtpClient)) {
+                return;
+            }
+
             RequestReceiveTimes = RequestReceiveTimes.ResizeOrCreate(WorkingRequestReceiveTimes.Length);
             ClientOwners = ClientOwners.ResizeOrCreate(WorkingClientOwners.Length);
             Array.Copy(WorkingRequestReceiveTimes, RequestReceiveTimes, WorkingRequestReceiveTimes.Length);
             Array.Copy(WorkingClientOwners, ClientOwners, WorkingClientOwners.Length);
-            ResponseSendTime = GetTime();
+            ResponseSendTime = OwnNtpClient.GetAdjustedLocalTime();
             WorkingResponseSentTime = ResponseSendTime;
 
             #region TLP_DEBUG
@@ -187,7 +195,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
                 log += $"{receiveTime:F4}, ";
             }
 
-            Warn($"Response send time: {GetTime():F9}");
+            Warn($"Response send time: {WorkingResponseSentTime:F9}");
             Warn($"Sending: {nameof(RequestReceiveTimes)}: {RequestReceiveTimes.LengthSafe()} elements; [{log}]");
 
             log = "";
@@ -215,7 +223,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
                 return;
             }
 
-            float responseReceiveTime = GetTime();
+            float responseReceiveTime = OwnNtpClient.GetRawTime();
 
             #region TLP_DEBUG
 #if TLP_DEBUG
