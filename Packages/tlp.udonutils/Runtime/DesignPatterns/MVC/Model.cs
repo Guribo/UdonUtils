@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Events;
 using UnityEngine;
 using VRC.SDKBase;
@@ -34,7 +35,7 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
         [PublicAPI]
         public bool Initialize(UdonEvent changeEvent) {
 #if TLP_DEBUG
-            DebugLog(nameof(Initialize));
+            DebugLog($"{nameof(Initialize)} with '{changeEvent.GetScriptPathInScene()}");
 #endif
             if (HasError) {
                 Error($"Can not initialize again due to previous critical error: '{CriticalError}'");
@@ -42,7 +43,7 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
             }
 
             if (Initialized) {
-                Warn("Already initialized");
+                Error("Already initialized");
                 return false;
             }
 

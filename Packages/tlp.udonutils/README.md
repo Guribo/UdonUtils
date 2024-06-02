@@ -36,6 +36,16 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [8.2.0] - 2024-06-02
+
+#### 🚀 Features
+
+- Add state machine implementation with optionally synchronized transition timing
+
+#### 🐛 Bug Fixes
+
+- *(UtcTimeSource)* Prevent usage of utc float time due to accuracy problems
+
 ### [8.1.1] - 2024-05-27
 
 #### 🐛 Bug Fixes
