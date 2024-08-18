@@ -1,5 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Sources;
 using UdonSharp;
 using UnityEngine;
@@ -74,6 +76,20 @@ namespace TLP.UdonUtils.Runtime.Logger
         private float _lastLog;
         #endregion
 
+        public void OnEnable() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(Prefix, nameof(OnEnable), ExecutionOrder, this);
+#endif
+            #endregion
+
+            string expectedName = ExpectedGameObjectName();
+            if (gameObject.name == expectedName) {
+                return;
+            }
+            Warn(Prefix, $"Changing name of GameObject '{transform.GetPathInScene()}' to '{expectedName}'", this);
+            gameObject.name = expectedName;
+        }
 
         public void Update() {
             _frameTimeStopwatch.Restart();
@@ -194,6 +210,10 @@ namespace TLP.UdonUtils.Runtime.Logger
         }
 
         #region Hook Implementations
+        public static string ExpectedGameObjectName() {
+            return $"TLP_Logger";
+        }
+
         protected override bool SetupAndValidate() {
             if (!Utilities.IsValid(TimeSource)) {
                 Error($"{nameof(TimeSource)} is not set");

@@ -36,6 +36,17 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [8.2.1] - 2024-08-18
+
+#### 🐛 Bug Fixes
+
+- *(TlpBaseBehaviour)* Correct gameobject path in setup error message
+
+#### ⚙️ Miscellaneous Tasks
+
+- Prevent error log spam when logger is missing
+- Add support for com.vrchat.worlds 3.7.x
+
 ### [8.2.0] - 2024-06-02
 
 #### 🚀 Features

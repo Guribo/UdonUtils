@@ -47,7 +47,7 @@ namespace TLP.UdonUtils.Runtime
 
         protected const int InvalidPlayer = -1;
         protected const int NoUser = InvalidPlayer;
-        public const string TlpLoggerGameObjectName = "TLP_Logger";
+        private const string PlayerTagTlpLoggerMissingLogged = "TlpLoggerMissingLogged";
         #endregion
 
         #region Settings
@@ -196,7 +196,7 @@ namespace TLP.UdonUtils.Runtime
             if (!SetupAndValidate()) {
                 ErrorAndDisableGameObject(
                         $"Some dependencies are not set up correctly. " +
-                        $"Deactivating GameObject '{this.GetComponentPathInScene()}'");
+                        $"Deactivating GameObject '{transform.GetPathInScene()}'");
             }
         }
         #endregion
@@ -212,14 +212,26 @@ namespace TLP.UdonUtils.Runtime
                 return true;
             }
 
-            Debug.LogError($"{LOGPrefix} : No {nameof(TlpLogger)} found. Please add the Prefab 'TLP_Logger' to your scene.");
+            if (MissingLoggerLogged()) {
+                // no need to fail again on all the other scripts if the first
+                // one already logged the error regarding the missing logger
+                return true;
+            }
+
+            GloballyRememberMissingLoggerLogged();
+            Debug.LogError(
+                    $"{LOGPrefix}: No active {nameof(TlpLogger)} found. Please add the Prefab 'TLP_Logger' to your scene and make sure the GameObject is activated", this);
             return false;
+        }
+
+        private static void GloballyRememberMissingLoggerLogged() {
+            Networking.LocalPlayer.SetPlayerTag(PlayerTagTlpLoggerMissingLogged, "true");
         }
         #endregion
 
         #region Logging
         private bool _hadLogger;
-        private string LOGPrefix => $"[{ExecutionOrderReadOnly} {this.GetScriptPathInScene()}]";
+        private string LOGPrefix => $"[{ExecutionOrderReadOnly} {this.GetScriptPathInScene()}] ";
 
 
         protected TlpLogger Logger { private set; get; }
@@ -295,14 +307,15 @@ namespace TLP.UdonUtils.Runtime
                 return true;
             }
 
-            var logger = GameObject.Find(TlpLoggerGameObjectName);
+            var logger = GameObject.Find(TlpLogger.ExpectedGameObjectName());
             if (!Utilities.IsValid(logger)) {
                 if (_hadLogger) {
 #if TLP_DEBUG
                     Debug.LogWarning($"{LOGPrefix} : Logger is already destroyed", this);
 #endif
-                } else {
-                    Debug.LogWarning($"{LOGPrefix} : GameObject '{TlpLoggerGameObjectName}' not found", this);
+                } else if (!MissingLoggerLogged()) {
+                    GloballyRememberMissingLoggerLogged();
+                    Debug.LogError($"{LOGPrefix}: No active TlpLogger found. Please add the Prefab '{TlpLogger.ExpectedGameObjectName()}' to your scene and make sure the GameObject is activated", this);
                 }
 
                 return false;
@@ -434,6 +447,17 @@ namespace TLP.UdonUtils.Runtime
 #if TLP_DEBUG
             DebugLog(nameof(OnPrepareForReturnToPool));
 #endif
+        }
+        #endregion
+
+        #region Internal
+        private static bool MissingLoggerLogged() {
+            var localPlayer = Networking.LocalPlayer;
+            if (!Utilities.IsValid(localPlayer)) {
+                return false;
+            }
+
+            return localPlayer.GetPlayerTag(PlayerTagTlpLoggerMissingLogged) == "true";
         }
         #endregion
     }

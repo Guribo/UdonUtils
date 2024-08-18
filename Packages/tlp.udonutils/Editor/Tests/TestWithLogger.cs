@@ -45,8 +45,8 @@ namespace TLP.UdonUtils.Editor.Tests
 
             UdonTestUtils.UdonTestEnvironment.ResetApiBindings();
             LogAssert.ignoreFailingMessages = false;
-            TlpLogger = new GameObject(TlpBaseBehaviour.TlpLoggerGameObjectName).AddComponent<TlpLogger>();
-            Debug.Log($"Created {TlpBaseBehaviour.TlpLoggerGameObjectName}: {TlpLogger == true}");
+            TlpLogger = new GameObject(TlpLogger.ExpectedGameObjectName()).AddComponent<TlpLogger>();
+            Debug.Log($"Created {TlpLogger.ExpectedGameObjectName()}: {TlpLogger == true}");
             TlpLogger.Severity = ELogLevel.Warning;
 
             UdonTestEnvironment = new UdonTestUtils.UdonTestEnvironment();
