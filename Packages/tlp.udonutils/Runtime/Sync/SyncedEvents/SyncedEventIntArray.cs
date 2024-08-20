@@ -1,6 +1,8 @@
-using JetBrains.Annotations;
+using System;
+using TLP.UdonUtils.Runtime.Extensions;
 using UdonSharp;
 using UnityEngine;
+using VRC.Udon.Common;
 
 namespace TLP.UdonUtils.Runtime.Sync.SyncedEvents
 {
@@ -8,8 +10,20 @@ namespace TLP.UdonUtils.Runtime.Sync.SyncedEvents
     [DefaultExecutionOrder(ExecutionOrder)]
     public class SyncedEventIntArray : SyncedEvent
     {
-        [PublicAPI]
         [UdonSynced]
-        public int[] Values = new int[0];
+        internal int[] SyncedValues = new int[0];
+
+        [NonSerialized]
+        public int[] WorkingValues = new int[0];
+
+        public override void OnPreSerialization() {
+            WorkingValues.CreateCopy(ref SyncedValues);
+            base.OnPreSerialization();
+        }
+
+        public override void OnDeserialization(DeserializationResult deserializationResult) {
+            SyncedValues.CreateCopy(ref WorkingValues);
+            base.OnDeserialization(deserializationResult);
+        }
     }
 }

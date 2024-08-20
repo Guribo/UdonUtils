@@ -81,7 +81,7 @@ namespace TLP.UdonUtils.Runtime.Sync.SyncedEvents
             base.OnDeserialization(deserializationResult);
 
             // raise without requesting another serialization by using the base implementation
-            base.Raise(this);
+            bool unused = base.Raise(this);
         }
 
         public override void OnPostSerialization(SerializationResult result) {

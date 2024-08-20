@@ -454,7 +454,7 @@ namespace TLP.UdonUtils.Runtime.Player
             #endregion
 
             sharedList.Clear();
-            string[] syncedListValues = syncedList.Values;
+            string[] syncedListValues = syncedList.WorkingValues;
             if (syncedListValues.LengthSafe() == 0) {
                 return;
             }
@@ -500,9 +500,9 @@ namespace TLP.UdonUtils.Runtime.Player
             #endregion
 
             var names = playerNames;
-            syncedNames.Values = new string[names.Count];
+            syncedNames.WorkingValues = new string[names.Count];
             for (int i = 0; i < names.Count; i++) {
-                syncedNames.Values[i] = names[i].String;
+                syncedNames.WorkingValues[i] = names[i].String;
             }
 
             if (syncedNames.TakeOwnership()) {

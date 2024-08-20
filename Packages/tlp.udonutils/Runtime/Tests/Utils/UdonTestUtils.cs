@@ -34,6 +34,9 @@ namespace TLP.UdonUtils.Runtime.Tests.Utils
                 VRCPlayerApi._SetAvatarAudioVolumetricRadius = null;
                 VRCPlayerApi._CombatGetCurrentHitpoints = null;
                 VRCPlayerApi._CombatSetCurrentHitpoints = null;
+                VRCPlayerApi._TeleportToOrientationLerp = null;
+                VRCPlayerApi._TeleportTo = null;
+                VRCPlayerApi._TeleportToOrientation = null;
                 VRCPlayerApi._IsUserInVR = null;
                 Networking._IsOwner = null;
                 Networking._GetOwner = null;
@@ -49,6 +52,9 @@ namespace TLP.UdonUtils.Runtime.Tests.Utils
 
                 VRCPlayerApi._SetAvatarEyeHeightByMeters = null;
                 VRCPlayerApi._GetAvatarEyeHeightAsMeters = null;
+
+                VRCPlayerApi._GetVoiceDistanceFar = null;
+                VRCPlayerApi._GetVoiceDistanceNear = null;
             }
 
             public class PlayerData
@@ -59,6 +65,7 @@ namespace TLP.UdonUtils.Runtime.Tests.Utils
                 public readonly int ID;
                 public readonly HashSet<GameObject> Owns = new HashSet<GameObject>();
                 public float VoiceRangeFar = 25f;
+                public float VoiceRangeNear = 1f;
                 public float HitPoints;
                 public readonly Dictionary<string, string> Tags = new Dictionary<string, string>();
                 public bool IsMaster;
@@ -159,6 +166,50 @@ namespace TLP.UdonUtils.Runtime.Tests.Utils
 
                 VRCPlayerApi._SetAvatarEyeHeightByMeters = (api, value) => _vrcPlayerToPlayer[api].EyeHeight = value;
                 VRCPlayerApi._GetAvatarEyeHeightAsMeters = (api) => _vrcPlayerToPlayer[api].EyeHeight;
+
+                VRCPlayerApi._TeleportToOrientationLerp = TeleportToOrientationLerp;
+                VRCPlayerApi._TeleportTo = TeleportTo;
+                VRCPlayerApi._TeleportToOrientation = TeleportToOrientation;
+
+                VRCPlayerApi._GetVoiceDistanceFar = api => _vrcPlayerToPlayer[api].VoiceRangeFar;
+                VRCPlayerApi._GetVoiceDistanceNear = api => _vrcPlayerToPlayer[api].VoiceRangeNear;
+            }
+
+            private void TeleportToOrientation(
+                    VRCPlayerApi player,
+                    Vector3 position,
+                    Quaternion rotation,
+                    VRC_SceneDescriptor.SpawnOrientation spawnOrientation
+            ) {
+                switch (spawnOrientation) {
+                    case VRC_SceneDescriptor.SpawnOrientation.Default:
+                        TeleportTo(player, position, rotation);
+                        break;
+                    case VRC_SceneDescriptor.SpawnOrientation.AlignPlayerWithSpawnPoint:
+                        TeleportTo(player, position, rotation);
+                        break;
+                    case VRC_SceneDescriptor.SpawnOrientation.AlignRoomWithSpawnPoint:
+                        throw new NotImplementedException();
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(spawnOrientation), spawnOrientation, null);
+                }
+            }
+
+            private void TeleportTo(VRCPlayerApi player, Vector3 position, Quaternion rotation) {
+                if (Utilities.IsValid(player)) {
+                    player.gameObject.transform.SetPositionAndRotation(position, rotation);
+                }
+            }
+
+            private void TeleportToOrientationLerp(
+                    VRCPlayerApi player,
+                    Vector3 position,
+                    Quaternion rotation,
+                    VRC_SceneDescriptor.SpawnOrientation spawnOrientation,
+                    bool lerp
+            ) {
+                TeleportTo(player, position, rotation);
             }
 
             private void SetPlayerTag(VRCPlayerApi arg1, string arg2, string arg3) {
@@ -238,7 +289,7 @@ namespace TLP.UdonUtils.Runtime.Tests.Utils
             }
 
             public void PlayerJoined(VRCPlayerApi newPlayer) {
-                foreach (var udonSharpBehaviour in Object.FindObjectsOfType<UdonSharpBehaviour>()) {
+                foreach (var udonSharpBehaviour in Object.FindObjectsOfType<UdonSharpBehaviour>(true)) {
                     udonSharpBehaviour.OnPlayerJoined(newPlayer);
                 }
             }

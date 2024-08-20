@@ -8,9 +8,9 @@ Please note that there is no explicit documentation available. The code is chang
 
 ## Installation
 
-1. Install VRChat World SDK 3.6
-2. Install CyanPlayerObjectPool: https://cyanlaser.github.io/CyanPlayerObjectPool/
-3. Install TLP UdonUtils: https://guribo.github.io/TLP/
+1. Install/Add VRChat World SDK 3.7 to your project
+2. Install/Add CyanPlayerObjectPool to your project: https://cyanlaser.github.io/CyanPlayerObjectPool/
+3. Install/Add TLP UdonUtils to your project: https://guribo.github.io/TLP/
 
 ## Setup
 
@@ -35,6 +35,12 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 ## Changelog
 
 All notable changes to this project will be documented in this file.
+
+### [9.0.0] - 2024-08-20
+
+#### 🚀 Features
+
+- Update events and lists, improve error handling, set some missing execution orders
 
 ### [8.2.1] - 2024-08-18
 

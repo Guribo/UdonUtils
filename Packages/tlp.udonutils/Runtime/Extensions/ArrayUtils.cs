@@ -58,15 +58,21 @@ namespace TLP.UdonUtils.Runtime.Extensions
             return array == null ? 0 : array.Length;
         }
 
-        public static T[] CreateCopy<T>(this T[] source, T[] destination) {
+
+        public static void CreateCopy<T>(this T[] source, ref T[] destination, bool copyNull = false) {
             int lengthSafe = source.LengthSafe();
             if (lengthSafe < 1) {
-                return source == null ? new T[0] : destination.ResizeOrCreate(0);
+                if (source == null && copyNull) {
+                    destination = null;
+                } else {
+                    destination = destination.ResizeOrCreate(0);
+                }
+
+                return;
             }
 
             destination = destination.ResizeOrCreate(lengthSafe);
             Array.Copy(source, destination, lengthSafe);
-            return destination;
         }
     }
 }

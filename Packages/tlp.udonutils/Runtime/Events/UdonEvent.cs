@@ -1,5 +1,6 @@
 ﻿using System;
 using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Common;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -194,15 +195,32 @@ namespace TLP.UdonUtils.Runtime.Events
         /// Does not care about duplicates!
         /// </summary>
         /// <param name="listener">must be valid</param>
-        /// <param name="callbackName">name of the function used as callback, used only to check correct connection</param>
+        /// <param name="callbackName">name of the function used as callback, used only to check correct
+        /// connection</param>
+        /// <param name="canChangeListenerMethod">if true will update the listener method name to the provided
+        /// callback name (will log a warning in the logs)</param>
         [PublicAPI]
-        public bool AddListenerVerified(TlpBaseBehaviour listener, string callbackName) {
+        public bool AddListenerVerified(
+                TlpBaseBehaviour listener,
+                string callbackName,
+                bool canChangeListenerMethod = false
+        ) {
             #region TLP_DEBUG
 #if TLP_DEBUG
             DebugLog($"{nameof(AddListenerVerified)} '{callbackName}'");
 
 #endif
             #endregion
+
+            if (canChangeListenerMethod
+                && ListenerMethod != callbackName
+                && !string.IsNullOrEmpty(callbackName)
+                && !string.IsNullOrWhiteSpace(callbackName)) {
+                Warn(
+                        $"Changing {this.GetScriptPathInScene()}.{nameof(ListenerMethod)} from '{ListenerMethod}' to '{callbackName}'");
+                ListenerMethod = callbackName;
+                return AddListener(listener);
+            }
 
             if (callbackName == ListenerMethod) {
                 return AddListener(listener);

@@ -2,7 +2,7 @@ using UdonSharp;
 
 namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     public class DummyView : View
     {
         public override void OnModelChanged() {

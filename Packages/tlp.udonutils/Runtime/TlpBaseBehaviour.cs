@@ -2,12 +2,14 @@
 using System.Diagnostics;
 using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Common;
+using TLP.UdonUtils.Runtime.Extensions;
 using TLP.UdonUtils.Runtime.Logger;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
 using VRC.SDKBase;
 using VRC.Udon.Common;
+using VRC.Udon.Common.Interfaces;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
@@ -63,6 +65,13 @@ namespace TLP.UdonUtils.Runtime
                 "Only applies to owned objects and manual sync.")]
         public bool AutoRetrySendOnFailure = true;
 
+        /// <summary>
+        /// <inheritdoc cref="SyncPaused"/>
+        /// </summary>
+        [SerializeField]
+        [Tooltip("Has no effect unless implemented by this particular script. See SyncPaused property for details.")]
+        private bool PauseSynchronization;
+
         [Header("TLP/Logging")]
         /// <summary>
         /// What kind of logs of this behavior shall be produced.
@@ -84,6 +93,36 @@ namespace TLP.UdonUtils.Runtime
         #endregion
 
         #region Networking
+
+
+        /// <summary>
+        /// Can be used to pause any synchronization locally, only works if inheriting scripts
+        /// check against this variable in <see cref="OnPreSerialization"/> and <see cref="OnDeserialization"/>!
+        /// Additionally, use local variables to store received values instead of directly using synced variables!
+        ///
+        /// When un-paused, will automatically send the current state or request a refresh from the current owner.
+        /// Pausing is local only and does not affect other players.
+        /// </summary>
+        public bool SyncPaused
+        {
+            get => PauseSynchronization;
+            set
+            {
+                PauseSynchronization = value;
+                if (PauseSynchronization) {
+                    return;
+                }
+
+                if (Networking.IsOwner(gameObject)) {
+                    MarkNetworkDirty();
+                    return;
+                }
+
+                SendCustomNetworkEvent(NetworkEventTarget.Owner, nameof(RPC_RequestSerialization));
+            }
+        }
+
+
         [PublicAPI]
         public bool IsPendingSerialization() {
             return PendingSerializations > 0;
@@ -111,6 +150,11 @@ namespace TLP.UdonUtils.Runtime
 #endif
             if (!Networking.IsOwner(gameObject)) {
                 Warn("Can not mark network dirty, not owner");
+                return false;
+            }
+
+            if (SyncPaused) {
+                Warn($"Synchronization is paused, set {nameof(SyncPaused)} to false first");
                 return false;
             }
 
@@ -180,9 +224,25 @@ namespace TLP.UdonUtils.Runtime
 
         public override void OnDeserialization(DeserializationResult deserializationResult) {
 #if TLP_DEBUG
-            DebugLog("OnDeserialization");
+            DebugLog(
+                    $"{nameof(OnDeserialization)}: s{deserializationResult.sendTime}s; r{deserializationResult.receiveTime}s; d{deserializationResult.Latency()}s");
 #endif
         }
+
+        #region RPCs
+        /// <summary>
+        /// Called by remote clients when they unpause synchronization
+        /// </summary>
+        public void RPC_RequestSerialization() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(RPC_RequestSerialization));
+#endif
+            #endregion
+
+            var unused = MarkNetworkDirty();
+        }
+        #endregion
         #endregion
 
         #region Unity Lifecycle
@@ -204,10 +264,15 @@ namespace TLP.UdonUtils.Runtime
         #region Hooks
         /// <summary>
         /// Hook that is called during <see cref="Start"/> that shall be used to verify
-        /// that e.g. all serialized references are setup correctly.
+        /// that e.g. all serialized references are set up correctly.
         /// </summary>
         /// <returns>shall return false if any essential reference is missing</returns>
         protected virtual bool SetupAndValidate() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(SetupAndValidate));
+#endif
+#endregion
             if (GetLogger()) {
                 return true;
             }
@@ -220,7 +285,8 @@ namespace TLP.UdonUtils.Runtime
 
             GloballyRememberMissingLoggerLogged();
             Debug.LogError(
-                    $"{LOGPrefix}: No active {nameof(TlpLogger)} found. Please add the Prefab 'TLP_Logger' to your scene and make sure the GameObject is activated", this);
+                    $"{LOGPrefix}: No active {nameof(TlpLogger)} found. Please add the Prefab 'TLP_Logger' to your scene and make sure the GameObject is activated",
+                    this);
             return false;
         }
 
@@ -315,7 +381,9 @@ namespace TLP.UdonUtils.Runtime
 #endif
                 } else if (!MissingLoggerLogged()) {
                     GloballyRememberMissingLoggerLogged();
-                    Debug.LogError($"{LOGPrefix}: No active TlpLogger found. Please add the Prefab '{TlpLogger.ExpectedGameObjectName()}' to your scene and make sure the GameObject is activated", this);
+                    Debug.LogError(
+                            $"{LOGPrefix}: No active TlpLogger found. Please add the Prefab '{TlpLogger.ExpectedGameObjectName()}' to your scene and make sure the GameObject is activated",
+                            this);
                 }
 
                 return false;

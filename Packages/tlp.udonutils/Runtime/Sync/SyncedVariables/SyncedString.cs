@@ -7,7 +7,7 @@ using VRC.Udon.Common;
 namespace TLP.UdonUtils.Runtime.Sync.SyncedVariables
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
-    [Obsolete("Use sync Events instead", false)]
+    [Obsolete("Use sync Events instead", true)]
     public class SyncedString : UdonSharpBehaviour
     {
         [UdonSynced]
