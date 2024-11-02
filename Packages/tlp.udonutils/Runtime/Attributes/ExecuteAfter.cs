@@ -148,7 +148,7 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
 
     private static void CheckForCyclicDependency(Type ownType, Dependency othersDependency, Type type) {
         if (othersDependency.ExecuteAfter.Contains(ownType)) {
-            throw new InvalidConstraintException(
+            throw new ArgumentException(
                     $"In {nameof(ExecuteAfterAttribute)}: Cyclic dependency between {ownType.Name} and {type.Name}"
             );
         }

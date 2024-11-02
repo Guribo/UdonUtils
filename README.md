@@ -36,6 +36,12 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [10.0.1] - 2024-11-02
+
+#### 🐛 Bug Fixes
+
+- *(ExecuteAfter)* Address compiler error caused by special exception
+
 ### [10.0.0] - 2024-11-02
 
 #### 🚀 Features
