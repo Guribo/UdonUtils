@@ -8,13 +8,14 @@ namespace TLP.UdonUtils.Runtime.Sync.SyncedEvents
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(SyncedEvent), ExecutionOrder)]
     public class SyncedEvent : UdonEvent
     {
         #region Executionorder
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.DefaultStart + 1;
+        public new const int ExecutionOrder = UdonEvent.ExecutionOrder + 1;
 
         [Tooltip(
                 "If enabled synchronisation is requested instantly instead of on the next frame, " +

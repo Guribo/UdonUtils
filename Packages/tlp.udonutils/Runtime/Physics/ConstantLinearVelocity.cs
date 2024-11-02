@@ -2,7 +2,7 @@
 
 namespace TLP.UdonUtils.Runtime.Physics
 {
-    public class ConstantLinearVelocity
+    public static class ConstantLinearVelocity
     {
         /// <summary>
         /// s(t) = v * t + s_0

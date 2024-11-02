@@ -1,4 +1,5 @@
-﻿using UdonSharp;
+﻿using JetBrains.Annotations;
+using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
@@ -8,9 +9,16 @@ namespace TLP.UdonUtils.Runtime.Player
     /// turns this gameobject around to always look at the local player, only rotates vertical rotation
     /// (pitch/roll are forced to 0)
     /// </summary>
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class HorizontalLookAt : UdonSharpBehaviour
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(HorizontalLookAt), ExecutionOrder)]
+    public class HorizontalLookAt : TlpBaseBehaviour
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = LateBoneFollower.ExecutionOrder + 1;
+
         [Tooltip(
                 "e.g. 0.5 makes it blend 50% between initial rotation and target rotation, 1.0 makes it look directly at the player"
         )]
@@ -19,7 +27,8 @@ namespace TLP.UdonUtils.Runtime.Player
 
         private Quaternion _initialRotation;
 
-        public void Start() {
+        public override void Start() {
+            base.Start();
             _initialRotation = transform.rotation;
         }
 

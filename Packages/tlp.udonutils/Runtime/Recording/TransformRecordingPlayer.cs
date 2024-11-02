@@ -1,4 +1,7 @@
 ﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Common;
+using TLP.UdonUtils.Runtime.Physics;
+using TLP.UdonUtils.Runtime.Sync;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -6,15 +9,15 @@ using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Recording
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(TransformRecordingPlayer), ExecutionOrder)]
     public class TransformRecordingPlayer : TlpBaseBehaviour
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.Min;
-
+        public new const int ExecutionOrder = InertiaTensor.ExecutionOrder + 1;
 
         [FormerlySerializedAs("transformRecorder")]
         public TransformRecorder TransformRecorder;

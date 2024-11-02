@@ -21,7 +21,7 @@ MonoBehaviour:
   compiledVersion: 2
   behaviourSyncMode: 4
   hasInteractEvent: 0
-  scriptID: 6528599812620602297
+  scriptID: 8960980690807037338
   serializationData:
     SerializedFormat: 2
     SerializedBytes: 
@@ -761,7 +761,7 @@ MonoBehaviour:
       Data: 49|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: TestMaxSendRate, TLP.UdonUtils.Runtime
+      Data: TLP.UdonUtils.Runtime.Testing.TestMaxSendRate, TLP.UdonUtils.Runtime
     - Name: 
       Entry: 8
       Data: 

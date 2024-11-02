@@ -8,14 +8,15 @@ using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Testing
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(TestController), ExecutionOrder)]
     public class TestController : Controller
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.Max;
+        public new const int ExecutionOrder = TestResult.ExecutionOrder + 1;
 
         private const string LogPrefix = "[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>]";
 

@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Sources;
 using UdonSharp;
 using UnityEngine;
@@ -8,10 +9,16 @@ namespace TLP.UdonUtils.Runtime.Physics
     /// calculates velocity and acceleration after everything that can affect locations and physics of objects which
     /// should be everything except audio
     /// </summary>
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(FixedUpdateVelocityProvider), ExecutionOrder)]
     public class FixedUpdateVelocityProvider : VelocityProvider
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = VelocityProvider.ExecutionOrder + 1;
+
         private readonly Vector3[] _position = new Vector3[3];
 
         #region Dependencies

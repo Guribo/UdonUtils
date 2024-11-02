@@ -1,4 +1,6 @@
 ﻿using System;
+using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Events;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -12,9 +14,16 @@ namespace TLP.UdonUtils.Runtime.Player
     /// Note: Obsolete/Redundant, use curve editor of AudioSource component directly.
     /// </summary>
     [Obsolete("Use curve editor of AudioSource directly")]
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(CustomAudioFalloff), ExecutionOrder)]
     public class CustomAudioFalloff : TlpBaseBehaviour
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = AudioEvent.ExecutionOrder + 1;
+
         #region Dependencies
         [FormerlySerializedAs("audioSource")]
         public AudioSource AudioSource;

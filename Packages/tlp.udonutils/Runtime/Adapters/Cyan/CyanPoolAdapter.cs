@@ -10,17 +10,17 @@ namespace TLP.UdonUtils.Runtime.Adapters.Cyan
 {
     /// <summary>
     /// Adapter that allows retrieving objects from the CyanPlayerObjectPool
-    /// with having to reference it directly.
+    /// without having to reference it directly.
     /// </summary>
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(CyanPoolAdapter), ExecutionOrder)]
     public class CyanPoolAdapter : TlpBaseBehaviour
     {
-        [PublicAPI]
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.DefaultEnd;
+        public new const int ExecutionOrder = CyanPoolEventListener.ExecutionOrder + 1;
 
         [FormerlySerializedAs("cyanPlayerObjectAssigner")]
         public CyanPlayerObjectAssigner CyanPlayerObjectAssigner;

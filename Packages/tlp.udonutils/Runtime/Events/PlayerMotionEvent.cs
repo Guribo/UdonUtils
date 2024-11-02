@@ -4,13 +4,14 @@ using UnityEngine;
 
 namespace TLP.UdonUtils.Runtime.Events
 {
-    [DefaultExecutionOrder(ExecutionOrder)]
     [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(PlayerMotionEvent), ExecutionOrder)]
     public class PlayerMotionEvent : UdonEvent
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.PlayerMotionStart;
+        public new const int ExecutionOrder = TlpExecutionOrder.PlayerMotionStart + 1;
     }
 }

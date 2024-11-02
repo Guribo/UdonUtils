@@ -1,22 +1,33 @@
 ﻿using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Sync;
+using UdonSharp;
 using UnityEngine;
+using UnityEngine.Serialization;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Common
 {
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(ChairProxy), ExecutionOrder)]
     public class ChairProxy : TlpBaseBehaviour
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = TlpAccurateSyncBehaviour.ExecutionOrder + 100;
+
+        [FormerlySerializedAs("actualChair")]
         [SerializeField]
-        protected Chair actualChair;
+        protected Chair ActualChair;
 
         [PublicAPI]
         public virtual bool OnLocalPlayerEntered() {
 #if TLP_DEBUG
             DebugLog(nameof(OnLocalPlayerEntered));
 #endif
-
-            if (!Assert(Utilities.IsValid(actualChair), "actualChair invalid", this)) {
+            if (!Utilities.IsValid(ActualChair)) {
+                Error($"{nameof(OnLocalPlayerEntered)}.{nameof(ActualChair)} not set");
                 return false;
             }
 
@@ -29,12 +40,13 @@ namespace TLP.UdonUtils.Runtime.Common
 #if TLP_DEBUG
             DebugLog(nameof(OnLocalPlayerExited));
 #endif
-            if (!Assert(Utilities.IsValid(actualChair), "actualChair invalid", this)) {
+            if (!Utilities.IsValid(ActualChair)) {
+                Error($"{nameof(OnLocalPlayerExited)}.{nameof(ActualChair)} not set");
                 return false;
             }
 
             var go = gameObject;
-            return OwnershipTransfer.TransferOwnershipFrom(go, go, Networking.GetOwner(actualChair.gameObject), true);
+            return OwnershipTransfer.TransferOwnershipFrom(go, go, Networking.GetOwner(ActualChair.gameObject), true);
         }
 
         [PublicAPI]
@@ -55,7 +67,7 @@ namespace TLP.UdonUtils.Runtime.Common
 
         [PublicAPI]
         public VRCPlayerApi GetSeatedPlayer() {
-            return Utilities.IsValid(actualChair) ? actualChair.GetSeatedPlayer() : null;
+            return Utilities.IsValid(ActualChair) ? ActualChair.GetSeatedPlayer() : null;
         }
     }
 }

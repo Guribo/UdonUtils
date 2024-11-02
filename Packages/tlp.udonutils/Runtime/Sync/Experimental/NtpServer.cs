@@ -1,5 +1,4 @@
 ﻿using System;
-using BestHTTP.SecureProtocol.Org.BouncyCastle.Ocsp;
 using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Adapters.Cyan;
 using TLP.UdonUtils.Runtime.Common;
@@ -24,13 +23,14 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
     /// </summary>
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(NtpServer), ExecutionOrder)]
     public class NtpServer : CyanPoolEventListener
     {
         #region ExecutionOrder
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = NtpTime.ExecutionOrder - 1;
+        public new const int ExecutionOrder = NtpClient.ExecutionOrder + 1;
         #endregion
 
         #region Dependencies

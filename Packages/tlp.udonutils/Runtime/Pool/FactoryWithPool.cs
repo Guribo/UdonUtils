@@ -1,12 +1,15 @@
 ﻿using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Factories;
+using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Pool
 {
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(FactoryWithPool), ExecutionOrder)]
     public class FactoryWithPool : InstantiatingFactory
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;

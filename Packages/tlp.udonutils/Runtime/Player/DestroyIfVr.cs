@@ -7,14 +7,15 @@ using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Player
 {
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [TlpDefaultExecutionOrder(typeof(DestroyIfVr), ExecutionOrder)]
     public class DestroyIfVr : TlpBaseBehaviour
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpLogger.ExecutionOrder + 1;
+        public new const int ExecutionOrder = DestroyIfDesktop.ExecutionOrder + 1;
 
         public override void Start() {
             base.Start();

@@ -1,4 +1,5 @@
-﻿using UdonSharp;
+﻿using JetBrains.Annotations;
+using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
 
@@ -8,9 +9,16 @@ namespace TLP.UdonUtils.Runtime.Sync
     /// Allows adding position and rotation snapshots for interpolation.
     /// Note that the time values must be monotonic rising, otherwise adding will fail.
     /// </summary>
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(TransformBacklog), ExecutionOrder)]
     public class TransformBacklog : TimeBacklog
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = TransformSnapshot.ExecutionOrder + 1;
+
         private readonly DataList _positionBackLog = new DataList();
         private readonly DataList _rotationBackLog = new DataList();
 

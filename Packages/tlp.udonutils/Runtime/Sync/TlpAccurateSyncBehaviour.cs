@@ -1,7 +1,9 @@
 using System;
 using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Events;
 using TLP.UdonUtils.Runtime.Extensions;
 using TLP.UdonUtils.Runtime.Physics;
+using TLP.UdonUtils.Runtime.Recording;
 using TLP.UdonUtils.Runtime.Sources;
 using UdonSharp;
 using UnityEngine;
@@ -13,15 +15,16 @@ namespace TLP.UdonUtils.Runtime.Sync
     /// <summary>
     /// Base Sync Behaviour for movement prediction based on received values from the current owner
     /// </summary>
-    [DefaultExecutionOrder(ExecutionOrder)]
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(TlpAccurateSyncBehaviour), ExecutionOrder)]
     public abstract class TlpAccurateSyncBehaviour : TlpBaseBehaviour
     {
         #region ExecutionOrder
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpBaseBehaviour.ExecutionOrder + 1;
+        public new const int ExecutionOrder = TransformRecordingPlayer.ExecutionOrder + 1;
         #endregion
 
         #region Dependencies

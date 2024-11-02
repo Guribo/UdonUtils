@@ -1,20 +1,28 @@
-﻿using UdonSharp;
+﻿using JetBrains.Annotations;
+using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Player
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    [DefaultExecutionOrder(50_000 + 10102)]
-    public class DistanceScalerUI : UdonSharpBehaviour
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(DistanceScalerUI), ExecutionOrder)]
+    public class DistanceScalerUI : TlpBaseBehaviour
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = LookAtPlayerUI.ExecutionOrder + 1;
+
         public VRCPlayerApi player;
         public bool useLocalPlayerByDefault = true;
         public float scale = 0.1f;
         public float minSize = 0.00001f;
         public float maxSize = 1000f;
 
-        public void Start() {
+        public override void Start() {
+            base.Start();
             if (useLocalPlayerByDefault) {
                 player = Networking.LocalPlayer;
             }

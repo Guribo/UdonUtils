@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
-using TLP.UdonUtils;
 using TLP.UdonUtils.Runtime;
+using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Extensions;
 using TLP.UdonUtils.Runtime.Player;
 using UdonSharp;
@@ -8,14 +8,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDKBase;
 
+[UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
 [DefaultExecutionOrder(ExecutionOrder)]
-[UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+[TlpDefaultExecutionOrder(typeof(DemoBlackListToggle), ExecutionOrder)]
 public class DemoBlackListToggle : TlpBaseBehaviour
 {
     protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
     [PublicAPI]
-    public new const int ExecutionOrder = TlpExecutionOrder.UiStart;
+    public new const int ExecutionOrder = ImageDownloader.ExecutionOrder + 1;
 
     public Button WhiteListButton;
     public Button BlackListButton;

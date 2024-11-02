@@ -1,4 +1,7 @@
-﻿using UdonSharp;
+﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Sync;
+using UdonSharp;
+using UnityEngine;
 
 namespace TLP.UdonUtils.Runtime.Sources
 {
@@ -6,9 +9,15 @@ namespace TLP.UdonUtils.Runtime.Sources
     /// Base class for time sources.
     /// Used to be more independent from Unity.
     /// </summary>
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(TimeSource), ExecutionOrder)]
     public abstract class TimeSource : TlpBaseBehaviour
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = TimeBacklog.ExecutionOrder + 1;
+
         /// <summary>
         /// Current time of this source.
         /// </summary>

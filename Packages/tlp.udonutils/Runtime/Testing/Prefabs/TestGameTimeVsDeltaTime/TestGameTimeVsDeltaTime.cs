@@ -1,29 +1,41 @@
-﻿using TLP.UdonUtils.Runtime.Testing;
+﻿using JetBrains.Annotations;
+using UdonSharp;
 using UnityEngine;
 
-/// <summary>
-/// Tests whether on the current frame the deltaTime is the same as the difference
-/// between the current game time and the game time of the previous frame.
-/// </summary>
-public class TestGameTimeVsDeltaTime : TestCase
+namespace TLP.UdonUtils.Runtime.Testing
 {
-    private float _previousGameTime;
+    /// <summary>
+    /// Tests whether on the current frame the deltaTime is the same as the difference
+    /// between the current game time and the game time of the previous frame.
+    /// </summary>
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(TestGameTimeVsDeltaTime), ExecutionOrder)]
+    public class TestGameTimeVsDeltaTime : TestCase
+    {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
-    protected override void RunTest() {
-        _previousGameTime = Time.timeSinceLevelLoad;
-        SendCustomEventDelayedFrames(nameof(EvaluateNextFrame), 1);
-    }
+        [PublicAPI]
+        public new const int ExecutionOrder = TestSanity.ExecutionOrder + 1;
 
-    public void EvaluateNextFrame() {
-        float delta = Time.timeSinceLevelLoad - _previousGameTime;
+        private float _previousGameTime;
 
-        if (Mathf.Abs(delta - Time.deltaTime) > 0.00001f) {
-            Error($"Delta time is {Time.deltaTime:F6}s but game time delta is {delta:F6}s!");
-            TestController.TestCompleted(false);
+        protected override void RunTest() {
+            _previousGameTime = Time.timeSinceLevelLoad;
+            SendCustomEventDelayedFrames(nameof(EvaluateNextFrame), 1);
         }
 
-        Info($"Delta time is {Time.deltaTime:F6}s and game time delta is {delta:F6}s!");
+        public void EvaluateNextFrame() {
+            float delta = Time.timeSinceLevelLoad - _previousGameTime;
 
-        TestController.TestCompleted(true);
+            if (Mathf.Abs(delta - Time.deltaTime) > 0.00001f) {
+                Error($"Delta time is {Time.deltaTime:F6}s but game time delta is {delta:F6}s!");
+                TestController.TestCompleted(false);
+            }
+
+            Info($"Delta time is {Time.deltaTime:F6}s and game time delta is {delta:F6}s!");
+
+            TestController.TestCompleted(true);
+        }
     }
 }

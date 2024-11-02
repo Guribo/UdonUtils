@@ -8,14 +8,15 @@ using VRC.Udon.Common.Enums;
 
 namespace TLP.UdonUtils.Runtime.Events
 {
-    [DefaultExecutionOrder(ExecutionOrder)]
     [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(UdonEvent), ExecutionOrder)]
     public class UdonEvent : TlpBaseBehaviour
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.DefaultStart + 1;
+        public new const int ExecutionOrder = TlpBaseBehaviour.ExecutionOrder + 1;
 
         private const int InvalidInvocationFrame = -1;
         private const int InvalidIndex = -1;

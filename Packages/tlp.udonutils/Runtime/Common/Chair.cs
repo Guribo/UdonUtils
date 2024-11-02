@@ -1,15 +1,24 @@
-﻿using TLP.UdonUtils.Runtime.Events;
+﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Events;
 using TLP.UdonUtils.Runtime.Extensions;
 using TLP.UdonUtils.Runtime.Sync;
+using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Common
 {
-    [RequireComponent(typeof(VRC.SDK3.Components.VRCStation))]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(Chair), ExecutionOrder)]
     public class Chair : TlpBaseBehaviour
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = ChairProxy.ExecutionOrder + 1;
+
         [FormerlySerializedAs("chairProxy")]
         [SerializeField]
         internal ChairProxy ChairProxy;
@@ -119,7 +128,8 @@ namespace TLP.UdonUtils.Runtime.Common
                 return;
             }
 
-            if (!Assert(Utilities.IsValid(player), "Player invalid", this)) {
+            if (!Utilities.IsValid(player)) {
+                Error($"{nameof(player)} invalid");
                 return;
             }
 
@@ -142,7 +152,6 @@ namespace TLP.UdonUtils.Runtime.Common
             return _localPlayerSitting || _remotePlayerSitting ? Networking.GetOwner(gameObject) : null;
         }
         #endregion
-
 
         #region Local Player Events
         private void NotifyLocalPlayerEntered() {
@@ -209,7 +218,6 @@ namespace TLP.UdonUtils.Runtime.Common
             }
         }
         #endregion
-
 
         #region Hook Implementations
         protected override bool SetupAndValidate() {

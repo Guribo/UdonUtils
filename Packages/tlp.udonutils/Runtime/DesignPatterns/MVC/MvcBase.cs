@@ -1,12 +1,21 @@
+using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Events;
+using TLP.UdonUtils.Runtime.Player;
 using UnityEngine;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 {
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(MvcBase), ExecutionOrder)]
     public abstract class MvcBase : TlpBaseBehaviour
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = PlayerFollowerUi.ExecutionOrder + 100;
+
         public string CriticalError { get; protected set; }
 
         public bool HasError { get; protected set; }

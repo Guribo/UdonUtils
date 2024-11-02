@@ -1,14 +1,25 @@
-﻿using TLP.UdonUtils.Runtime.Player;
+﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Player;
+using TLP.UdonUtils.Runtime.Sync;
+using TLP.UdonUtils.Runtime.Sync.SyncedEvents;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Common
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class ObjectSpawner : UdonSharpBehaviour
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(ObjectSpawner), ExecutionOrder)]
+    public class ObjectSpawner : TlpBaseBehaviour
     {
-        public void Start() {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = RoundRobinSynchronizer.ExecutionOrder + 1;
+
+        public override void Start() {
+            base.Start();
             int playersCount = VRCPlayerApi.GetPlayerCount();
             var players = new VRCPlayerApi[playersCount];
             foreach (var vrcPlayerApi in VRCPlayerApi.GetPlayers(players)) {

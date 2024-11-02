@@ -6,12 +6,13 @@ using VRC.SDKBase;
 namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 {
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(View), ExecutionOrder)]
     public abstract class View : MvcBase
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = Controller.ExecutionOrder + 1;
+        public new const int ExecutionOrder = Controller.ExecutionOrder + 100;
 
         public bool Initialized { get; private set; }
         public Model Model { get; private set; }

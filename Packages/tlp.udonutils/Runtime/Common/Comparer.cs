@@ -5,9 +5,17 @@ using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Common
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(Comparer), ExecutionOrder)]
     public abstract class Comparer : TlpBaseBehaviour
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = TlpExecutionOrder.TimeSourcesStart + 1;
+
+
         [Tooltip("Used when the result of this Comparer object indicates no difference")]
         public Comparer optionalFallback;
 

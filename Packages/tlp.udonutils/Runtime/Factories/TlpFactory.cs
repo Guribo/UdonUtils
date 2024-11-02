@@ -2,20 +2,22 @@ using System;
 using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Logger;
+using TLP.UdonUtils.Runtime.Sync.SyncedEvents;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Factories
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(TlpFactory), ExecutionOrder)]
     public abstract class TlpFactory : TlpBaseBehaviour
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.DefaultStart;
+        public new const int ExecutionOrder = ObjectSpawner.ExecutionOrder + 1;
 
         public const string FactoriesGameObjectName = "TLP_Factories";
 

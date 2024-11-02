@@ -8,8 +8,14 @@ namespace TLP.UdonUtils.Runtime.Sync.SyncedEvents
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(SyncedEventBool), ExecutionOrder)]
     public class SyncedEventBool : SyncedEvent
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = SyncedEvent.ExecutionOrder + 1;
+
         [UdonSynced]
         internal bool SyncedValue;
 

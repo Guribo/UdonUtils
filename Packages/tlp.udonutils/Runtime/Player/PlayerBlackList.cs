@@ -11,14 +11,15 @@ using VRC.Udon;
 
 namespace TLP.UdonUtils.Runtime.Player
 {
-    [DefaultExecutionOrder(ExecutionOrder)]
     [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(PlayerBlackList), ExecutionOrder)]
     public class PlayerBlackList : TlpBaseBehaviour
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.DefaultStart;
+        public new const int ExecutionOrder = SyncedPlayerSet.ExecutionOrder + 1;
 
         [SerializeField]
         internal SyncedEventStringArray BlackListedPlayers;

@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
-using UdonSharp;
+using TLP.UdonUtils.Runtime.Recording;
 using UnityEngine;
+using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Physics
 {
@@ -8,15 +9,15 @@ namespace TLP.UdonUtils.Runtime.Physics
     /// calculates velocity and acceleration after everything that can affect locations and physics of objects which
     /// should be everything except audio
     /// </summary>
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(VelocityProvider), ExecutionOrder)]
     public abstract class VelocityProvider : TlpBaseBehaviour
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         // after everything that can affect locations and physics of objects which should be everything except audio
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.UiEnd + 1;
+        public new const int ExecutionOrder = TransformRecorder.ExecutionOrder + 1;
 
         public Transform RelativeTo;
 
@@ -117,5 +118,20 @@ namespace TLP.UdonUtils.Runtime.Physics
                 out Transform relativeTo,
                 out float circleAngularVelocityDegrees
         );
+
+        #region Overrides
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
+            }
+
+            if (!Utilities.IsValid(RelativeTo)) {
+                Error($"{nameof(RelativeTo)} not set");
+                return false;
+            }
+
+            return true;
+        }
+        #endregion
     }
 }

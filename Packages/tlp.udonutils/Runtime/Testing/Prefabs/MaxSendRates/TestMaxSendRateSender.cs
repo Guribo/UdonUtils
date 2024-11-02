@@ -1,44 +1,55 @@
-﻿using TLP.UdonUtils.Runtime;
+﻿using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Sources;
 using UdonSharp;
+using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon.Common;
 
-[UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
-public class TestMaxSendRateSender : TlpBaseBehaviour
+namespace TLP.UdonUtils.Runtime.Testing
 {
-    public TimeSource TimeSource;
+    [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(TestMaxSendRateSender), ExecutionOrder)]
+    public class TestMaxSendRateSender : TlpBaseBehaviour
+    {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
-    [UdonSynced]
-    public double SendTime;
+        [PublicAPI]
+        public new const int ExecutionOrder = TestMaxSendRate.ExecutionOrder + 1;
 
-    public TestMaxSendRate Test;
+        public TimeSource TimeSource;
 
-    public override void Start() {
-        base.Start();
-        AutoRetrySendOnFailure = false;
-    }
+        [UdonSynced]
+        public double SendTime;
 
-    protected override bool SetupAndValidate() {
-        if (!base.SetupAndValidate()) {
-            return false;
+        public TestMaxSendRate Test;
+
+        public override void Start() {
+            base.Start();
+            AutoRetrySendOnFailure = false;
         }
 
-        if (!Utilities.IsValid(TimeSource)) {
-            Error($"{nameof(TimeSource)} is not set");
-            return false;
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
+            }
+
+            if (!Utilities.IsValid(TimeSource)) {
+                Error($"{nameof(TimeSource)} is not set");
+                return false;
+            }
+
+            return true;
         }
 
-        return true;
-    }
+        public override void OnPreSerialization() {
+            base.OnPreSerialization();
+            SendTime = TimeSource.TimeAsDouble();
+        }
 
-    public override void OnPreSerialization() {
-        base.OnPreSerialization();
-        SendTime = TimeSource.TimeAsDouble();
-    }
-
-    public override void OnDeserialization(DeserializationResult result) {
-        base.OnDeserialization(result);
-        Test.ReceivedData(this);
+        public override void OnDeserialization(DeserializationResult result) {
+            base.OnDeserialization(result);
+            Test.ReceivedData(this);
+        }
     }
 }

@@ -1,12 +1,20 @@
-﻿using UdonSharp;
+﻿using JetBrains.Annotations;
+using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Physics
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
-    public class InertiaTensor : UdonSharpBehaviour
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(InertiaTensor), ExecutionOrder)]
+    public class InertiaTensor : TlpBaseBehaviour
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = CenterOfMass.ExecutionOrder + 1;
+
         [SerializeField]
         private Rigidbody body;
 
@@ -23,7 +31,8 @@ namespace TLP.UdonUtils.Runtime.Physics
             enabled = false;
         }
 
-        public void Start() {
+        public override void Start() {
+            base.Start();
             OnEnable();
         }
 

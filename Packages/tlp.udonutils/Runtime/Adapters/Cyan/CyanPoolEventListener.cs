@@ -5,8 +5,17 @@ using VRC.Udon;
 
 namespace TLP.UdonUtils.Runtime.Adapters.Cyan
 {
-    public class CyanPoolEventListener : TlpBaseBehaviour
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(CyanPoolEventListener), ExecutionOrder)]
+    public abstract class CyanPoolEventListener : TlpBaseBehaviour
     {
+
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = CyanPooledObject.ExecutionOrder + 1;
+
+
         /// <summary>
         /// This event is called when the local player's pool object has been assigned.
         /// </summary>

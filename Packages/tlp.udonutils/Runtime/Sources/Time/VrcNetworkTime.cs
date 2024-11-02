@@ -1,4 +1,8 @@
-﻿using VRC.SDKBase;
+﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Sources.Time.Experimental;
+using UdonSharp;
+using UnityEngine;
+using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Sources.Time
 {
@@ -6,8 +10,17 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
     /// Implementation of <see cref="TimeSource"/>
     /// using <see cref="Networking.GetServerTimeInSeconds"/>
     /// </summary>
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(VrcNetworkTime), ExecutionOrder)]
     public class VrcNetworkTime : TimeSource
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = TimeSinceLevelLoad.ExecutionOrder + 1;
+
+
         protected override bool SetupAndValidate() {
             if (!base.SetupAndValidate()) {
                 return false;

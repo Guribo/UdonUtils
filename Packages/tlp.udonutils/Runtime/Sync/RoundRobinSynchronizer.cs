@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Events;
 using TLP.UdonUtils.Runtime.Extensions;
+using TLP.UdonUtils.Runtime.Sync.SyncedEvents;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -12,13 +13,14 @@ namespace TLP.UdonUtils.Runtime.Sync
     /// Gives every player an equal chance to send something, ownership is controlled by the current master
     /// </summary>
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
-    [DefaultExecutionOrder(ExecutionOrder)] // TODO move me to the class declaration!
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(RoundRobinSynchronizer), ExecutionOrder)]
     public class RoundRobinSynchronizer : TlpBaseBehaviour
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.UiEnd + 1;
+        public new const int ExecutionOrder = SyncedEvent.ExecutionOrder + 100;
 
 
         private VRCPlayerApi[] _players;

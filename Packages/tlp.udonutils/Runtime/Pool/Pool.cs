@@ -1,6 +1,6 @@
 ﻿using System;
 using JetBrains.Annotations;
-using TLP.UdonUtils;
+using TLP.UdonUtils.Runtime.Events;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -9,14 +9,15 @@ using VRC.Udon;
 
 namespace TLP.UdonUtils.Runtime.Pool
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(Pool), ExecutionOrder)]
     public class Pool : TlpBaseBehaviour
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpBaseBehaviour.ExecutionOrder + 1;
+        public new const int ExecutionOrder = ExampleEventListener.ExecutionOrder + 1;
 
         public bool AttachToParent = true;
 

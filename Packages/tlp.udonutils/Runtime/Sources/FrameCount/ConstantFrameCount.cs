@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using JetBrains.Annotations;
+using UdonSharp;
+using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace TLP.UdonUtils.Runtime.Sources.FrameCount
@@ -7,8 +9,16 @@ namespace TLP.UdonUtils.Runtime.Sources.FrameCount
     /// Implementation of the <see cref="FrameCountSource"/>
     /// that returns a constant value.
     /// </summary>
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(ConstantFrameCount), ExecutionOrder)]
     public class ConstantFrameCount : FrameCountSource
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = FrameCountSource.ExecutionOrder + 1;
+
         /// <summary>
         /// Constant value returned by the method <see cref="Frame"/>
         /// </summary>

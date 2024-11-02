@@ -1,19 +1,21 @@
 ﻿using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Events;
+using TLP.UdonUtils.Runtime.Player;
 using UnityEngine;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 {
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(Model), ExecutionOrder)]
     public abstract class Model : MvcBase
     {
         #region ExecutionOrder
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.UiStart;
+        public new const int ExecutionOrder = MvcBase.ExecutionOrder + 1;
         #endregion
 
         #region Constants

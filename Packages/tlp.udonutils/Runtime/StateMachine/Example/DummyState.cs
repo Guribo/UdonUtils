@@ -1,10 +1,21 @@
-﻿using TLP.UdonUtils.Runtime.Common;
+﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Common;
+using UdonSharp;
+using UnityEngine;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.StateMachine.Example
 {
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(DummyState), ExecutionOrder)]
     public class DummyState : StateMachineState
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = StateMachineState.ExecutionOrder + 1;
+
         public StateMachineState Next;
         public float Delay = 3f;
 

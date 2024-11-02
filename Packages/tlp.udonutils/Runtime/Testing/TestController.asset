@@ -19,7 +19,7 @@ MonoBehaviour:
   sourceCsScript: {fileID: 11500000, guid: 633845384acec5440afe0af63e8253f2, type: 3}
   scriptVersion: 2
   compiledVersion: 2
-  behaviourSyncMode: 1
+  behaviourSyncMode: 2
   hasInteractEvent: 0
   scriptID: 4271378112241499094
   serializationData:
@@ -1322,7 +1322,7 @@ MonoBehaviour:
       Data: 75|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: TestData, TLP.UdonUtils.Runtime
+      Data: TLP.UdonUtils.Runtime.Testing.TestData, TLP.UdonUtils.Runtime
     - Name: 
       Entry: 8
       Data: 
@@ -1382,7 +1382,7 @@ MonoBehaviour:
       Data: 79|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: TestResultsUi, TLP.UdonUtils.Runtime
+      Data: TLP.UdonUtils.Runtime.Testing.TestResultsUi, TLP.UdonUtils.Runtime
     - Name: 
       Entry: 8
       Data: 

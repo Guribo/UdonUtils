@@ -1,14 +1,22 @@
-﻿using UdonSharp;
+﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Sync;
+using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon.Common;
 
 namespace TLP.UdonUtils.Runtime.Player
 {
-    [DefaultExecutionOrder(50_000 + -500)]
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(UdonInput), ExecutionOrder)]
     public class UdonInput : TlpBaseBehaviour
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = OwnerOnly.ExecutionOrder + 1;
+
         public static UdonInput Find() {
             var udonInputGameObject = GameObject.Find(nameof(UdonInput));
             if (!Utilities.IsValid(udonInputGameObject)) {

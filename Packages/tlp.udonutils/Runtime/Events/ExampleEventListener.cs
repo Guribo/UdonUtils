@@ -1,10 +1,18 @@
-using System;
+using JetBrains.Annotations;
+using UdonSharp;
 using UnityEngine;
 
 namespace TLP.UdonUtils.Runtime.Events
 {
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(ExampleEventListener), ExecutionOrder)]
     public class ExampleEventListener : TlpBaseBehaviour
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = StateMachine.StateMachineBehaviour.ExecutionOrder + 100;
         [SerializeField]
         private UdonEvent UdonEvent;
 

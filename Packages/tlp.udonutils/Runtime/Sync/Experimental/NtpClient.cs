@@ -2,6 +2,7 @@
 using TLP.UdonUtils.Runtime.Adapters.Cyan;
 using TLP.UdonUtils.Runtime.Extensions;
 using TLP.UdonUtils.Runtime.Sources;
+using TLP.UdonUtils.Runtime.Sources.Time;
 using TLP.UdonUtils.Runtime.Sources.Time.Experimental;
 using UdonSharp;
 using UnityEngine;
@@ -25,13 +26,14 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
     /// </summary>
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(NtpClient), ExecutionOrder)]
     public class NtpClient : CyanPooledObject
     {
         #region ExecutionOrder
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = NtpTime.ExecutionOrder - 2;
+        public new const int ExecutionOrder = UtcTimeSource.ExecutionOrder + 1;
         #endregion
 
         #region Dependencies

@@ -1,16 +1,22 @@
+using JetBrains.Annotations;
 using UdonSharp;
 using UnityEngine;
 
 namespace TLP.UdonUtils.Runtime.Physics
 {
     /// <summary>
-    /// calculates velocity and acceleration after everything that can affect locations and physics of objects which
-    /// should be everything except audio
+    /// calculates velocity and acceleration after everything that can affect locations
     /// </summary>
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(PostLateUpdateVelocityProvider), ExecutionOrder)]
     public class PostLateUpdateVelocityProvider : VelocityProvider
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = RigidbodyVelocityProvider.ExecutionOrder + 1;
+
         [SerializeField]
         private Transform ToTrack;
 

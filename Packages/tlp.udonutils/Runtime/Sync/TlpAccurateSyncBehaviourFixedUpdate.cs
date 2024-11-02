@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using JetBrains.Annotations;
+using UdonSharp;
+using UnityEngine;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Sync
@@ -6,8 +8,15 @@ namespace TLP.UdonUtils.Runtime.Sync
     /// <summary>
     /// Variant that predicts movement based on <see cref="FixedUpdate"/>
     /// </summary>
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(TlpAccurateSyncBehaviourFixedUpdate), ExecutionOrder)]
     public abstract class TlpAccurateSyncBehaviourFixedUpdate : TlpAccurateSyncBehaviour
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = TlpAccurateSyncBehaviour.ExecutionOrder + 1;
+
         #region U# Lifecycle
         public void FixedUpdate() {
             #region TLP_DEBUG

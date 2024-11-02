@@ -1,7 +1,7 @@
 ﻿using System;
+using JetBrains.Annotations;
 using UdonSharp;
 using UnityEngine;
-using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Testing
 {
@@ -20,9 +20,16 @@ namespace TLP.UdonUtils.Runtime.Testing
     /// 
     /// Behaviour sync mode can be changed depending on the test performed, default is no variable sync
     /// </summary>
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(TestCase), ExecutionOrder)]
     public abstract class TestCase : TlpBaseBehaviour
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = TestController.ExecutionOrder + 1;
+
         [NonSerialized]
         public TestController TestController;
 

@@ -1,7 +1,9 @@
 ﻿using System;
+using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Extensions;
 using TLP.UdonUtils.Runtime.Sync.SyncedEvents;
 using UdonSharp;
+using UnityEngine;
 using VRC.SDK3.Data;
 using VRC.SDKBase;
 using VRC.Udon.Common;
@@ -25,8 +27,16 @@ namespace TLP.UdonUtils.Runtime.Player
     /// <remarks>DO NOT MODIFY <see cref="PlayerSet.WorkingValues"/> DIRECTLY!</remarks>
     /// </summary>
     [UdonBehaviourSyncMode(BehaviourSyncMode.Any)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(PlayerSet), ExecutionOrder)]
     public class PlayerSet : SyncedEventIntArray
     {
+
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = SyncedEventUrl.ExecutionOrder + 1;
+
         #region Constants
         private const string UnknownPlayerName = "UNKNOWN PLAYER";
         #endregion

@@ -1,18 +1,20 @@
 using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Events;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Player
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(PlayerFollower), ExecutionOrder)]
     public class PlayerFollower : TlpBaseBehaviour
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.DefaultStart;
+        public new const int ExecutionOrder = TlpExecutionOrder.PlayerMotionStart + 500;
 
         public VRCPlayerApi Player;
         public bool UseLocalPlayerByDefault = true;

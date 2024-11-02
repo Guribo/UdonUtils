@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using JetBrains.Annotations;
+using UdonSharp;
+using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace TLP.UdonUtils.Runtime.Sources.Time
@@ -6,8 +8,15 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
     /// <summary>
     /// <see cref="TimeSource"/> that always returns the same value.
     /// </summary>
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(ConstantTime), ExecutionOrder)]
     public class ConstantTime : TimeSource
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = TimeSource.ExecutionOrder + 1;
         #region Settings
         [Tooltip("Constant time returned by Time and TimeAsDouble")]
         [FormerlySerializedAs("Value")]

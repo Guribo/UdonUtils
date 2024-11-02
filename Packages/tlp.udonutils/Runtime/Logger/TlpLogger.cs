@@ -23,20 +23,20 @@ namespace TLP.UdonUtils.Runtime.Logger
         Debug = 5
     }
 
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(TlpLogger), ExecutionOrder)]
     public class TlpLogger : TlpBaseBehaviour
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.Min;
+        public new const int ExecutionOrder = TlpExecutionOrder.Min + 1;
 
         #region Dependencies
         public TimeSource TimeSource;
         public FrameCountSource FrameCount;
         #endregion
-
 
         #region Settings
         public bool DetailedPlayerInfo = true;
@@ -87,6 +87,7 @@ namespace TLP.UdonUtils.Runtime.Logger
             if (gameObject.name == expectedName) {
                 return;
             }
+
             Warn(Prefix, $"Changing name of GameObject '{transform.GetPathInScene()}' to '{expectedName}'", this);
             gameObject.name = expectedName;
         }
@@ -97,7 +98,8 @@ namespace TLP.UdonUtils.Runtime.Logger
 
         public string DebugLogOfFrame { get; private set; }
 
-        protected virtual string Prefix => "[<color=#008000>TLP</color>]";
+        public const string DefaultPrefix = "[<color=#008000>TLP</color>]";
+        protected virtual string Prefix => DefaultPrefix;
 
         protected virtual string GetPlayerInfo(Object context) {
             if (!DetailedPlayerInfo) {
@@ -255,6 +257,26 @@ namespace TLP.UdonUtils.Runtime.Logger
         private bool AllowedToLog(Object context) {
             return context != null && (RuntimeWhiteList.Count == 0 || RuntimeWhiteList.ContainsKey(context)) &&
                    (RuntimeBlackList.Count == 0 || !RuntimeBlackList.ContainsKey(context));
+        }
+        #endregion
+
+        #region Static Log Functions
+        public static void StaticDebugLog(string message, Type type, Object context = null) {
+#if TLP_DEBUG
+            Debug.Log($"[<color=#FF3B8B>DEBUG</color>]{DefaultPrefix}[{type}] {message}", context);
+#endif
+        }
+
+        public static void StaticInfo(string message, Type type, Object context = null) {
+            Debug.Log($"[INFO]{DefaultPrefix}[{type}] {message}", context);
+        }
+
+        public static void StaticWarning(string message, Type type, Object context = null) {
+            Debug.LogWarning($"[<color=#FFFD55>WARN</color>]{DefaultPrefix}[{type}] {message}", context);
+        }
+
+        public static void StaticError(string message, Type type, Object context = null) {
+            Debug.LogError($"[<color=#EB3324>ERROR</color>]{DefaultPrefix}[{type}] {message}", context);
         }
         #endregion
     }

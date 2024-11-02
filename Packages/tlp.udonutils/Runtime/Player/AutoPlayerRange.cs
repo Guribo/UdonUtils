@@ -1,4 +1,5 @@
-﻿using UdonSharp;
+﻿using JetBrains.Annotations;
+using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
@@ -7,9 +8,16 @@ namespace TLP.UdonUtils.Runtime.Player
     /// <summary>
     /// Updates the far voice range of all players every time a player leaves or joins the world.
     /// </summary>
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
-    public class AutoPlayerRange : UdonSharpBehaviour
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(AutoPlayerRange), ExecutionOrder)]
+    public class AutoPlayerRange : TlpBaseBehaviour
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = CustomAudioFalloff.ExecutionOrder + 1;
+
         /// <summary>
         /// default voice far range defined by VRChat
         /// <remarks>https://docs.vrchat.com/docs/playewar-audio#set-voice-distance-far</remarks>

@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
@@ -12,12 +13,13 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
     /// The controller also handles any business logic related to user input.
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(Controller), ExecutionOrder)]
     public abstract class Controller : MvcBase
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = Model.ExecutionOrder + 1;
+        public new const int ExecutionOrder = Model.ExecutionOrder + 100;
 
         public bool Initialized { get; private set; }
         protected Model Model { get; private set; }

@@ -36,6 +36,17 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [10.0.0] - 2024-11-02
+
+#### 🚀 Features
+
+- *(StateMachine)* Add transtion to delayed method to statemachine
+- [**breaking**] Deterministic execution order of scripts to address know VRC-bug
+
+#### 🐛 Bug Fixes
+
+- *(RigidbodyVelocityProvider)* Add missing dependency validation
+
 ### [9.0.0] - 2024-08-20
 
 #### 🚀 Features

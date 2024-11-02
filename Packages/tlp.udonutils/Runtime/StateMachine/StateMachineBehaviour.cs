@@ -10,15 +10,16 @@ namespace TLP.UdonUtils.Runtime.StateMachine
     /// Only active while the <see cref="RelatedState"/> is set and active.
     ///
     /// </summary>
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [TlpDefaultExecutionOrder(typeof(StateMachineBehaviour), ExecutionOrder)]
     public abstract class StateMachineBehaviour : TlpBaseBehaviour
     {
         #region ExecutionOrder
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = StateMachineState.ExecutionOrder + 1;
+        public new const int ExecutionOrder = StateMachineState.ExecutionOrder + 100;
         #endregion
 
         #region State

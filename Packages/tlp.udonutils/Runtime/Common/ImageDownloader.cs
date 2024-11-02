@@ -1,5 +1,7 @@
 ﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.DesignPatterns.MVC;
 using TLP.UdonUtils.Runtime.Extensions;
+using TLP.UdonUtils.Runtime.Player;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,15 +13,16 @@ using VRC.Udon;
 namespace TLP.UdonUtils.Runtime.Common
 {
     [DisallowMultipleComponent]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [TlpDefaultExecutionOrder(typeof(ImageDownloader), ExecutionOrder)]
     public class ImageDownloader : TlpBaseBehaviour
     {
         #region Executionorder
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.UiStart + 1;
+        public new const int ExecutionOrder = Controller.ExecutionOrder + 1;
         #endregion
 
         [SerializeField]
@@ -329,7 +332,10 @@ namespace TLP.UdonUtils.Runtime.Common
 #endif
             #endregion
 
-            Assert(Utilities.IsValid(_imageDownloader), $"{nameof(_imageDownloader)} invalid", this);
+            if (!Utilities.IsValid(_imageDownloader)) {
+                Error($"{nameof(_imageDownloader)} invalid");
+                return;
+            }
 
             _imageDownload = _imageDownloader.DownloadImage(
                     ImageUrls[_currentImageIndex],

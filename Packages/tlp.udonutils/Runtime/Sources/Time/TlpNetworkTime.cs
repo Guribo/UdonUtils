@@ -18,18 +18,16 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
     ///
     /// In summary, it provides an averaged network time that is based on game time for smooth interpolations.
     /// </summary>
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [TlpDefaultExecutionOrder(typeof(TlpNetworkTime), ExecutionOrder)]
     public class TlpNetworkTime : TimeSource
     {
         #region ExecutionOrder
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
-        /// <summary>
-        /// Ensure that network time is determined as early as possible after the logger.
-        /// </summary>
         [PublicAPI]
-        public new const int ExecutionOrder = TlpLogger.ExecutionOrder + 1;
+        public new const int ExecutionOrder = VrcNetworkTime.ExecutionOrder + 1;
         #endregion
 
         #region Constants

@@ -21,15 +21,16 @@ namespace TLP.UdonUtils.Runtime.StateMachine
     /// Should be extended to implement conditions for transitioning to other states.
     /// Alternatively transition logic can be implemented in dedicated <see cref="StateMachineBehaviour"/>s.
     /// </summary>
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [TlpDefaultExecutionOrder(typeof(StateMachineState), ExecutionOrder)]
     public class StateMachineState : TlpBaseBehaviour
     {
         #region ExecutionOrder
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = StateMachine.ExecutionOrder + 1;
+        public new const int ExecutionOrder = StateMachine.ExecutionOrder + 100;
         #endregion
 
         #region State

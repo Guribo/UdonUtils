@@ -1,5 +1,7 @@
 using System;
+using JetBrains.Annotations;
 using UdonSharp;
+using UnityEngine;
 using VRC.SDK3.Data;
 
 namespace TLP.UdonUtils.Runtime.Sync
@@ -7,9 +9,16 @@ namespace TLP.UdonUtils.Runtime.Sync
     /// <summary>
     /// Container for received snapshot data for inter-/extrapolation
     /// </summary>
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(TimeBacklog), ExecutionOrder)]
     public abstract class TimeBacklog : TlpBaseBehaviour
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = TimeSnapshot.ExecutionOrder + 1;
+
         protected readonly DataList _timeStamps = new DataList();
         private double _lastAdded = double.MinValue;
 

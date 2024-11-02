@@ -1,8 +1,20 @@
-﻿using TLP.UdonUtils.Runtime.Testing;
+﻿using JetBrains.Annotations;
+using UdonSharp;
+using UnityEngine;
 
-/// <summary>
-/// Empty test that should always pass.
-/// </summary>
-public class TestSanity : TestCase
+namespace TLP.UdonUtils.Runtime.Testing
 {
+    /// <summary>
+    /// Empty test that should always pass.
+    /// </summary>
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(TestSanity), ExecutionOrder)]
+    public class TestSanity : TestCase
+    {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = TestCase.ExecutionOrder + 2;
+    }
 }

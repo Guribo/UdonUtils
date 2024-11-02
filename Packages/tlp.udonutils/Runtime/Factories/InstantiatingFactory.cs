@@ -1,4 +1,5 @@
-﻿using TLP.UdonUtils.Runtime.Common;
+﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Common;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -8,9 +9,16 @@ namespace TLP.UdonUtils.Runtime.Factories
     /// <summary>
     /// Factory that creates new clones of a provided GameObject with <see cref="UdonSharpBehaviour"/> on it.
     /// </summary>
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(InstantiatingFactory), ExecutionOrder)]
     public class InstantiatingFactory : TlpFactory
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = TlpFactory.ExecutionOrder + 1;
+
         [Tooltip("What type of Component with GameObject to instantiate")]
         public UdonSharpBehaviour Prototype;
 

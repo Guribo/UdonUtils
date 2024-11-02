@@ -36,6 +36,7 @@ namespace TLP.UdonUtils.Runtime
     /// <remarks>https://docs.vrchat.com/docs/event-execution-order</remarks>
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(TlpBaseBehaviour), ExecutionOrder)]
     public abstract class TlpBaseBehaviour : UdonSharpBehaviour
     {
         protected virtual int ExecutionOrderReadOnly => ExecutionOrder;
@@ -250,6 +251,9 @@ namespace TLP.UdonUtils.Runtime
             #region TLP_DEBUG
 #if TLP_DEBUG
             DebugLog(nameof(Start));
+            if (Utilities.IsValid(Networking.LocalPlayer)) {
+                AssertExecutionOrderCorrect();
+            }
 #endif
             #endregion
 
@@ -407,34 +411,9 @@ namespace TLP.UdonUtils.Runtime
         /// <param name="message">Compact error message, will be surrounded by context info</param>
         /// <param name="context">Object which is relevant to the condition failing, usually a behaviour or GameObject</param>
         /// <returns>The value of condition</returns>
-        [Obsolete("Use Assert(bool condition, string message) instead")]
+        [Obsolete("Use Assert(bool condition, string message) instead", true)]
         protected bool Assert(bool condition, string message, Object context) {
-#if !TLP_DEBUG
-            return condition;
-#else
-            if ((int)Severity < (int)ELogLevel.Assertion) {
-                return condition;
-            }
-
-            if (condition) {
-                return true;
-            }
-
-            if (Utilities.IsValid(context)) {
-                var udonSharpBehaviour = (UdonSharpBehaviour)context;
-                // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
-                if (Utilities.IsValid(udonSharpBehaviour)) {
-                    Error($"Assertion failed : '{udonSharpBehaviour.gameObject.name} : {message}'");
-                } else {
-                    Error($"Assertion failed : '{context.GetType()} : {message}'");
-                }
-            } else {
-                Error("Assertion failed :  '" + message + "'");
-            }
-
-            Debug.Assert(condition, message);
             return false;
-#endif
         }
 
         [Conditional("TLP_DEBUG")]
@@ -526,6 +505,47 @@ namespace TLP.UdonUtils.Runtime
             }
 
             return localPlayer.GetPlayerTag(PlayerTagTlpLoggerMissingLogged) == "true";
+        }
+
+        private void AssertExecutionOrderCorrect() {
+            const string playerTagExecOrder = "TLP/Base/ExecOrder";
+            const string playerTagLastFrameStart = "TLP/Base/LastFrameStart";
+            const string playerTagLastFrameBehaviour = "TLP/Base/LastFrameBehaviour";
+            string lastStarted = Networking.LocalPlayer.GetPlayerTag(playerTagExecOrder);
+            string lastFrameStart = Networking.LocalPlayer.GetPlayerTag(playerTagLastFrameStart);
+            string lastFrameBehaviour = Networking.LocalPlayer.GetPlayerTag(playerTagLastFrameBehaviour);
+            ValidateStartOrder(lastFrameStart, lastStarted, lastFrameBehaviour);
+            Networking.LocalPlayer.SetPlayerTag(playerTagExecOrder, ExecutionOrderReadOnly.ToString());
+            Networking.LocalPlayer.SetPlayerTag(playerTagLastFrameStart, Time.frameCount.ToString());
+            Networking.LocalPlayer.SetPlayerTag(playerTagLastFrameBehaviour, GetUdonTypeName());
+        }
+
+        private void ValidateStartOrder( string lastFrameStart, string lastStarted, string lastBehaviour) {
+            if (string.IsNullOrEmpty(lastFrameStart)) {
+                return;
+            }
+
+            if (!int.TryParse(lastFrameStart, out int savedFrame)) {
+                return;
+            }
+
+            if (savedFrame != Time.frameCount) {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(lastStarted)) {
+                return;
+            }
+
+            if (!int.TryParse(lastStarted, out int execOrder)) {
+                return;
+            }
+
+            if (lastBehaviour != GetUdonTypeName() && ExecutionOrderReadOnly <= execOrder) {
+                Warn($"Received Start() in incorrect order, previously started script '{lastBehaviour}' in this frame had " +
+                     $"ExecutionOrder {execOrder} while {GetUdonTypeName()} has ExecutionOrder {ExecutionOrderReadOnly}. " +
+                     $"Please add [TlpDefaultExecutionOrder(ExecutionOrder)] to this script or the script that started before this one.");
+            }
         }
         #endregion
     }

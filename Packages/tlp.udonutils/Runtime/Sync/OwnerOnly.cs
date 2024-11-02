@@ -1,12 +1,22 @@
-﻿using UdonSharp;
+﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Events;
+using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Sync
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
-    public class OwnerOnly : UdonSharpBehaviour
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(OwnerOnly), ExecutionOrder)]
+    public class OwnerOnly : TlpBaseBehaviour
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = DirectInputEvent.ExecutionOrder + 1;
+
+
         public GameObject[] gameObjects;
         public UdonSharpBehaviour[] UdonSharpBehaviours;
 

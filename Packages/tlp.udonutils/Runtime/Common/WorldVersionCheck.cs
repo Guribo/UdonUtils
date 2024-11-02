@@ -1,7 +1,6 @@
 ﻿using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Events;
 using TLP.UdonUtils.Runtime.Extensions;
-using TLP.UdonUtils.Runtime.Logger;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -19,12 +18,13 @@ namespace TLP.UdonUtils.Runtime.Common
     /// </summary>
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(WorldVersionCheck), ExecutionOrder)]
     public class WorldVersionCheck : TlpBaseBehaviour
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpLogger.ExecutionOrder + 1;
+        public new const int ExecutionOrder = TlpExecutionOrder.WorldInitStart + 1;
 
         #region State
 

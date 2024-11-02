@@ -6,14 +6,15 @@ using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Recording
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(TransformRecorder), ExecutionOrder)]
     public class TransformRecorder : TlpBaseBehaviour
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.Max;
+        public new const int ExecutionOrder = TlpExecutionOrder.RecordingStart + 1;
 
         [FormerlySerializedAs("directionThresholdAngle")]
         public float DirectionThresholdAngle = 10f;

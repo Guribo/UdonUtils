@@ -1,4 +1,5 @@
 using System;
+using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Extensions;
 using UdonSharp;
 using UnityEngine;
@@ -8,8 +9,14 @@ namespace TLP.UdonUtils.Runtime.Sync.SyncedEvents
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(SyncedEventStringArray), ExecutionOrder)]
     public class SyncedEventStringArray : SyncedEvent
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = SyncedEventString.ExecutionOrder + 1;
+
         [UdonSynced]
         internal string[] SyncedValues = new string[0];
 

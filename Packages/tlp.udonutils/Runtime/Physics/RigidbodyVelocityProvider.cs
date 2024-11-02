@@ -1,7 +1,9 @@
+using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Extensions;
 using TLP.UdonUtils.Runtime.Sources;
 using UdonSharp;
 using UnityEngine;
+using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Physics
 {
@@ -9,10 +11,15 @@ namespace TLP.UdonUtils.Runtime.Physics
     /// uses rigidbody velocity and calculates acceleration after everything that can affect physics of objects which
     /// should be everything except audio
     /// </summary>
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(RigidbodyVelocityProvider), ExecutionOrder)]
     public class RigidbodyVelocityProvider : VelocityProvider
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = FixedUpdateVelocityProvider.ExecutionOrder + 1;
         #region Dependencies
         public Rigidbody ToTrack;
 
@@ -131,6 +138,26 @@ namespace TLP.UdonUtils.Runtime.Physics
             _accelerationTime[2] = time;
 
             _position = RelativeTo.InverseTransformPoint(worldPosition);
+        }
+        #endregion
+
+        #region Overrides
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
+            }
+
+            if (!Utilities.IsValid(ToTrack)) {
+                Error($"{nameof(ToTrack)} not set");
+                return false;
+            }
+
+            if (!Utilities.IsValid(TimeSource)) {
+                Error($"{nameof(TimeSource)} not set");
+                return false;
+            }
+
+            return true;
         }
         #endregion
     }

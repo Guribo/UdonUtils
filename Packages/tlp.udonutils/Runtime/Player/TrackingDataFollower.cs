@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Events;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -6,14 +7,15 @@ using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Player
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(TrackingDataFollower), ExecutionOrder)]
     public class TrackingDataFollower : TlpBaseBehaviour
     {
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.DefaultStart;
+        public new const int ExecutionOrder = WeaponsEvent.ExecutionOrder + 1;
 
         public VRCPlayerApi Player;
 

@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Events;
 using TMPro;
 using UdonSharp;
@@ -10,9 +11,16 @@ namespace TLP.UdonUtils.Runtime.Examples
     /// <summary>
     /// Example of a UdonBehaviour that can get notified when a player with a different world version joined.
     /// </summary>
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(WorldVersionEventListener), ExecutionOrder)]
     public class WorldVersionEventListener : TlpBaseBehaviour
     {
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = WorldVersionCheck.ExecutionOrder + 1;
+
         #region Dependencies
         public Canvas Canvas;
         public TextMeshProUGUI UpdateAvailableText;

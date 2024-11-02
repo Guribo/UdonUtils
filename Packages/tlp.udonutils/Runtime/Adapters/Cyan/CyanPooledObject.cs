@@ -1,11 +1,23 @@
 ﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Events;
+using TLP.UdonUtils.Runtime.Sync;
+using UnityEngine;
 using UnityEngine.Serialization;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Adapters.Cyan
 {
-    public class CyanPooledObject : TlpBaseBehaviour
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(CyanPooledObject), ExecutionOrder)]
+    public abstract class CyanPooledObject : TlpBaseBehaviour
     {
+
+        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+
+        [PublicAPI]
+        public new const int ExecutionOrder = VehicleMotionEvent.ExecutionOrder + 1;
+
+
         [FormerlySerializedAs("cyanPoolAdapter")]
         public CyanPoolAdapter CyanPoolAdapter;
 

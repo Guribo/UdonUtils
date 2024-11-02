@@ -1,5 +1,7 @@
 ﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Extensions;
+using TLP.UdonUtils.Runtime.Factories;
 using TLP.UdonUtils.Runtime.Sources.Time;
 using UdonSharp;
 using UnityEngine;
@@ -13,15 +15,16 @@ namespace TLP.UdonUtils.Runtime.StateMachine
     /// Controls which <see cref="StateMachineState"/> and thus corresponding <see cref="StateMachineBehaviour"/>s are active.
     /// Which state is currently active is automatically synchronized across the network if set to manual sync.
     /// </summary>
-    [DefaultExecutionOrder(ExecutionOrder)]
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+    [DefaultExecutionOrder(ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(StateMachine), ExecutionOrder)]
     public class StateMachine : TlpBaseBehaviour
     {
         #region ExecutionOrder
         protected override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.DefaultStart;
+        public new const int ExecutionOrder = TlpFactory.ExecutionOrder + 100;
         #endregion
 
         #region Settings
@@ -40,18 +43,23 @@ namespace TLP.UdonUtils.Runtime.StateMachine
         public float EventSyncDelay = 0.5f;
         #endregion
 
-
         #region Synced State
         [UdonSynced]
         internal int SyncedStateIndex = -1;
 
         [UdonSynced]
         internal float SyncedTransitionTime;
+
+        #region Local Copy
+        internal int WorkingStateIndex = -1;
+        internal float WorkingTransitionTime;
+        #endregion
         #endregion
 
         #region State
         internal int LocalStateIndex = -1;
-        internal int PendingDelayedStateTransition = -1;
+        internal int ScheduledTransitionTarget = -1;
+        internal StateMachineState DelayedTransitionTarget;
         #endregion
 
         #region Lifecycle
@@ -80,13 +88,12 @@ namespace TLP.UdonUtils.Runtime.StateMachine
         }
         #endregion
 
-
         #region Public API
         /// <summary>
         /// Scheduled network time of the pending or last state transition.
         /// Can be used to determine exact timing between clients.
         /// </summary>
-        public float TransitionNetworkTime => SyncedTransitionTime;
+        public float TransitionNetworkTime => WorkingTransitionTime;
 
         public StateMachineState StateMachineState { get; internal set; }
 
@@ -144,15 +151,15 @@ namespace TLP.UdonUtils.Runtime.StateMachine
                 return false;
             }
 
-            if (newStateIndex != SyncedStateIndex) {
+            if (newStateIndex != WorkingStateIndex) {
                 if (!MarkNetworkDirty()) {
                     return false;
                 }
 
                 if (Utilities.IsValid(OptionalNetworkTime)) {
-                    SyncedStateIndex = newStateIndex;
-                    PendingDelayedStateTransition = newStateIndex;
-                    SyncedTransitionTime = OptionalNetworkTime.Time() + EventSyncDelay;
+                    WorkingStateIndex = newStateIndex;
+                    ScheduledTransitionTarget = newStateIndex;
+                    WorkingTransitionTime = OptionalNetworkTime.Time() + EventSyncDelay;
                     SendCustomEventDelayedSeconds(nameof(Delayed_ActiveSyncedState), EventSyncDelay);
                     return true;
                 }
@@ -165,7 +172,7 @@ namespace TLP.UdonUtils.Runtime.StateMachine
             }
 
             LocalStateIndex = newStateIndex;
-            SyncedStateIndex = newStateIndex;
+            WorkingStateIndex = newStateIndex;
             var newState = AllStates[newStateIndex];
             StateMachineState = newState;
             newState.enabled = true;
@@ -210,20 +217,50 @@ namespace TLP.UdonUtils.Runtime.StateMachine
 
             return true;
         }
+
+        /// <summary>
+        /// Schedule a delayed transition to the target state
+        /// </summary>
+        /// <remarks>There can only be a single delayed transition at once,
+        /// calling this multiple times may trigger an early transition using
+        /// the remaining delay of the first call</remarks>
+        /// <param name="targetState"></param>
+        /// <param name="delaySeconds"></param>
+        public bool TransitionToDelayed(StateMachineState targetState, float delaySeconds) {
+            if (!Utilities.IsValid(targetState)) {
+                Error($"{nameof(targetState)} invalid");
+                return false;
+            }
+
+            if (!Networking.IsOwner(gameObject)) {
+                Error($"{nameof(TransitionToDelayed)} caller must be owner");
+                return false;
+            }
+
+            DelayedTransitionTarget = targetState;
+            SendCustomEventDelayedSeconds(nameof(Delayed_TransitionToNext), delaySeconds);
+            return true;
+        }
         #endregion
 
         #region Network Events
+        public override void OnPreSerialization() {
+            base.OnPreSerialization();
+            WriteNetworkState();
+        }
+
         public override void OnDeserialization(DeserializationResult deserializationResult) {
             base.OnDeserialization(deserializationResult);
+            ReadNetworkState();
+
             if (Utilities.IsValid(OptionalNetworkTime)) {
                 if (TryScheduleDelayedTransition()) {
                     return;
                 }
             }
 
-            LocalOnlySetNewState(SyncedStateIndex);
+            LocalOnlySetNewState(WorkingStateIndex);
         }
-
 
         public override void OnOwnershipTransferred(VRCPlayerApi player) {
             base.OnOwnershipTransferred(player);
@@ -238,21 +275,6 @@ namespace TLP.UdonUtils.Runtime.StateMachine
         #endregion
 
         #region Internal
-        public void Delayed_ActiveSyncedState() {
-            #region TLP_DEBUG
-#if TLP_DEBUG
-            DebugLog(nameof(Delayed_ActiveSyncedState));
-#endif
-            #endregion
-
-            if (PendingDelayedStateTransition != SyncedStateIndex) {
-                Warn("Another state is already pending, discarding delayed transition");
-                return;
-            }
-
-            LocalOnlySetNewState(SyncedStateIndex);
-        }
-
         internal bool Initialize() {
 #if TLP_DEBUG
             DebugLog(nameof(Initialize));
@@ -322,15 +344,73 @@ namespace TLP.UdonUtils.Runtime.StateMachine
         }
 
         private bool TryScheduleDelayedTransition() {
-            float delay = SyncedTransitionTime - OptionalNetworkTime.Time();
+            float delay = WorkingTransitionTime - OptionalNetworkTime.Time();
             if (delay <= 0f) {
                 return false;
             }
 
-            PendingDelayedStateTransition = SyncedStateIndex;
+            ScheduledTransitionTarget = WorkingStateIndex;
             SendCustomEventDelayedSeconds(nameof(Delayed_ActiveSyncedState), delay);
             return true;
         }
+
+        private void ReadNetworkState() {
+            WorkingStateIndex = SyncedStateIndex;
+            WorkingTransitionTime = SyncedTransitionTime;
+        }
+
+        private void WriteNetworkState() {
+            SyncedStateIndex = WorkingStateIndex;
+            SyncedTransitionTime = WorkingTransitionTime;
+        }
+
+        #region Delayed
+        /// <summary>
+        /// DO NOT CALL DIRECTLY!
+        /// Performs the scheduled transition to <see cref="DelayedTransitionTarget"/>
+        /// </summary>
+        public void Delayed_TransitionToNext() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(Delayed_TransitionToNext));
+#endif
+            #endregion
+
+            if (!Utilities.IsValid(DelayedTransitionTarget)) {
+                Warn(
+                        $"{nameof(Delayed_TransitionToNext)} had no target. {nameof(TransitionToDelayed)} was most likely called multiple times.");
+                return;
+            }
+
+            if (!Networking.IsOwner(gameObject)) {
+                Warn(
+                        $"Caller of {nameof(Delayed_TransitionToNext)} has no longer ownership, aborting scheduled transition to {DelayedTransitionTarget.GetScriptPathInScene()}");
+                return;
+            }
+
+            OwnerSetNewState(DelayedTransitionTarget.StateMachineIndex);
+            DelayedTransitionTarget = null;
+        }
+
+        /// <summary>
+        /// DO NOT CALL DIRECTLY!
+        /// Performs the scheduled transition to <see cref="ScheduledTransitionTarget"/>
+        /// </summary>
+        public void Delayed_ActiveSyncedState() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(Delayed_ActiveSyncedState));
+#endif
+            #endregion
+
+            if (ScheduledTransitionTarget != WorkingStateIndex) {
+                Warn("Another state is already pending, discarding delayed transition");
+                return;
+            }
+
+            LocalOnlySetNewState(WorkingStateIndex);
+        }
+        #endregion
         #endregion
 
         #region Overrides
