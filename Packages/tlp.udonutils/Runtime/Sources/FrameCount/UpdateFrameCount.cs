@@ -13,7 +13,7 @@ namespace TLP.UdonUtils.Runtime.Sources.FrameCount
     [TlpDefaultExecutionOrder(typeof(UpdateFrameCount), ExecutionOrder)]
     public class UpdateFrameCount : FrameCountSource
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = ConstantFrameCount.ExecutionOrder + 1;

@@ -1,8 +1,10 @@
 ﻿using System;
 using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Common;
+using TLP.UdonUtils.Runtime.Extensions;
 using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.Data;
 using VRC.SDKBase;
 using VRC.Udon.Common.Enums;
 
@@ -13,10 +15,10 @@ namespace TLP.UdonUtils.Runtime.Events
     [TlpDefaultExecutionOrder(typeof(UdonEvent), ExecutionOrder)]
     public class UdonEvent : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpBaseBehaviour.ExecutionOrder + 1;
+        public new const int ExecutionOrder = TlpSingleton.ExecutionOrder + 1;
 
         private const int InvalidInvocationFrame = -1;
         private const int InvalidIndex = -1;
@@ -41,7 +43,7 @@ namespace TLP.UdonUtils.Runtime.Events
         internal TlpBaseBehaviour _instigator;
 
         #region Unity Lifecycle
-        public void OnEnable() {
+        public virtual void OnEnable() {
             #region TLP_DEBUG
 #if TLP_DEBUG
             DebugLog(nameof(OnEnable));
@@ -53,12 +55,12 @@ namespace TLP.UdonUtils.Runtime.Events
             }
         }
 
-        public override void Start() {
-            base.Start();
-
-            if (RaiseOnStart) {
-                Raise(this);
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
             }
+
+            return !RaiseOnStart || Raise(this);
         }
         #endregion
 
@@ -83,20 +85,22 @@ namespace TLP.UdonUtils.Runtime.Events
             ListenerCount = Consolidate(Listeners, ListenerCount);
             int found = 0;
             for (int i = 0; i < ListenerCount; i++) {
-                if (Listeners[i] != listener) {
+                if (!ReferenceEquals(Listeners[i], listener)) {
                     continue;
                 }
 
                 Listeners[i] = null;
-                ListenerCount = Consolidate(Listeners, ListenerCount);
+
 
                 if (!all) {
+                    ListenerCount = Consolidate(Listeners, ListenerCount);
                     return true;
                 }
 
                 ++found;
             }
 
+            ListenerCount = Consolidate(Listeners, ListenerCount);
             return found > 0;
         }
 
@@ -133,7 +137,11 @@ namespace TLP.UdonUtils.Runtime.Events
                 }
 
                 listener.EventInstigator = instigator;
-                listener.OnEvent(ListenerMethod);
+                if (listener.HasStartedOk) {
+                    listener.OnEvent(ListenerMethod);
+                } else {
+                    Warn($"Listener {listener.GetScriptPathInScene()} is not ready, skipping");
+                }
             }
 
             return true;
@@ -212,6 +220,11 @@ namespace TLP.UdonUtils.Runtime.Events
 
 #endif
             #endregion
+
+            if (!HasStartedOk) {
+                Error($"{nameof(AddListenerVerified)}: Not initialized");
+                return false;
+            }
 
             if (canChangeListenerMethod
                 && ListenerMethod != callbackName
@@ -314,11 +327,7 @@ namespace TLP.UdonUtils.Runtime.Events
 
 
         private static int Consolidate(TlpBaseBehaviour[] list, int elements) {
-            if (list == null) {
-                return 0;
-            }
-
-            int end = Mathf.Min(elements, list.Length);
+            int end = Mathf.Min(elements, list.LengthSafe());
             int valid = 0;
             int moveIndex = InvalidIndex;
             for (int i = 0; i < end; i++) {

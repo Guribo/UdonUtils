@@ -11,7 +11,7 @@ namespace TLP.UdonUtils.Runtime.EditorOnly
     public class MockModel : Model
     {
 
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = Controller.ExecutionOrder -1;
@@ -30,7 +30,7 @@ namespace TLP.UdonUtils.Runtime.EditorOnly
         }
 
         public void SetMockHasError(bool error) {
-            HasError = error;
+            CriticalError = error.ToString();
         }
     }
 }

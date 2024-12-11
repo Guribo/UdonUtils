@@ -10,7 +10,7 @@ namespace TLP.UdonUtils.Runtime.Player
     [TlpDefaultExecutionOrder(typeof(LookAtPlayerUI), ExecutionOrder)]
     public class LookAtPlayerUI : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TrackingDataFollowerUI.ExecutionOrder + 1;
@@ -18,11 +18,17 @@ namespace TLP.UdonUtils.Runtime.Player
         public VRCPlayerApi player;
         public bool useLocalPlayerByDefault = true;
 
-        public override void Start() {
-            base.Start();
+
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
+            }
+
             if (useLocalPlayerByDefault) {
                 player = Networking.LocalPlayer;
             }
+
+            return true;
         }
 
         public override void PostLateUpdate() {

@@ -13,7 +13,7 @@ namespace TLP.UdonUtils.Runtime.Testing
     [TlpDefaultExecutionOrder(typeof(TestGameTimeVsDeltaTime), ExecutionOrder)]
     public class TestGameTimeVsDeltaTime : TestCase
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TestSanity.ExecutionOrder + 1;

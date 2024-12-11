@@ -14,7 +14,7 @@ namespace TLP.UdonUtils.Runtime.Player
     [TlpDefaultExecutionOrder(typeof(HorizontalLookAt), ExecutionOrder)]
     public class HorizontalLookAt : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = LateBoneFollower.ExecutionOrder + 1;
@@ -27,9 +27,14 @@ namespace TLP.UdonUtils.Runtime.Player
 
         private Quaternion _initialRotation;
 
-        public override void Start() {
-            base.Start();
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
+            }
+
             _initialRotation = transform.rotation;
+
+            return true;
         }
 
         public void Update() {

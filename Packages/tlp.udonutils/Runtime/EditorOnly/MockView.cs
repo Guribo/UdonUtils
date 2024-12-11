@@ -10,7 +10,7 @@ namespace TLP.UdonUtils.Runtime.EditorOnly
     [TlpDefaultExecutionOrder(typeof(MockView), ExecutionOrder)]
     public class MockView : View
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = View.ExecutionOrder + 99;
@@ -32,7 +32,7 @@ namespace TLP.UdonUtils.Runtime.EditorOnly
         }
 
         public void SetMockHasError(bool error) {
-            HasError = error;
+            CriticalError = error.ToString();
         }
     }
 }

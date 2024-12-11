@@ -21,7 +21,7 @@ namespace TLP.UdonUtils.Runtime.Common
     [TlpDefaultExecutionOrder(typeof(WorldVersionCheck), ExecutionOrder)]
     public class WorldVersionCheck : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TlpExecutionOrder.WorldInitStart + 1;

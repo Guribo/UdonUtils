@@ -1,5 +1,4 @@
 ﻿using JetBrains.Annotations;
-using TLP.UdonUtils.Runtime;
 using TLP.UdonUtils.Runtime.DesignPatterns.MVC;
 using UdonSharp;
 using UnityEngine;
@@ -12,7 +11,7 @@ namespace TLP.UdonUtils.Runtime.Testing
     [TlpDefaultExecutionOrder(typeof(TestData), ExecutionOrder)]
     public class TestData : Model
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TlpExecutionOrder.TestingStart + 1;

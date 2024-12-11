@@ -28,7 +28,7 @@ namespace TLP.UdonUtils.Runtime.Logger
     [TlpDefaultExecutionOrder(typeof(TlpLogger), ExecutionOrder)]
     public class TlpLogger : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TlpExecutionOrder.Min + 1;

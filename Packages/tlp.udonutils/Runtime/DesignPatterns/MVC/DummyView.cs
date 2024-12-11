@@ -9,7 +9,7 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
     [TlpDefaultExecutionOrder(typeof(DummyView), ExecutionOrder)]
     public class DummyView : View
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = View.ExecutionOrder + 1;

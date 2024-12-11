@@ -1,7 +1,6 @@
 ﻿using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Events;
-using TLP.UdonUtils.Runtime.Player;
 using UnityEngine;
 using VRC.SDKBase;
 
@@ -12,7 +11,7 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
     public abstract class Model : MvcBase
     {
         #region ExecutionOrder
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = MvcBase.ExecutionOrder + 1;
@@ -23,7 +22,12 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
         #endregion
 
         #region State
-        public bool Initialized { get; private set; }
+        /// <summary>
+        /// True if Model is currently
+        /// initialized with <see cref="Initialize"/>.
+        /// </summary>
+        public bool IsModelInitialized { get; private set; }
+
         public virtual bool Dirty { get; set; }
         public UdonEvent ChangeEvent { get; private set; }
         #endregion
@@ -37,18 +41,25 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 #endif
             #endregion
 
-            if (HasError) {
-                Error($"Can not initialize again due to previous critical error: '{CriticalError}'");
+            if (!IsReceivingStart) {
+                if (!HasStartedOk) {
+                    Error($"{nameof(Initialize)}: {nameof(Initialize)}: Not initialized");
+                    return false;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(CriticalError)) {
+                Error($"{nameof(Initialize)}: Can not initialize again due to previous critical error: '{CriticalError}'");
                 return false;
             }
 
-            if (Initialized) {
-                Error("Already initialized");
+            if (IsModelInitialized) {
+                Error($"{nameof(Initialize)}: Already initialized");
                 return false;
             }
 
             if (!Utilities.IsValid(changeEvent)) {
-                Error($"{nameof(changeEvent)} invalid");
+                Error($"{nameof(Initialize)}: {nameof(changeEvent)} invalid");
                 return false;
             }
 
@@ -56,34 +67,20 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
             ChangeEvent = changeEvent;
             ChangeEvent.ListenerMethod = OnModelChangedCallbackName;
             if (!ChangeEvent.AddListenerVerified(this, OnModelChangedCallbackName)) {
-                Error($"Adding to {nameof(ChangeEvent)} with callback '{OnModelChangedCallbackName}' failed");
+                Error($"{nameof(Initialize)}: Adding to {nameof(ChangeEvent)} with callback '{OnModelChangedCallbackName}' failed");
                 return false;
             }
 
             // setting it to true to prevent attempts to re-initialize controllers that have
             // failed to initialize and are in need of cleanup
-            Initialized = true;
+            IsModelInitialized = true;
 
             if (InitializeInternal()) {
                 return true;
             }
 
-            Error($"Initialization failed. Using {nameof(DeInitialize)} to cleanup.");
+            Error($"{nameof(Initialize)}: Initialization failed. Using {nameof(DeInitialize)} to cleanup.");
             DeInitialize();
-            return false;
-        }
-
-        public bool IsReady() {
-            if (HasError) {
-                Error($"Not ready, has critical error: {CriticalError}");
-                return false;
-            }
-
-            if (Initialized) {
-                return true;
-            }
-
-            Error("Not initialized");
             return false;
         }
 
@@ -94,19 +91,19 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 #endif
             #endregion
 
-            if (!Initialized) {
+            if (!IsModelInitialized) {
                 return false;
             }
 
             if (Utilities.IsValid(ChangeEvent)) {
                 if (!ChangeEvent.RemoveListener(this, true)) {
-                    Warn($"{nameof(ChangeEvent)} wasn't being listened to");
+                    Warn($"{nameof(DeInitialize)}: {nameof(ChangeEvent)} wasn't being listened to");
                 }
             }
 
             if (DeInitializeInternal()) {
                 ChangeEvent = null;
-                Initialized = false;
+                IsModelInitialized = false;
                 CriticalError = null;
                 return true;
             }
@@ -114,7 +111,6 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
             ChangeEvent = null;
             CriticalError = $"De-Initialization failed.";
             Error(CriticalError);
-            HasError = true;
             return false;
         }
 
@@ -132,22 +128,23 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 #endif
             #endregion
 
+            if (!HasStartedOk) {
+                Error($"{nameof(NotifyIfDirty)}: Not initialized");
+                return false;
+            }
+
             if (!Dirty) {
                 return true;
             }
 
-            if (!IsReady()) {
-                return false;
-            }
-
             if (!Utilities.IsValid(ChangeEvent)) {
-                Error($"{nameof(ChangeEvent)} invalid");
+                Error($"{nameof(NotifyIfDirty)}: {nameof(ChangeEvent)} invalid");
                 return false;
             }
 
             if (delayFrames < 1) {
                 if (!ChangeEvent.Raise(this)) {
-                    Error($"Failed to raise {nameof(ChangeEvent)} '{ChangeEvent.ListenerMethod}'");
+                    Error($"{nameof(NotifyIfDirty)}: Failed to raise {nameof(ChangeEvent)} '{ChangeEvent.ListenerMethod}'");
                     return false;
                 }
 
@@ -155,7 +152,7 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
             }
 
             if (!ChangeEvent.RaiseOnIdle(this, delayFrames)) {
-                Error($"Failed to raise {nameof(ChangeEvent)} '{ChangeEvent.ListenerMethod}'");
+                Error($"{nameof(NotifyIfDirty)}: Failed to raise {nameof(ChangeEvent)} '{ChangeEvent.ListenerMethod}'");
                 return false;
             }
 

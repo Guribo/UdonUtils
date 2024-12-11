@@ -11,7 +11,7 @@ namespace TLP.UdonUtils.Runtime.Sync
     [TlpDefaultExecutionOrder(typeof(TransformSnapshot), ExecutionOrder)]
     public class TransformSnapshot : TimeSnapshot
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = CyanPoolAdapter.ExecutionOrder + 1;

@@ -11,7 +11,7 @@ namespace TLP.UdonUtils.Runtime.Rendering
     [TlpDefaultExecutionOrder(typeof(ReflectionProbeController), ExecutionOrder)]
     public class ReflectionProbeController : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TlpExecutionOrder.RecordingStart + 500;

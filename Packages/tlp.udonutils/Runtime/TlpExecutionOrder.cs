@@ -4,32 +4,49 @@ namespace TLP.UdonUtils.Runtime
 {
     public static class TlpExecutionOrder
     {
+        // Minimum allowed by VRChat
         public const int Min = int.MinValue + 1_000_000;
-        public const int Max = TestingEnd + 1;
 
         public const int DefaultOffset = 150_000;
+        public const int SectionWidth = 999;
         public const int WorldInitStart = -3_000 + DefaultOffset;
-        public const int WorldInitEnd = -2_001 + DefaultOffset;
-        public const int TimeSourcesStart = -2_000 + DefaultOffset;
-        public const int TimeSourcesEnd = -1_001 + DefaultOffset;
-        public const int DirectInputStart = -1_000 + DefaultOffset;
-        public const int DirectInputEnd = -1 + DefaultOffset;
-        public const int DefaultStart = 0 + DefaultOffset;
-        public const int DefaultEnd = 999 + DefaultOffset;
-        public const int VehicleMotionStart = 1_000 + DefaultOffset;
-        public const int VehicleMotionEnd = 1_999 + DefaultOffset;
-        public const int PlayerMotionStart = 2_000 + DefaultOffset;
-        public const int PlayerMotionEnd = 2_999 + DefaultOffset;
-        public const int WeaponsStart = 3_000 + DefaultOffset;
-        public const int WeaponsEnd = 3_999 + DefaultOffset;
-        public const int UiStart = 10_000 + DefaultOffset;
-        public const int UiEnd = 10_999 + DefaultOffset;
-        public const int AudioStart = 11_000 + DefaultOffset;
-        public const int AudioEnd = 11_999 + DefaultOffset;
-        public const int RecordingStart = 12_000 + DefaultOffset;
-        public const int RecordingEnd = 12_999 + DefaultOffset;
-        public const int TestingStart = 13_000 + DefaultOffset;
-        public const int TestingEnd = 13_999 + DefaultOffset;
+        public const int WorldInitEnd = WorldInitStart + SectionWidth;
+
+        public const int TimeSourcesStart = WorldInitEnd + 1;
+        public const int TimeSourcesEnd = TimeSourcesStart + SectionWidth;
+
+        public const int DirectInputStart = TimeSourcesEnd + 1;
+        public const int DirectInputEnd = DirectInputStart + SectionWidth;
+
+        public const int DefaultStart = DirectInputEnd + 1;
+        public const int DefaultEnd = DefaultStart + SectionWidth;
+
+        public const int VehicleMotionStart = DefaultEnd + 1;
+        public const int VehicleMotionEnd = VehicleMotionStart + SectionWidth;
+
+        public const int PlayerMotionStart = VehicleMotionEnd + 1;
+        public const int PlayerMotionEnd = PlayerMotionStart + SectionWidth;
+
+        public const int WeaponsStart = PlayerMotionEnd + 1;
+        public const int WeaponsEnd = WeaponsStart + SectionWidth;
+
+        public const int CameraStart = WeaponsEnd + 1;
+        public const int CameraEnd = CameraStart + SectionWidth;
+
+        public const int UiStart = CameraEnd + 1;
+        public const int UiEnd = UiStart + SectionWidth;
+
+        public const int AudioStart = UiEnd + 1;
+        public const int AudioEnd = AudioStart + SectionWidth;
+
+        public const int RecordingStart = AudioEnd + 1;
+        public const int RecordingEnd = RecordingStart + SectionWidth;
+
+        public const int TestingStart = RecordingEnd + 1;
+        public const int TestingEnd = TestingStart + SectionWidth;
+
+        public const int Max = TestingEnd + 1;
+
 
         public static readonly DataDictionary s_All = new DataDictionary()
         {
@@ -48,6 +65,8 @@ namespace TLP.UdonUtils.Runtime
                 { PlayerMotionEnd, nameof(PlayerMotionEnd) },
                 { WeaponsStart, nameof(WeaponsStart) },
                 { WeaponsEnd, nameof(WeaponsEnd) },
+                { CameraStart, nameof(CameraStart) },
+                { CameraEnd, nameof(CameraEnd) },
                 { UiStart, nameof(UiStart) },
                 { UiEnd, nameof(UiEnd) },
                 { AudioStart, nameof(AudioStart) },

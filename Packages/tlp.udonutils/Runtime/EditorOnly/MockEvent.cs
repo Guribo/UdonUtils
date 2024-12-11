@@ -13,7 +13,7 @@ namespace TLP.UdonUtils.Runtime.EditorOnly
     [TlpDefaultExecutionOrder(typeof(MockEvent), ExecutionOrder)]
     public class MockEvent : UdonEvent
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = UdonEvent.ExecutionOrder + 99;

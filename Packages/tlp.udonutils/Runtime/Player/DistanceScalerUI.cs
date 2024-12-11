@@ -10,7 +10,7 @@ namespace TLP.UdonUtils.Runtime.Player
     [TlpDefaultExecutionOrder(typeof(DistanceScalerUI), ExecutionOrder)]
     public class DistanceScalerUI : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = LookAtPlayerUI.ExecutionOrder + 1;
@@ -21,11 +21,17 @@ namespace TLP.UdonUtils.Runtime.Player
         public float minSize = 0.00001f;
         public float maxSize = 1000f;
 
-        public override void Start() {
-            base.Start();
+
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
+            }
+
             if (useLocalPlayerByDefault) {
                 player = Networking.LocalPlayer;
             }
+
+            return true;
         }
 
         public override void PostLateUpdate() {

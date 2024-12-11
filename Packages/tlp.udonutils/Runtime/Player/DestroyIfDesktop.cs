@@ -13,20 +13,23 @@ namespace TLP.UdonUtils.Runtime.Player
     [TlpDefaultExecutionOrder(typeof(DestroyIfDesktop), ExecutionOrder)]
     public class DestroyIfDesktop : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = WorldVersionEventListener.ExecutionOrder + 1;
 
-        public override void Start() {
-            base.Start();
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
+            }
 
             if (Networking.LocalPlayer.IsUserInVR()) {
-                return;
+                return true;
             }
 
             DebugLog($"Destroying {transform.GetPathInScene()}");
             Destroy(gameObject);
+            return true;
         }
     }
 }

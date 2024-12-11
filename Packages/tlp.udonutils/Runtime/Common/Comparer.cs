@@ -10,10 +10,10 @@ namespace TLP.UdonUtils.Runtime.Common
     [TlpDefaultExecutionOrder(typeof(Comparer), ExecutionOrder)]
     public abstract class Comparer : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.TimeSourcesStart + 1;
+        public new const int ExecutionOrder = TlpExecutionOrder.TimeSourcesStart + 10;
 
 
         [Tooltip("Used when the result of this Comparer object indicates no difference")]
@@ -35,8 +35,15 @@ namespace TLP.UdonUtils.Runtime.Common
                 return true;
             }
 
-            bool noFallbackAvailable = !Utilities.IsValid(optionalFallback);
-            return noFallbackAvailable || optionalFallback.Compare(first, second, out comparisonResult);
+            if (Utilities.IsValid(optionalFallback)) {
+                return optionalFallback.Compare(first, second, out comparisonResult);
+            }
+
+#if TLP_DEBUG
+            DebugLog(
+                    $"Entries '{first.GetScriptPathInScene()}' and '{second.GetScriptPathInScene()}' are equal and no fallback is available that could say otherwise");
+#endif
+            return true;
         }
         #endregion
 
@@ -47,6 +54,17 @@ namespace TLP.UdonUtils.Runtime.Common
                 UdonSharpBehaviour second,
                 out int comparisonResult
         );
+        #endregion
+
+        #region Pool
+        public bool ReturnToPool() {
+            if (PoolableInUse && Utilities.IsValid((Pool.Pool)Pool)) {
+                ((Pool.Pool)Pool).Return(gameObject);
+                return true;
+            }
+
+            return false;
+        }
         #endregion
     }
 }

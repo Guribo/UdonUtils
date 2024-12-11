@@ -9,7 +9,7 @@ namespace TLP.UdonUtils.Runtime.Events
     [TlpDefaultExecutionOrder(typeof(VehicleMotionEvent), ExecutionOrder)]
     public class VehicleMotionEvent : UdonEvent
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TlpExecutionOrder.VehicleMotionStart + 1;

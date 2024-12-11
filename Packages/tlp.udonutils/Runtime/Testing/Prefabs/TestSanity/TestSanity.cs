@@ -12,7 +12,7 @@ namespace TLP.UdonUtils.Runtime.Testing
     [TlpDefaultExecutionOrder(typeof(TestSanity), ExecutionOrder)]
     public class TestSanity : TestCase
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TestCase.ExecutionOrder + 2;

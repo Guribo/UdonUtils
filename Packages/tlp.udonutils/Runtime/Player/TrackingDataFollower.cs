@@ -12,7 +12,7 @@ namespace TLP.UdonUtils.Runtime.Player
     [TlpDefaultExecutionOrder(typeof(TrackingDataFollower), ExecutionOrder)]
     public class TrackingDataFollower : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = WeaponsEvent.ExecutionOrder + 1;
@@ -27,13 +27,17 @@ namespace TLP.UdonUtils.Runtime.Player
 
         protected Transform OwnTransform;
 
-        public override void Start() {
-            base.Start();
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
+            }
+
             if (UseLocalPlayerByDefault) {
                 Player = Networking.LocalPlayer;
             }
 
             OwnTransform = transform;
+            return true;
         }
 
         public override void PostLateUpdate() {

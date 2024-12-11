@@ -14,7 +14,7 @@ namespace TLP.UdonUtils.Runtime.Recording
     [TlpDefaultExecutionOrder(typeof(TransformRecordingPlayer), ExecutionOrder)]
     public class TransformRecordingPlayer : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = InertiaTensor.ExecutionOrder + 1;

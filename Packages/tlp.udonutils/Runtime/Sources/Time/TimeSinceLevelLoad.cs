@@ -13,7 +13,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
     [TlpDefaultExecutionOrder(typeof(TimeSinceLevelLoad), ExecutionOrder)]
     public class TimeSinceLevelLoad : TimeSource
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = StopwatchTime.ExecutionOrder + 1;

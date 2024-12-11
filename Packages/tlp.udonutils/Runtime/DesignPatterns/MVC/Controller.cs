@@ -16,12 +16,12 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
     [TlpDefaultExecutionOrder(typeof(Controller), ExecutionOrder)]
     public abstract class Controller : MvcBase
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = Model.ExecutionOrder + 100;
 
-        public bool Initialized { get; private set; }
+        public bool IsControllerInitialized { get; private set; }
         protected Model Model { get; private set; }
         protected View View { get; private set; }
 
@@ -31,12 +31,12 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 #if TLP_DEBUG
             DebugLog(nameof(Initialize));
 #endif
-            if (HasError) {
+            if (!string.IsNullOrEmpty(CriticalError)) {
                 Error($"Can not initialize again due to previous critical error: '{CriticalError}'");
                 return false;
             }
 
-            if (Initialized) {
+            if (IsControllerInitialized) {
                 Warn("Already initialized");
                 return false;
             }
@@ -51,22 +51,22 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
                 return false;
             }
 
-            if (view.HasError) {
+            if (!string.IsNullOrEmpty(view.CriticalError)) {
                 Error($"{nameof(view)} has critical error: '{view.CriticalError}'");
                 return false;
             }
 
-            if (view.Initialized) {
+            if (view.IsViewInitialized) {
                 Error($"{nameof(view)} is already initialized");
                 return false;
             }
 
-            if (model.HasError) {
+            if (!string.IsNullOrEmpty(model.CriticalError)) {
                 Error($"{nameof(model)} has critical error: '{model.CriticalError}'");
                 return false;
             }
 
-            if (!model.Initialized) {
+            if (!model.IsModelInitialized) {
                 Error($"{nameof(model)} is not initialized");
                 return false;
             }
@@ -76,7 +76,7 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 
             // setting it to true to prevent attempts to re-initialize controllers that have
             // failed to initialize and are in need of cleanup
-            Initialized = true;
+            IsControllerInitialized = true;
 
             if (InitializeInternal()) {
                 return true;
@@ -98,7 +98,7 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 #if TLP_DEBUG
             DebugLog(nameof(DeInitialize));
 #endif
-            if (!Initialized) {
+            if (!IsControllerInitialized) {
                 return false;
             }
 
@@ -115,14 +115,13 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
             Model = null;
 
             if (DeInitializeInternal()) {
-                Initialized = false;
+                IsControllerInitialized = false;
                 CriticalError = null;
                 return true;
             }
 
             CriticalError = $"De-Initialization failed.";
             Error(CriticalError);
-            HasError = true;
             return false;
         }
         #endregion

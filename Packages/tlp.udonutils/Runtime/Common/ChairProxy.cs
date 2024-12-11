@@ -12,7 +12,7 @@ namespace TLP.UdonUtils.Runtime.Common
     [TlpDefaultExecutionOrder(typeof(ChairProxy), ExecutionOrder)]
     public class ChairProxy : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TlpAccurateSyncBehaviour.ExecutionOrder + 100;

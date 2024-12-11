@@ -15,7 +15,7 @@ Please note that there is no explicit documentation available. The code is chang
 ## Setup
 
 1. Add `TLP_Essentials` prefab to your scene to get the core components
-   1. TLPLogger - *for logging anything TLP related*
+   1. TLPLogger - *for logging anything TLP related (mandatory)*
    2. WorldVersionCheck - *Warns users if a player with a new world version joins*
    3. TLPNetworkTime - *Much more accurate VRC network time provider (sub-millisecond accuracy)*
 
@@ -35,6 +35,85 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 ## Changelog
 
 All notable changes to this project will be documented in this file.
+
+### [11.0.0] - 2024-12-11
+
+#### 🚀 Features
+
+- *(TlpBaseBehaviour)* Add IsReady property that initializes scripts if needed
+- *(UdonEvent)* Ensure listener is ready before event is invoked
+- Ensure init runs
+- Add warning to isReady check
+- Add camera start and end section, refactor
+- Add TlpSingleton
+- *(ObjectSpawner)* Use setup and validate override
+- *(Model)* [**breaking**] Update isReady function for MVC
+- *(MvcBase)* [**breaking**] Removed isready property
+- *(UdonEvent)* Adjust executionorder
+- *(Player)* Update error handling
+- *(Pool)* Update error handling
+- *(NtpClient)* Update error handling and initialization
+- *(TlpBaseBehaviour)* Add IsActiveAndEnabled
+- *(Runtime)* Update assets and prefabs
+- *(ExecutionOrderCheck)* Split logging of duplicates into multiple lines
+- *(Persistence)* Add custom playerdata restored event, experimental executor for own lifecycle
+- Make ExecutionOrderReadOnly public
+- Add more changes
+- [**breaking**] Change IsReady to HasStartedOk
+- Add taskscheduler and task + example
+- Add progress
+- Fix using all available cpu time if vsync limited
+- *(ExecutionOrderCheck)* Reduce logging and remove check on compilation
+- *(WorldVersionGenerator)* Remove executionorder check added to scene saving
+- *(UdonEditorUtils)* Add tool options to un-/lock framerate
+- *(Comparer)* Update executionorder
+- *(ImageDownloader)* Turn into controller
+- *(UdonCommon)* Add ToReadableString and SecondsToLocalTime
+- *(Controller)* [**breaking**] Change Initialized to IsControllerInitialized
+- *(UiEvent)* [**breaking**] Disable sync
+- *(Executor)* Add missing executionorders
+- *(Tasks)* Add missing executionorders
+- *(VRCPlayerApiUtils)* Add Set-/GetPlayerTagSafe
+- *(Pool)* [**breaking**] Turn pool initialization into background task
+- *(DemoBlackListToggle)* [**breaking**] Turn into controller
+- *(UiButton)* Add UiEvent
+- *(UiTextTMP)* Enable squishing of text before it is wrapped
+
+#### 🐛 Bug Fixes
+
+- *(Controller)* Update error handling
+- *(View)* Updated error handling
+- *(Factory)* Update error handling
+- *(CenterOfMass)* Update error handling
+- *(InertiaTensor)* Update error handling
+- Compile error
+- *(TlpBaseBehaviour)* Add check if player is valid during init
+- *(Model)* Improve debug logs and fix init not working during start()
+- *(PlayerDataRestoredEvent)* Support players with the same name
+- *(TimeSources)* Fix tag reading, update executionorders
+
+#### ⚡ Performance
+
+- *(UdonEvent)* Fix slow RemoveListener method
+
+#### 🧪 Testing
+
+- *(MVC)* Update error setting in mocks
+- *(TestController)* Update error handling
+- *(TestMaxSendRateSender)* Update error handling
+- Update and fix broken tests
+- Update and fix broken tests
+
+#### ⚙️ Miscellaneous Tasks
+
+- Update assets
+- *(View)* Migrate to new Controller
+- Update assets
+- Update assets
+- Update assets
+- Update assets
+- Update assets
+- Bump version
 
 ### [10.0.1] - 2024-11-02
 

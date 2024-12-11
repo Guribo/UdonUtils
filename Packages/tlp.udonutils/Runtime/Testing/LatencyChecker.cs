@@ -18,7 +18,7 @@ namespace TLP.UdonUtils.Runtime.Testing
     [TlpDefaultExecutionOrder(typeof(LatencyChecker), ExecutionOrder)]
     public class LatencyChecker : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = NtpTime.ExecutionOrder + 1;

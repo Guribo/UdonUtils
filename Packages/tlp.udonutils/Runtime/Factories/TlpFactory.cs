@@ -14,14 +14,12 @@ namespace TLP.UdonUtils.Runtime.Factories
     [TlpDefaultExecutionOrder(typeof(TlpFactory), ExecutionOrder)]
     public abstract class TlpFactory : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = ObjectSpawner.ExecutionOrder + 1;
 
         public const string FactoriesGameObjectName = "TLP_Factories";
-
-        private bool _initialized;
 
         [Tooltip("Key of the factory when trying to access it globally")]
         public string FactoryKey;
@@ -42,46 +40,30 @@ namespace TLP.UdonUtils.Runtime.Factories
                     : $"{factoryTypeName}_of_product_{productTypeName}";
         }
 
-        private int _failureCount;
-
-        public override void Start() {
-            base.Start();
-
-            if (_initialized) {
-                return;
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
             }
 
             if (!InitializeFactory()) {
-                if (_failureCount >= 3) {
-                    Error("Initialization failed completely");
-                    enabled = false;
-                    return;
-                }
-
-                ++_failureCount;
-                Warn($"Initialization of {gameObject.name} failed {_failureCount} times");
-                SendCustomEventDelayedFrames(nameof(Start), 1);
-                return;
+                Error($"{nameof(InitializeFactory)} failed");
+                return false;
             }
 
-            _initialized = true;
-#if TLP_DEBUG
-            if (Severity == ELogLevel.Debug) {
-                DebugLog("Creating test instance");
-                CreateInstance();
-            }
-#endif
+            return true;
         }
 
         public static T GetConcreteFactory<T>(string productKeyOrUdonTypeName) where T : TlpFactory {
-            string productTypeName = productKeyOrUdonTypeName == null ? null : UdonCommon.UdonTypeNameShort(productKeyOrUdonTypeName);
+            string productTypeName = productKeyOrUdonTypeName == null
+                    ? null
+                    : UdonCommon.UdonTypeNameShort(productKeyOrUdonTypeName);
             string factoryTypeName = UdonCommon.UdonTypeNameShort(GetUdonTypeName<T>());
             string gameObjectToFind = productTypeName == null
                     ? factoryTypeName
                     : $"{factoryTypeName}_of_product_{productTypeName}";
 
 #if TLP_DEBUG
-            Debug.Log($"{nameof(GetConcreteFactory)} '{gameObjectToFind}'");
+            TlpLogger.StaticDebugLog($"{nameof(GetConcreteFactory)} '{gameObjectToFind}'", null);
 #endif
             if (!FindFactoriesGameObject(out var runtimeFactories)) {
                 return null;
@@ -98,18 +80,18 @@ namespace TLP.UdonUtils.Runtime.Factories
                 }
             }
 
-            Debug.LogError(
-                    $"GetConcreteFactory '{gameObjectToFind}' with a '{factoryTypeName}' component for product '{productTypeName}' was not found"
-            );
+            TlpLogger.StaticError(
+                    $"GetConcreteFactory '{gameObjectToFind}' with a '{factoryTypeName}' component for product '{productTypeName}' was not found",
+                    null);
             return null;
         }
 
         protected static bool FindFactoriesGameObject(out GameObject runtimeFactories) {
             runtimeFactories = GameObject.Find(FactoriesGameObjectName);
             if (!Utilities.IsValid(runtimeFactories)) {
-                Debug.LogError(
-                        $"GameObject called '{FactoriesGameObjectName}' not found or not valid, ensure it exists and is active and a child of '{FactoriesGameObjectName}'"
-                );
+                TlpLogger.StaticError(
+                        $"GameObject called '{FactoriesGameObjectName}' not found or not valid, ensure it exists and is active and a child of '{FactoriesGameObjectName}'",
+                        null);
                 return false;
             }
 
@@ -122,24 +104,23 @@ namespace TLP.UdonUtils.Runtime.Factories
         }
 
         public GameObject CreateInstance() {
+            #region TLP_DEBUG
 #if TLP_DEBUG
             DebugLog(nameof(CreateInstance));
 #endif
+            #endregion
+
             if (!enabled) {
                 Warn("Can not produce when not enabled");
                 return null;
             }
 
-            if (!_initialized) {
-                if (!InitializeFactory()) {
-                    Error("Initialization failed");
-                    return null;
-                }
-
-                _initialized = true;
+            if (HasStartedOk) {
+                return ProduceInstance();
             }
 
-            return ProduceInstance();
+            Error("Not initialized");
+            return null;
         }
 
         protected abstract GameObject ProduceInstance();

@@ -15,7 +15,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
     [TlpDefaultExecutionOrder(typeof(UtcTimeSource), ExecutionOrder)]
     public class UtcTimeSource : TimeSource
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TlpNetworkTime.ExecutionOrder + 1;

@@ -11,7 +11,7 @@ namespace TLP.UdonUtils.Runtime.Sync
     [TlpDefaultExecutionOrder(typeof(TlpAccurateSyncBehaviourUpdate), ExecutionOrder)]
     public abstract class TlpAccurateSyncBehaviourUpdate : TlpAccurateSyncBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TlpAccurateSyncBehaviourFixedUpdate.ExecutionOrder + 1;

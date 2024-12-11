@@ -9,7 +9,7 @@ namespace TLP.UdonUtils.Runtime.Player
     [TlpDefaultExecutionOrder(typeof(TrackingDataFollowerUI), ExecutionOrder)]
     public class TrackingDataFollowerUI : TrackingDataFollower
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = PlayerFollowerUi.ExecutionOrder + 1;

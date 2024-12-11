@@ -11,7 +11,7 @@ namespace TLP.UdonUtils.Runtime.StateMachine.Example
     [TlpDefaultExecutionOrder(typeof(DummyState), ExecutionOrder)]
     public class DummyState : StateMachineState
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = StateMachineState.ExecutionOrder + 1;

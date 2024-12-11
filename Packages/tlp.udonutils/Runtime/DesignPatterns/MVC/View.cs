@@ -9,12 +9,12 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
     [TlpDefaultExecutionOrder(typeof(View), ExecutionOrder)]
     public abstract class View : MvcBase
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = Controller.ExecutionOrder + 100;
 
-        public bool Initialized { get; private set; }
+        public bool IsViewInitialized { get; private set; }
         public Model Model { get; private set; }
         public Controller Controller { get; private set; }
         private UdonEvent _modelChangeEvent;
@@ -32,12 +32,12 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 #if TLP_DEBUG
             DebugLog(nameof(Initialize));
 #endif
-            if (HasError) {
+            if (!string.IsNullOrEmpty(CriticalError)) {
                 Error($"Can not initialize again due to previous critical error: '{CriticalError}'");
                 return false;
             }
 
-            if (Initialized) {
+            if (IsViewInitialized) {
                 Warn("Already initialized");
                 return false;
             }
@@ -47,23 +47,23 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
                 return false;
             }
 
-            if (model.HasError) {
+            if (!string.IsNullOrEmpty(model.CriticalError)) {
                 Error($"{nameof(model)} has critical error: '{model.CriticalError}'");
                 return false;
             }
 
-            if (!model.Initialized) {
+            if (!model.IsModelInitialized) {
                 Error($"{nameof(model)} is not initialized");
                 return false;
             }
 
             if (Utilities.IsValid(optionalController)) {
-                if (optionalController.HasError) {
+                if (!string.IsNullOrEmpty(optionalController.CriticalError)) {
                     Error($"{nameof(optionalController)} has critical error: '{optionalController.CriticalError}'");
                     return false;
                 }
 
-                if (!optionalController.Initialized) {
+                if (!optionalController.IsControllerInitialized) {
                     Error($"{nameof(optionalController)} is not initialized");
                     return false;
                 }
@@ -84,7 +84,7 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 
             // setting it to true to prevent attempts to re-initialize controllers that have
             // failed to initialize and are in need of cleanup
-            Initialized = true;
+            IsViewInitialized = true;
             if (InitializeInternal()) {
                 return true;
             }
@@ -98,7 +98,7 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 #if TLP_DEBUG
             DebugLog(nameof(DeInitialize));
 #endif
-            if (!Initialized) {
+            if (!IsViewInitialized) {
                 return false;
             }
 
@@ -110,14 +110,13 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
             Model = null;
 
             if (DeInitializeInternal()) {
-                Initialized = false;
+                IsViewInitialized = false;
                 CriticalError = null;
                 return true;
             }
 
             CriticalError = $"De-Initialization failed.";
             Error(CriticalError);
-            HasError = true;
             return false;
         }
         #endregion
@@ -130,13 +129,13 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
         public override void OnEvent(string eventName) {
             switch (eventName) {
                 case nameof(OnModelChanged):
-                    if (Initialized && !HasError) {
-                        OnModelChanged();
-                    } else {
-                        Warn($"Ignoring '{eventName}' as not initialized or error has occurred");
-                        base.OnEvent(eventName);
-                    }
+                    #region TLP_DEBUG
+#if TLP_DEBUG
+        DebugLog_OnEvent(eventName);
+#endif
+                    #endregion
 
+                    OnModelChanged();
                     break;
                 default:
                     base.OnEvent(eventName);

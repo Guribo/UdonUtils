@@ -11,7 +11,7 @@ namespace TLP.UdonUtils.Runtime.Sync
     [TlpDefaultExecutionOrder(typeof(OwnerOnly), ExecutionOrder)]
     public class OwnerOnly : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = DirectInputEvent.ExecutionOrder + 1;

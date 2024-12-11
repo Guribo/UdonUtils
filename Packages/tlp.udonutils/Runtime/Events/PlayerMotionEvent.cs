@@ -9,7 +9,7 @@ namespace TLP.UdonUtils.Runtime.Events
     [TlpDefaultExecutionOrder(typeof(PlayerMotionEvent), ExecutionOrder)]
     public class PlayerMotionEvent : UdonEvent
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TlpExecutionOrder.PlayerMotionStart + 1;

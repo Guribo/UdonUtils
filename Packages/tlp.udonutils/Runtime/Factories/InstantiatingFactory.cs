@@ -14,7 +14,7 @@ namespace TLP.UdonUtils.Runtime.Factories
     [TlpDefaultExecutionOrder(typeof(InstantiatingFactory), ExecutionOrder)]
     public class InstantiatingFactory : TlpFactory
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TlpFactory.ExecutionOrder + 1;

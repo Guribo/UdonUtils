@@ -27,7 +27,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
     public class NtpServer : CyanPoolEventListener
     {
         #region ExecutionOrder
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = NtpClient.ExecutionOrder + 1;

@@ -75,23 +75,28 @@ namespace TLP.UdonUtils.Runtime.Extensions
         /// <param name="targetValue"></param>
         /// <param name="deltaTime"></param>
         /// <returns>result, integral, currentError</returns>
-        public static Vector3 PidUpdate(
-                Vector3 pid,
-                float previousIntegral,
-                float previousError,
+        public static float PidUpdate(
+                float p,
+                float i,
+                float d,
+                ref float previousIntegral,
+                ref float previousError,
                 float currentValue,
                 float targetValue,
                 float deltaTime
         ) {
+
             float currentError = targetValue - currentValue;
 
-            float proportional = pid.x * currentError;
-            float integral = previousIntegral + deltaTime * pid.y * currentError;
-            float derivative = pid.z * (currentError - previousError) / deltaTime;
+            float proportional = p * currentError;
+            float integral = previousIntegral + deltaTime * i * currentError;
+            float derivative = d * (currentError - previousError) / deltaTime;
 
             float result = proportional + integral + derivative;
 
-            return new Vector3(result, integral, currentError);
+            previousIntegral = integral;
+            previousError = currentError;
+            return result;
         }
 
         /// <summary>

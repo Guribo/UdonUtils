@@ -14,7 +14,7 @@ namespace TLP.UdonUtils.Runtime.Sync
     [TlpDefaultExecutionOrder(typeof(TransformBacklog), ExecutionOrder)]
     public class TransformBacklog : TimeBacklog
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TransformSnapshot.ExecutionOrder + 1;

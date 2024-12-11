@@ -12,7 +12,7 @@ namespace TLP.UdonUtils.Runtime.Testing
     [TlpDefaultExecutionOrder(typeof(TestMaxSendRateSender), ExecutionOrder)]
     public class TestMaxSendRateSender : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TestMaxSendRate.ExecutionOrder + 1;
@@ -24,11 +24,6 @@ namespace TLP.UdonUtils.Runtime.Testing
 
         public TestMaxSendRate Test;
 
-        public override void Start() {
-            base.Start();
-            AutoRetrySendOnFailure = false;
-        }
-
         protected override bool SetupAndValidate() {
             if (!base.SetupAndValidate()) {
                 return false;
@@ -38,6 +33,9 @@ namespace TLP.UdonUtils.Runtime.Testing
                 Error($"{nameof(TimeSource)} is not set");
                 return false;
             }
+
+            AutoRetrySendOnFailure = false;
+
 
             return true;
         }

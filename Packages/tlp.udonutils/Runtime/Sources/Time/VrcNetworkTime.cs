@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Extensions;
 using TLP.UdonUtils.Runtime.Sources.Time.Experimental;
 using UdonSharp;
 using UnityEngine;
@@ -15,7 +16,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
     [TlpDefaultExecutionOrder(typeof(VrcNetworkTime), ExecutionOrder)]
     public class VrcNetworkTime : TimeSource
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TimeSinceLevelLoad.ExecutionOrder + 1;
@@ -26,14 +27,14 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
                 return false;
             }
 
-            string existingInstance = Networking.LocalPlayer.GetPlayerTag(nameof(VrcNetworkTime));
+            string existingInstance = Networking.LocalPlayer.GetPlayerTagSafe(nameof(VrcNetworkTime));
             string idString = GetInstanceID().ToString();
 
             if (!string.IsNullOrEmpty(existingInstance) && existingInstance != idString) {
                 ErrorAndDisableGameObject($"Another instance of {nameof(VrcNetworkTime)} already exists: {idString} (this) != {existingInstance} (other)");
                 return false;
             }
-            Networking.LocalPlayer.SetPlayerTag(nameof(VrcNetworkTime), idString);
+            Networking.LocalPlayer.SetPlayerTagSafe(nameof(VrcNetworkTime), idString);
             return true;
         }
 

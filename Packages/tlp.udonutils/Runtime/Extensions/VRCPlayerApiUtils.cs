@@ -1,3 +1,4 @@
+using System.Text;
 using JetBrains.Annotations;
 using VRC.SDKBase;
 
@@ -68,6 +69,47 @@ namespace TLP.UdonUtils.Runtime.Extensions
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Get all players in a new array
+        /// </summary>
+        /// <returns>freshly allocated array containing all players</returns>
+        public static VRCPlayerApi[] GetAllPlayers() {
+            var players = new VRCPlayerApi[VRCPlayerApi.GetPlayerCount()];
+            return VRCPlayerApi.GetPlayers(players);
+        }
+
+        /// <param name="player">Must be valid</param>
+        /// <returns>Name of the player followed by player ID, example: 'Foo (1)'</returns>
+        public static string DisplayNameUnique(this VRCPlayerApi player) {
+            return new StringBuilder().Append(player.displayName).Append(" (").Append(player.playerId).Append(")")
+                    .ToString();
+        }
+
+        /// <param name="player"></param>
+        /// <returns>Name of the player followed by player ID, example: 'Foo (1)'; Empty string if player is invalid</returns>
+        public static string DisplayNameUniqueSafe(this VRCPlayerApi player) {
+            if (Utilities.IsValid(player)) {
+                return new StringBuilder().Append(player.displayName).Append(" (").Append(player.playerId).Append(")")
+                        .ToString();
+            }
+
+            return "";
+        }
+
+        public static string GetPlayerTagSafe(this VRCPlayerApi player, string tag) {
+            if (Utilities.IsValid(player)) return player.GetPlayerTag(tag);
+            return null;
+        }
+
+        public static bool SetPlayerTagSafe(this VRCPlayerApi player, string tag, string value) {
+            if (Utilities.IsValid(player)) {
+                player.SetPlayerTag(tag, value);
+                return true;
+            }
+
+            return false;
         }
     }
 }

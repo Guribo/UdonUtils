@@ -9,7 +9,7 @@ namespace TLP.UdonUtils.Runtime.Events
     [TlpDefaultExecutionOrder(typeof(DirectInputEvent), ExecutionOrder)]
     public class DirectInputEvent : UdonEvent
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TlpExecutionOrder.DirectInputStart + 1;

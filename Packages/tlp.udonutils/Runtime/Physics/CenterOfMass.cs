@@ -1,8 +1,8 @@
 ﻿using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Common;
-using TLP.UdonUtils.Runtime.Recording;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.Serialization;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Physics
@@ -12,53 +12,67 @@ namespace TLP.UdonUtils.Runtime.Physics
     [TlpDefaultExecutionOrder(typeof(CenterOfMass), ExecutionOrder)]
     public class CenterOfMass : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        #region ExecutionOrder
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = ToggleObject.ExecutionOrder + 1;
+        #endregion
 
+        [FormerlySerializedAs("body")]
         [SerializeField]
-        private Rigidbody body;
+        private Rigidbody Body;
 
-        public bool useCustomCenterOfGravityOnEnable;
-        public Transform centerOfMass;
+        [FormerlySerializedAs("useCustomCenterOfGravityOnEnable")]
+        public bool InitOnStart;
 
-        public void OnEnable() {
-            if (useCustomCenterOfGravityOnEnable) {
-                if (!Utilities.IsValid(centerOfMass)) {
-                    Debug.LogError("Invalid centerOfGravity", gameObject);
-                    return;
-                }
+        [FormerlySerializedAs("centerOfMassPosition")]
+        [FormerlySerializedAs("centerOfMass")]
+        public Transform CenterOfMassPosition;
 
-                Set(centerOfMass.position);
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
+            }
+
+            if (!Utilities.IsValid(Body)) {
+                Error($"{nameof(Body)} not set");
+                return false;
+            }
+
+            if (!Utilities.IsValid(CenterOfMassPosition)) {
+                Error($"{nameof(CenterOfMassPosition)} not set");
+                return false;
+            }
+
+            if (InitOnStart) {
+                UpdateCenterOfMass(CenterOfMassPosition.position);
             }
 
             LogCenterOfMass();
-            enabled = false;
+            return true;
         }
 
-        public override void Start() {
-            base.Start();
-            OnEnable();
-        }
-
-        public void Set(Vector3 worldPosition) {
-            if (!Utilities.IsValid(body)) {
-                Debug.LogError("Invalid Rigidbody", gameObject);
-                return;
+        public bool Set(Vector3 worldPosition) {
+            if (!HasStartedOk) {
+                Error("Not initialized");
+                return false;
             }
 
-            body.centerOfMass = body.transform.InverseTransformPoint(worldPosition);
+            UpdateCenterOfMass(worldPosition);
+            return true;
+        }
+
+
+        #region Internal
+        private void UpdateCenterOfMass(Vector3 worldPosition) {
+            Body.centerOfMass = Body.transform.InverseTransformPoint(worldPosition);
         }
 
         private void LogCenterOfMass() {
-            if (!Utilities.IsValid(body)) {
-                Debug.LogError("Invalid Rigidbody", gameObject);
-                return;
-            }
-
-            Debug.Log($"[{GetType()}.LogTensor] {body.gameObject.name}.centerOfMass = {body.centerOfMass}");
-            Debug.Log($"[{GetType()}.LogTensor] {body.gameObject.name}.worldCenterOfMass = {body.worldCenterOfMass}");
+            DebugLog($"[{GetType()}.LogTensor] {Body.gameObject.name}.centerOfMassPosition = {Body.centerOfMass}");
+            DebugLog($"[{GetType()}.LogTensor] {Body.gameObject.name}.worldCenterOfMass = {Body.worldCenterOfMass}");
         }
+        #endregion
     }
 }

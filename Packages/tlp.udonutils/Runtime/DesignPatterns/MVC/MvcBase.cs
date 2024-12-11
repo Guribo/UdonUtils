@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Events;
+using TLP.UdonUtils.Runtime.Logger;
 using TLP.UdonUtils.Runtime.Player;
 using UnityEngine;
 using VRC.SDKBase;
@@ -11,14 +12,12 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
     [TlpDefaultExecutionOrder(typeof(MvcBase), ExecutionOrder)]
     public abstract class MvcBase : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = PlayerFollowerUi.ExecutionOrder + 100;
 
         public string CriticalError { get; protected set; }
-
-        public bool HasError { get; protected set; }
 
         public static bool InitializeMvcSingleGameObject(GameObject gameObject) {
             if (!Utilities.IsValid(gameObject)) {
@@ -57,12 +56,12 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
             #endregion
 
             if (!Utilities.IsValid(model)) {
-                Debug.LogError($"{nameof(model)} invalid");
+                TlpLogger.StaticError($"{nameof(model)} invalid", null, model);
                 return false;
             }
 
             if (!Utilities.IsValid(view)) {
-                Debug.LogError($"{nameof(view)} invalid");
+                TlpLogger.StaticError($"{nameof(view)} invalid", null, view);
                 return false;
             }
 
@@ -72,7 +71,7 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
             }
 
             if (!Utilities.IsValid(modelChangedEvent)) {
-                Debug.LogError($"{nameof(modelChangedEvent)} invalid");
+                TlpLogger.StaticError($"{nameof(modelChangedEvent)} invalid", null, modelChangedEvent);
                 return false;
             }
 

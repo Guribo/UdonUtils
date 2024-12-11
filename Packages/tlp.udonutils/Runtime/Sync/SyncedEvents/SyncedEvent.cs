@@ -12,7 +12,7 @@ namespace TLP.UdonUtils.Runtime.Sync.SyncedEvents
     public class SyncedEvent : UdonEvent
     {
         #region Executionorder
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = UdonEvent.ExecutionOrder + 1;

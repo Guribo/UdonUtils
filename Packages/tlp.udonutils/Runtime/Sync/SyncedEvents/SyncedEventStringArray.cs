@@ -12,7 +12,7 @@ namespace TLP.UdonUtils.Runtime.Sync.SyncedEvents
     [TlpDefaultExecutionOrder(typeof(SyncedEventStringArray), ExecutionOrder)]
     public class SyncedEventStringArray : SyncedEvent
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = SyncedEventString.ExecutionOrder + 1;

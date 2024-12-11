@@ -21,7 +21,7 @@ namespace TLP.UdonUtils.Runtime.StateMachine
     public class StateMachine : TlpBaseBehaviour
     {
         #region ExecutionOrder
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TlpFactory.ExecutionOrder + 100;

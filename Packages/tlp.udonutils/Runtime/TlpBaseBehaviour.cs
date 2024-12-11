@@ -39,10 +39,10 @@ namespace TLP.UdonUtils.Runtime
     [TlpDefaultExecutionOrder(typeof(TlpBaseBehaviour), ExecutionOrder)]
     public abstract class TlpBaseBehaviour : UdonSharpBehaviour
     {
-        protected virtual int ExecutionOrderReadOnly => ExecutionOrder;
+        public virtual int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public const int ExecutionOrder = TlpExecutionOrder.DefaultStart;
+        public const int ExecutionOrder = TlpExecutionOrder.DefaultStart + 1;
 
         #region Constants
         protected const int False = 0;
@@ -94,8 +94,6 @@ namespace TLP.UdonUtils.Runtime
         #endregion
 
         #region Networking
-
-
         /// <summary>
         /// Can be used to pause any synchronization locally, only works if inheriting scripts
         /// check against this variable in <see cref="OnPreSerialization"/> and <see cref="OnDeserialization"/>!
@@ -247,21 +245,94 @@ namespace TLP.UdonUtils.Runtime
         #endregion
 
         #region Unity Lifecycle
-        public virtual void Start() {
+        #region State
+        #region Start
+        /// <summary>
+        /// Whether Unity has called the Start method
+        /// </summary>
+        public bool IsReceivingStart { private set; get; }
+
+        public bool HasReceivedStart { protected set; get; }
+
+        public bool HasStartedOk
+        {
+            get
+            {
+                if (_hasStartedSuccessfully) return true;
+                if (HasReceivedStart || IsReceivingStart) {
+                    Warn(
+                            $"Accessing {nameof(HasStartedOk)} during {nameof(Start)} or after validation failed");
+                    return false;
+                }
+
+                if (!Utilities.IsValid(Networking.LocalPlayer)) {
+                    Error($"{nameof(HasStartedOk)}: No active {nameof(Networking.LocalPlayer)}");
+                    return false;
+                }
+
+                _isEarlyStart = true;
+                Start();
+                _isEarlyStart = false;
+                return _hasStartedSuccessfully;
+            }
+            set
+            {
+                if (!value) {
+                    HasReceivedStart = false;
+                }
+
+                _hasStartedSuccessfully = value;
+            }
+        }
+
+        private bool _hasStartedSuccessfully;
+        private bool _isEarlyStart;
+        #endregion
+
+
+#if UNITY_INCLUDE_TESTS && !COMPILER_UDONSHARP
+        public bool IsActiveAndEnabled => Utilities.IsValid(this) && enabled;
+#else
+        public bool IsActiveAndEnabled => Utilities.IsValid(this) && enabled && gameObject.activeInHierarchy;
+#endif
+
+        public virtual bool HasFailedToStart => (IsReceivingStart || HasReceivedStart) && !HasStartedOk;
+        #endregion
+
+#if UNITY_EDITOR && !COMPILER_UDONSHARP
+        public void Start() {
+#else
+        internal void Start() {
+#endif
+
+            if (HasReceivedStart) return;
+
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(Start));
-            if (Utilities.IsValid(Networking.LocalPlayer)) {
-                AssertExecutionOrderCorrect();
+            if (!_isEarlyStart) {
+                DebugLog(nameof(Start));
+                if (Utilities.IsValid(Networking.LocalPlayer)) {
+                    AssertExecutionOrderCorrect();
+                }
+            } else {
+                DebugLog($"{nameof(Start)} (early)");
             }
 #endif
             #endregion
 
-            if (!SetupAndValidate()) {
+            IsReceivingStart = true;
+
+            if (SetupAndValidate()) {
+                HasStartedOk = true;
+            } else {
+                HasStartedOk = false;
                 ErrorAndDisableGameObject(
                         $"Some dependencies are not set up correctly. " +
                         $"Deactivating GameObject '{transform.GetPathInScene()}'");
             }
+
+            IsReceivingStart = false;
+            HasReceivedStart = true;
         }
         #endregion
 
@@ -276,7 +347,8 @@ namespace TLP.UdonUtils.Runtime
 #if TLP_DEBUG
             DebugLog(nameof(SetupAndValidate));
 #endif
-#endregion
+            #endregion
+
             if (GetLogger()) {
                 return true;
             }
@@ -440,7 +512,7 @@ namespace TLP.UdonUtils.Runtime
         [PublicAPI]
         public virtual void OnEvent(string eventName) {
 #if TLP_DEBUG
-            DebugLog($"{nameof(OnEvent)} {eventName}");
+            DebugLog_OnEvent(eventName);
 #endif
             Error($"Unhandled event '{eventName}'");
         }
@@ -520,7 +592,7 @@ namespace TLP.UdonUtils.Runtime
             Networking.LocalPlayer.SetPlayerTag(playerTagLastFrameBehaviour, GetUdonTypeName());
         }
 
-        private void ValidateStartOrder( string lastFrameStart, string lastStarted, string lastBehaviour) {
+        private void ValidateStartOrder(string lastFrameStart, string lastStarted, string lastBehaviour) {
             if (string.IsNullOrEmpty(lastFrameStart)) {
                 return;
             }
@@ -542,11 +614,22 @@ namespace TLP.UdonUtils.Runtime
             }
 
             if (lastBehaviour != GetUdonTypeName() && ExecutionOrderReadOnly <= execOrder) {
-                Warn($"Received Start() in incorrect order, previously started script '{lastBehaviour}' in this frame had " +
-                     $"ExecutionOrder {execOrder} while {GetUdonTypeName()} has ExecutionOrder {ExecutionOrderReadOnly}. " +
-                     $"Please add [TlpDefaultExecutionOrder(ExecutionOrder)] to this script or the script that started before this one.");
+                Warn(
+                        $"Received Start() in incorrect order, previously started script '{lastBehaviour}' in this frame had " +
+                        $"ExecutionOrder {execOrder} while {GetUdonTypeName()} has ExecutionOrder {ExecutionOrderReadOnly}. " +
+                        $"Please add [TlpDefaultExecutionOrder(ExecutionOrder)] to this script or the script that started before this one.");
             }
         }
+        #endregion
+
+        #region Debugging
+#if TLP_DEBUG
+
+        protected void DebugLog_OnEvent(string eventName) {
+            DebugLog($"{nameof(OnEvent)}: {eventName} (Instigator: {EventInstigator.GetScriptPathInScene()})");
+        }
+
+#endif
         #endregion
     }
 }

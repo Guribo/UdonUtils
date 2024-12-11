@@ -9,7 +9,7 @@ namespace TLP.UdonUtils.Runtime.Events
     [TlpDefaultExecutionOrder(typeof(AudioEvent), ExecutionOrder)]
     public class AudioEvent : UdonEvent
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TlpExecutionOrder.AudioStart + 1;

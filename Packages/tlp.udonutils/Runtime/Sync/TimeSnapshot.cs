@@ -16,7 +16,7 @@ namespace TLP.UdonUtils.Runtime.Sync
     [TlpDefaultExecutionOrder(typeof(TimeSnapshot), ExecutionOrder)]
     public abstract class TimeSnapshot : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = FrameCountSource.ExecutionOrder + 100;

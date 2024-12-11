@@ -12,7 +12,7 @@ namespace TLP.UdonUtils.Runtime.Player
     [TlpDefaultExecutionOrder(typeof(SyncedPlayerSet), ExecutionOrder)]
     public class SyncedPlayerSet : PlayerSet
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = PlayerSet.ExecutionOrder + 1; // no changes

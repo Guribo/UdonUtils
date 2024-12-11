@@ -17,7 +17,7 @@ namespace TLP.UdonUtils.Runtime.Sync
     [TlpDefaultExecutionOrder(typeof(RoundRobinSynchronizer), ExecutionOrder)]
     public class RoundRobinSynchronizer : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = SyncedEvent.ExecutionOrder + 100;

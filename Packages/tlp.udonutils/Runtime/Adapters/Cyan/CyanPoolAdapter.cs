@@ -17,7 +17,7 @@ namespace TLP.UdonUtils.Runtime.Adapters.Cyan
     [TlpDefaultExecutionOrder(typeof(CyanPoolAdapter), ExecutionOrder)]
     public class CyanPoolAdapter : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = CyanPoolEventListener.ExecutionOrder + 1;

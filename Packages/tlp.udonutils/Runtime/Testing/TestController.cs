@@ -13,7 +13,7 @@ namespace TLP.UdonUtils.Runtime.Testing
     [TlpDefaultExecutionOrder(typeof(TestController), ExecutionOrder)]
     public class TestController : Controller
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TestResult.ExecutionOrder + 1;
@@ -56,12 +56,17 @@ namespace TLP.UdonUtils.Runtime.Testing
         private int _testIndex;
         private bool _pendingNextStep;
 
-        public override void Start() {
-            base.Start();
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
+            }
 
             if (!InitializeMvc(TestData, TestResultsUi, this, TestDataChangeEvent)) {
-                ErrorAndDisableGameObject($"{LogPrefix} {name}.Start: failed to initialize MVC");
+                Error($"{LogPrefix} {name}.Start: failed to initialize MVC");
+                return false;
             }
+
+            return true;
         }
 
         protected override bool InitializeInternal() {

@@ -21,7 +21,7 @@ namespace TLP.UdonUtils.Runtime.Sync
     public abstract class TlpAccurateSyncBehaviour : TlpBaseBehaviour
     {
         #region ExecutionOrder
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TransformRecordingPlayer.ExecutionOrder + 1;

@@ -11,7 +11,7 @@ namespace TLP.UdonUtils.Runtime.Player
     [TlpDefaultExecutionOrder(typeof(PlayerFollower), ExecutionOrder)]
     public class PlayerFollower : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TlpExecutionOrder.PlayerMotionStart + 500;
@@ -26,9 +26,13 @@ namespace TLP.UdonUtils.Runtime.Player
 
         private Vector3 _smoothingVelocity;
 
-        public override void Start() {
-            base.Start();
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
+            }
+
             OwnTransform = transform;
+            return true;
         }
 
         public override void PostLateUpdate() {

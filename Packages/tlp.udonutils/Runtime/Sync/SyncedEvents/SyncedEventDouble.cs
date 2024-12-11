@@ -11,7 +11,7 @@ namespace TLP.UdonUtils.Runtime.Sync.SyncedEvents
     [TlpDefaultExecutionOrder(typeof(SyncedEventDouble), ExecutionOrder)]
     public class SyncedEventDouble : SyncedEvent
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = SyncedEventBool.ExecutionOrder + 1;

@@ -32,7 +32,7 @@ namespace TLP.UdonUtils.Runtime.Player
     public class PlayerSet : SyncedEventIntArray
     {
 
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = SyncedEventUrl.ExecutionOrder + 1;

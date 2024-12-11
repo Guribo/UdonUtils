@@ -11,7 +11,7 @@ namespace TLP.UdonUtils.Runtime.Player
     public class LateBoneFollower : TlpBaseBehaviour
     {
 
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TrackingDataFollower.ExecutionOrder + 1;

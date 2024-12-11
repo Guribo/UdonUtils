@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Text;
+using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Extensions;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
@@ -214,6 +217,36 @@ namespace TLP.UdonUtils.Runtime.Common
 
             return component.transform.GetPathInScene() + "/" +
                    UdonTypeNameShort(component.GetUdonTypeName());
+        }
+
+        /// <param name="t"></param>
+        /// <param name="elementsPerLine">if 0 then there is no linebreaks '\n', if > 0 then there will be a linebreak after the given number of elements</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>string in format '[a, b,...,\nc, d]'</returns>
+        public static string ToReadableString<T>(this T[] t, int elementsPerLine = 0) {
+            var sb = new StringBuilder("[");
+            int length = t.LengthSafe();
+            for (int i = 0; i < length; i++) {
+                sb.Append(t[i]);
+                if (i >= length - 1) {
+                    continue;
+                }
+
+                if (elementsPerLine > 0 && i % elementsPerLine == elementsPerLine - 1) {
+                    sb.Append(",\n");
+                } else {
+                    sb.Append(", ");
+                }
+            }
+
+            sb.Append("]");
+            return sb.ToString();
+        }
+
+        [PublicAPI]
+        public static DateTimeOffset SecondsToLocalTime(double lastSeenUnixTimeStampInSeconds) {
+            var dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds((long)lastSeenUnixTimeStampInSeconds);
+            return TimeZoneInfo.ConvertTime(dateTimeOffset, TimeZoneInfo.Local);
         }
     }
 }

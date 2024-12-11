@@ -9,7 +9,7 @@ namespace TLP.UdonUtils.Runtime.Events
     [TlpDefaultExecutionOrder(typeof(ExampleEventListener), ExecutionOrder)]
     public class ExampleEventListener : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = StateMachine.StateMachineBehaviour.ExecutionOrder + 100;

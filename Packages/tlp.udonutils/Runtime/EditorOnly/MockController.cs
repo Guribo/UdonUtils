@@ -10,7 +10,7 @@ namespace TLP.UdonUtils.Runtime.EditorOnly
     [TlpDefaultExecutionOrder(typeof(MockController), ExecutionOrder)]
     public class MockController : Controller
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = View.ExecutionOrder - 1;
@@ -29,7 +29,7 @@ namespace TLP.UdonUtils.Runtime.EditorOnly
         }
 
         public void SetMockHasError(bool error) {
-            HasError = error;
+            CriticalError = error.ToString();
         }
     }
 }

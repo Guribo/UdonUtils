@@ -16,7 +16,7 @@ namespace TLP.UdonUtils.Runtime.Physics
     [TlpDefaultExecutionOrder(typeof(RigidbodyVelocityProvider), ExecutionOrder)]
     public class RigidbodyVelocityProvider : VelocityProvider
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = FixedUpdateVelocityProvider.ExecutionOrder + 1;

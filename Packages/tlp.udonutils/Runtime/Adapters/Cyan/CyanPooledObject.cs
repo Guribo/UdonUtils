@@ -12,7 +12,7 @@ namespace TLP.UdonUtils.Runtime.Adapters.Cyan
     public abstract class CyanPooledObject : TlpBaseBehaviour
     {
 
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = VehicleMotionEvent.ExecutionOrder + 1;

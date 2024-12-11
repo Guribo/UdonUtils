@@ -13,7 +13,7 @@ namespace TLP.UdonUtils.Runtime.Physics
     [TlpDefaultExecutionOrder(typeof(VelocityProvider), ExecutionOrder)]
     public abstract class VelocityProvider : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         // after everything that can affect locations and physics of objects which should be everything except audio
         [PublicAPI]

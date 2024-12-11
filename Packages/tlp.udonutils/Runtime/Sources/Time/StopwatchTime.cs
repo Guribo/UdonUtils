@@ -15,7 +15,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
     [TlpDefaultExecutionOrder(typeof(StopwatchTime), ExecutionOrder)]
     public class StopwatchTime : TimeSource
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = ConstantTime.ExecutionOrder + 1;

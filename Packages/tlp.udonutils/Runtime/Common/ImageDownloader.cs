@@ -1,7 +1,6 @@
 ﻿using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.DesignPatterns.MVC;
 using TLP.UdonUtils.Runtime.Extensions;
-using TLP.UdonUtils.Runtime.Player;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,10 +15,10 @@ namespace TLP.UdonUtils.Runtime.Common
     [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
     [TlpDefaultExecutionOrder(typeof(ImageDownloader), ExecutionOrder)]
-    public class ImageDownloader : TlpBaseBehaviour
+    public class ImageDownloader : Controller
     {
         #region Executionorder
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = Controller.ExecutionOrder + 1;
@@ -140,7 +139,7 @@ namespace TLP.UdonUtils.Runtime.Common
             _downloadedImages.Clear();
         }
 
-        private void OnDestroy() {
+        protected override void OnDestroy() {
             #region TLP_DEBUG
 #if TLP_DEBUG
             DebugLog(nameof(OnDestroy));
@@ -270,7 +269,6 @@ namespace TLP.UdonUtils.Runtime.Common
             SetFallbackTexture();
         }
         #endregion
-
 
         #region Delayed Events
         public void UpdateProgress() {

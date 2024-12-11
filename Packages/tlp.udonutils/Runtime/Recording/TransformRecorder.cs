@@ -11,7 +11,7 @@ namespace TLP.UdonUtils.Runtime.Recording
     [TlpDefaultExecutionOrder(typeof(TransformRecorder), ExecutionOrder)]
     public class TransformRecorder : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TlpExecutionOrder.RecordingStart + 1;

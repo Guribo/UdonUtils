@@ -13,7 +13,7 @@ namespace TLP.UdonUtils.Runtime.Sources
     [TlpDefaultExecutionOrder(typeof(TimeSource), ExecutionOrder)]
     public abstract class TimeSource : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TimeBacklog.ExecutionOrder + 1;

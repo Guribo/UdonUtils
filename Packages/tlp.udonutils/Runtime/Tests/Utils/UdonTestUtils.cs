@@ -190,7 +190,6 @@ namespace TLP.UdonUtils.Runtime.Tests.Utils
                         break;
                     case VRC_SceneDescriptor.SpawnOrientation.AlignRoomWithSpawnPoint:
                         throw new NotImplementedException();
-                        break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(spawnOrientation), spawnOrientation, null);
                 }

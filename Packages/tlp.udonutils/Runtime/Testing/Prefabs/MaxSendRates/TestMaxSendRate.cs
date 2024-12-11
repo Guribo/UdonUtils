@@ -13,7 +13,7 @@ namespace TLP.UdonUtils.Runtime.Testing
     [TlpDefaultExecutionOrder(typeof(TestMaxSendRate), ExecutionOrder)]
     public class TestMaxSendRate : TestCase
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = NtpAccuracyTester.ExecutionOrder + 1;

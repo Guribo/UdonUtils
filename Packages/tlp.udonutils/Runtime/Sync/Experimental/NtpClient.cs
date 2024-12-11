@@ -30,7 +30,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
     public class NtpClient : CyanPooledObject
     {
         #region ExecutionOrder
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = UtcTimeSource.ExecutionOrder + 1;
@@ -99,6 +99,11 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
 
         public override void OnDeserialization(DeserializationResult deserializationResult) {
             base.OnDeserialization(deserializationResult);
+            if (!HasStartedOk) {
+                Error($"{nameof(OnDeserialization)}: Not initialized");
+                return;
+            }
+
             if (!Networking.IsMaster) {
                 return;
             }
@@ -122,21 +127,32 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         /// <returns>Returns the local time + offset if master
         /// and only the local time if not master</returns>
         public float GetTime() {
-            if (Networking.IsMaster) {
-                return GetAdjustedLocalTime();
+            if (HasStartedOk) {
+                return Networking.IsMaster ? GetAdjustedLocalTime() : TimeSource.Time();
             }
 
-            return TimeSource.Time();
+            Error($"{nameof(GetTime)}: Not initialized");
+            return float.MinValue;
         }
 
         /// <returns>the local time without offset</returns>
         public float GetRawTime() {
-            return TimeSource.Time();
+            if (HasStartedOk) {
+                return TimeSource.Time();
+            }
+
+            Error($"{nameof(GetRawTime)}: Not initialized");
+            return float.MinValue;
         }
 
         /// <returns>the local time + offset</returns>
         public float GetAdjustedLocalTime() {
-            return TimeSource.Time() + ClockOffset;
+            if (HasStartedOk) {
+                return TimeSource.Time() + ClockOffset;
+            }
+
+            Error($"{nameof(GetAdjustedLocalTime)}: Not initialized");
+            return float.MinValue;
         }
 
         public void AdjustRequestTiming() {
@@ -159,6 +175,11 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
                     $"{nameof(responseReceiveTime)}: {responseReceiveTime:F5}");
 #endif
             #endregion
+
+            if (!HasStartedOk) {
+                Error($"{nameof(UpdateOffset)}: Not initialized");
+                return false;
+            }
 
             float ping = GetDelta(WorkingRequestSendTime, requestReceiveTime, responseSendTime, responseReceiveTime);
             if (ping < 0f) {
@@ -188,79 +209,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
             return true;
         }
 
-        private float GetNewAverageClockOffset() {
-            float newAverageOffset = 0f;
-            int maxSamples = ClockOffsetHistory.LengthSafe();
-            int startIndex = ClockOffsetIndex;
-            for (int i = CurrentClockOffsetSamples - 1; i >= 0; i--) {
-                newAverageOffset += ClockOffsetHistory[startIndex] / CurrentClockOffsetSamples;
-                startIndex.MoveIndexLeftLooping(maxSamples);
-            }
-
-            return newAverageOffset;
-        }
-
-        private void SaveOffsetSample(float offset) {
-            int maxSamples = ClockOffsetHistory.LengthSafe();
-            ClockOffsetIndex.MoveIndexRightLooping(maxSamples);
-            ClockOffsetHistory[ClockOffsetIndex] = offset;
-            CurrentClockOffsetSamples = Mathf.Min(maxSamples, CurrentClockOffsetSamples + 1);
-        }
-        #endregion
-
-        #region TlpBase Overrides
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
-                return false;
-            }
-
-            if (!Utilities.IsValid(TimeSource)) {
-                Error($"{nameof(TimeSource)} not set");
-                return false;
-            }
-
-            if (!Utilities.IsValid(Server)) {
-                Error($"{nameof(Server)} not set");
-                return false;
-            }
-
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            if (ClockOffsetSamples < 1) {
-                Error($"{nameof(ClockOffsetSamples)} must be >= 1");
-                return false;
-            }
-
-            ClockOffsetHistory = new float[ClockOffsetSamples];
-
-            return true;
-        }
-
-        public override void OnOwnershipTransferred(VRCPlayerApi player) {
-            base.OnOwnershipTransferred(player);
-            if (Networking.LocalPlayer.IsOwner(gameObject)
-                && (!Utilities.IsValid(Server.OwnNtpClient)
-                    || !Networking.LocalPlayer.IsOwner(Server.OwnNtpClient.gameObject))) {
-                Server.OwnNtpClient = this;
-            }
-
-            PingToMaster = 0f;
-            CurrentClockOffsetSamples = 0;
-            ClockOffsetIndex = 0;
-        }
-        #endregion
-
-        #region Internal
-        internal bool RequestNtpSynchronization() {
-            if (!Networking.IsOwner(Networking.LocalPlayer, gameObject)) {
-                Error("Not Owner");
-                return false;
-            }
-
-            MarkNetworkDirty();
-            RequestSerialization();
-            return true;
-        }
-
+        #region Static
         /// <summary>
         /// Round-Trip Delay: The total time taken for a message to travel from the client to the server and back,
         /// without the duration it takes the server to send its response.
@@ -327,6 +276,85 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
             float requestSendDuration = requestReceiveTime - requestSendTime;
             float responseSendDurationFlipped = responseSendTime - responseReceiveTime;
             offset = 0.5f * (requestSendDuration + responseSendDurationFlipped);
+            return true;
+        }
+        #endregion
+        #endregion
+
+        #region TlpBase Overrides
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
+            }
+
+            if (!Utilities.IsValid(TimeSource)) {
+                Error($"{nameof(TimeSource)} not set");
+                return false;
+            }
+
+            if (!Utilities.IsValid(Server)) {
+                Error($"{nameof(Server)} not set");
+                return false;
+            }
+
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (ClockOffsetSamples < 1) {
+                Error($"{nameof(ClockOffsetSamples)} must be >= 1");
+                return false;
+            }
+
+            ClockOffsetHistory = new float[ClockOffsetSamples];
+
+            return true;
+        }
+
+        public override void OnOwnershipTransferred(VRCPlayerApi player) {
+            base.OnOwnershipTransferred(player);
+            if (!HasStartedOk) {
+                Error($"{nameof(OnOwnershipTransferred)}: Not initialized");
+                return;
+            }
+
+            if (Networking.LocalPlayer.IsOwner(gameObject)
+                && (!Utilities.IsValid(Server.OwnNtpClient)
+                    || !Networking.LocalPlayer.IsOwner(Server.OwnNtpClient.gameObject))) {
+                Server.OwnNtpClient = this;
+            }
+
+            PingToMaster = 0f;
+            CurrentClockOffsetSamples = 0;
+            ClockOffsetIndex = 0;
+        }
+        #endregion
+
+        #region Internal
+        private float GetNewAverageClockOffset() {
+            float newAverageOffset = 0f;
+            int maxSamples = ClockOffsetHistory.LengthSafe();
+            int startIndex = ClockOffsetIndex;
+            for (int i = CurrentClockOffsetSamples - 1; i >= 0; i--) {
+                newAverageOffset += ClockOffsetHistory[startIndex] / CurrentClockOffsetSamples;
+                startIndex.MoveIndexLeftLooping(maxSamples);
+            }
+
+            return newAverageOffset;
+        }
+
+        private void SaveOffsetSample(float offset) {
+            int maxSamples = ClockOffsetHistory.LengthSafe();
+            ClockOffsetIndex.MoveIndexRightLooping(maxSamples);
+            ClockOffsetHistory[ClockOffsetIndex] = offset;
+            CurrentClockOffsetSamples = Mathf.Min(maxSamples, CurrentClockOffsetSamples + 1);
+        }
+
+        internal bool RequestNtpSynchronization() {
+            if (!Networking.IsOwner(Networking.LocalPlayer, gameObject)) {
+                Error("Not Owner");
+                return false;
+            }
+
+            MarkNetworkDirty();
+            RequestSerialization();
             return true;
         }
         #endregion

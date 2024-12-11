@@ -13,7 +13,7 @@ namespace TLP.UdonUtils.Runtime.Player
     [TlpDefaultExecutionOrder(typeof(AutoPlayerRange), ExecutionOrder)]
     public class AutoPlayerRange : TlpBaseBehaviour
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = CustomAudioFalloff.ExecutionOrder + 1;

@@ -1,6 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Events;
+using TLP.UdonUtils.Runtime.Experimental.Tasks;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -12,9 +13,9 @@ namespace TLP.UdonUtils.Runtime.Pool
     [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
     [TlpDefaultExecutionOrder(typeof(Pool), ExecutionOrder)]
-    public class Pool : TlpBaseBehaviour
+    public class Pool : Task
     {
-        protected override int ExecutionOrderReadOnly => ExecutionOrder;
+        public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = ExampleEventListener.ExecutionOrder + 1;
@@ -61,13 +62,31 @@ namespace TLP.UdonUtils.Runtime.Pool
         #endregion
 
         #region Monobehaviour
-        public override void Start() {
-            base.Start();
-            Initialize();
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
+            }
+
+            bool hasPrefab = Utilities.IsValid(PoolInstancePrefab);
+            if (hasPrefab) {
+                UsesRectTransform = Utilities.IsValid(PoolInstancePrefab.GetComponent<RectTransform>());
+            }
+
+            if (InitialInstancesPrePooled <= 0) {
+            } else {
+                _initiallyCreatedIndex = 0;
+
+                if (!TaskScheduler.AddTaskToDefaultScheduler(this, this)) {
+                    Error("Failed to add task to default scheduler");
+                    return false;
+                }
+            }
 
             if (DisableAfterInitialization) {
                 gameObject.SetActive(false);
             }
+
+            return true;
         }
         #endregion
 
@@ -167,29 +186,14 @@ namespace TLP.UdonUtils.Runtime.Pool
         #endregion
 
         #region Internal
-        private void Initialize() {
-            bool hasPrefab = Utilities.IsValid(PoolInstancePrefab);
-            if (hasPrefab) {
-                UsesRectTransform = Utilities.IsValid(PoolInstancePrefab.GetComponent<RectTransform>());
-            }
-
-            if (InitialInstancesPrePooled <= 0) {
-                return;
-            }
-
-            _initiallyCreatedIndex = 0;
-
-            SendCustomEventDelayedFrames(nameof(CreateNextInitialInstance), 1);
-        }
-
-        public void CreateNextInitialInstance() {
+        public TaskResult CreateNextInitialInstance() {
 #if TLP_DEBUG
             DebugLog($"{nameof(CreateNextInitialInstance)} {_initiallyCreatedIndex}");
 #endif
 
             if (!Utilities.IsValid(PoolInstancePrefab)) {
                 Error("Pool can not be prefilled: invalid prefab");
-                return;
+                return TaskResult.Failed;
             }
 
             for (int i = 0;
@@ -199,7 +203,7 @@ namespace TLP.UdonUtils.Runtime.Pool
                 var newInstance = Instantiate(PoolInstancePrefab);
                 if (!Utilities.IsValid(newInstance)) {
                     Error("Failed to create a new instance");
-                    return;
+                    return TaskResult.Failed;
                 }
 
                 var instances = newInstance.gameObject.GetComponents<TlpBaseBehaviour>();
@@ -228,8 +232,9 @@ namespace TLP.UdonUtils.Runtime.Pool
             }
 
             if (_initiallyCreatedIndex < InitialInstancesPrePooled && TotalCreated < InitialInstancesPrePooled) {
-                SendCustomEventDelayedFrames(nameof(CreateNextInitialInstance), 1);
-                return;
+                if (InitialInstancesPrePooled > 0)
+                    SetProgress((float)_initiallyCreatedIndex / InitialInstancesPrePooled);
+                return TaskResult.Unknown;
             }
 
 
@@ -238,6 +243,8 @@ namespace TLP.UdonUtils.Runtime.Pool
             if (LimitToInitiallyCreated) {
                 PoolInstancePrefab = null;
             }
+
+            return TaskResult.Succeeded;
         }
 
 
@@ -321,6 +328,32 @@ namespace TLP.UdonUtils.Runtime.Pool
             behaviour.Pool = this;
             behaviour.PoolableInUse = true;
             behaviour.OnReadyForUse();
+        }
+        #endregion
+
+        #region Event Handling
+        public override void OnEvent(string eventName) {
+            switch (eventName) {
+                case "OnTaskFinished":
+#if TLP_DEBUG
+                    DebugLog_OnEvent(eventName);
+#endif
+                    Info("Pool pre-filling completed");
+                    break;
+                default:
+                    base.OnEvent(eventName);
+                    break;
+            }
+        }
+        #endregion
+
+        #region Task Implementation
+        protected override TaskResult RunStep() {
+            return CreateNextInitialInstance();
+        }
+
+        protected override bool InitTask() {
+            return true;
         }
         #endregion
     }
