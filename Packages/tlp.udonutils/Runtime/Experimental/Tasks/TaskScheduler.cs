@@ -99,6 +99,12 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
 
         public override void PostLateUpdate() {
             base.PostLateUpdate();
+
+            if (PendingTasks.Count < 1) {
+                enabled = false;
+                return;
+            }
+
             float startTime = Time.realtimeSinceStartup;
 
             // reduced PID controller to just "I"

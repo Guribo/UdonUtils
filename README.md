@@ -36,6 +36,12 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [11.0.1] - 2024-12-13
+
+#### 🐛 Bug Fixes
+
+- *(TaskScheduler)* Ensure it turns off without tasks
+
 ### [11.0.0] - 2024-12-11
 
 #### 🚀 Features
@@ -320,18 +326,33 @@ All notable changes to this project will be documented in this file.
 
 ### [3.0.0] - 2024-03-30
 
+#### ⚙️ Miscellaneous Tasks
+
+- Bump version
+
+### [3.0.0-rc.3] - 2024-03-30
+
+#### 🚀 Features
+
+- *(TimeSource)* Add DeltaTime getter, reformat codebase
+
+### [3.0.0-rc.2] - 2024-03-29
+
+#### 🚀 Features
+
+- *(TlpAccurateSyncBehaviour)* Add setup checks to start
+
+### [3.0.0-rc.1] - 2024-03-28
+
 #### 🚀 Features
 
 - [**breaking**] Add time sources
-- *(TlpAccurateSyncBehaviour)* Add setup checks to start
-- *(TimeSource)* Add DeltaTime getter, reformat codebase
 
 #### ⚙️ Miscellaneous Tasks
 
 - Append changelog to readme
 - Prepare release 3.0.0
 - Revert deletion of Testing folder
-- Bump version
 
 ### [2.0.0] - 2023-11-16
 
