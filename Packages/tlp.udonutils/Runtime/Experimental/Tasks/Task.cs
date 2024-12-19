@@ -1,7 +1,4 @@
-﻿using System;
-using JetBrains.Annotations;
-using TLP.UdonUtils.Runtime.Common;
-using TLP.UdonUtils.Runtime.Player;
+﻿using JetBrains.Annotations;
 using UnityEngine;
 using VRC.SDKBase;
 
@@ -9,9 +6,9 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
 {
     public enum TaskState
     {
+        Finished,
         Pending,
-        Running,
-        Finished
+        Running
     }
 
     public enum TaskResult
@@ -30,15 +27,16 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TLP.UdonUtils.Runtime.Pool.Pool.ExecutionOrder + 50;
+        public new const int ExecutionOrder = Runtime.Pool.Pool.ExecutionOrder + 50;
         #endregion
 
-        public TaskState State { get; private set; }
-        public TaskResult Result { get; private set; }
+        public TaskState State { get; private set; } = TaskState.Finished;
+        public TaskResult Result { get; private set; } = TaskResult.Unknown;
 
         internal TaskScheduler DefaultScheduler;
         internal TaskScheduler ActiveScheduler;
         internal TlpBaseBehaviour TaskInstigator;
+
         /// <summary>
         /// In range 0 - 1 (inclusive)
         /// </summary>
@@ -61,7 +59,6 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             Result = TaskResult.Failed;
             State = TaskState.Finished;
             return false;
-
         }
 
         public bool Abort() {
@@ -83,6 +80,7 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                 ActiveScheduler.CancelTask(this);
                 return true;
             }
+
             Error($"{nameof(Abort)}: was not scheduled");
             return false;
         }
@@ -122,6 +120,13 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
 
         #region Internal
         protected void SetProgress(float progress) {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog($"{nameof(SetProgress)}: {nameof(progress)}={progress}");
+#endif
+            #endregion
+
+
             Progress = Mathf.Clamp01(progress);
         }
 

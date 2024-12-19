@@ -36,6 +36,20 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [11.0.2] - 2024-12-19
+
+#### 🐛 Bug Fixes
+
+- *(Pool)* Fix exception when pool object has no UdonSharpBehaviour
+- *(Model)* NotifyIfDirty fails if Model not yet initialized
+- *(Task)* New tasks are in "Finished" state with result "Unknown"
+- *(StateMachine)* Fix null error on invalid state in AllStates
+- *(Model)* Ignore NotifyIfDirty errors if not dirty
+
+#### 🚜 Refactor
+
+- *(Task)* Magic strings to const variables
+
 ### [11.0.1] - 2024-12-13
 
 #### 🐛 Bug Fixes

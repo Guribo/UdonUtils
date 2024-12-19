@@ -22,6 +22,8 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         public new const int ExecutionOrder = TlpExecutionOrder.RecordingEnd - 2;
         #endregion
 
+        public const string FinishedTaskVariableName = "FinishedTask";
+        public const string FinishedTaskCallbackName = "OnTaskFinished";
         public const string GameObjectName = "TLP_TaskScheduler";
         internal readonly DataList PendingTasks = new DataList();
         internal readonly DataDictionary UniqueTasks = new DataDictionary();
@@ -194,8 +196,10 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                         var instigator = (TlpBaseBehaviour)instigatorToken.Reference;
                         if (Utilities.IsValid(instigator)) {
                             instigator.EventInstigator = this;
-                            instigator.OnEvent("OnTaskFinished");
+                            instigator.SetProgramVariable(FinishedTaskVariableName, task);
+                            instigator.OnEvent(FinishedTaskCallbackName);
                             instigator.EventInstigator = null;
+                            instigator.SetProgramVariable(FinishedTaskVariableName, null);
                         } else {
                             Error(
                                     $"{nameof(RemoveTask)}: {nameof(instigator)} invalid, {task.GetScriptPathInScene()} has no owner");

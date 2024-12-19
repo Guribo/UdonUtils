@@ -171,9 +171,14 @@ namespace TLP.UdonUtils.Runtime.StateMachine
                 StateMachineState.enabled = false;
             }
 
+            var newState = AllStates[newStateIndex];
+            if (!Utilities.IsValid(newState)) {
+                Error($"{nameof(OwnerSetNewState)}: {nameof(AllStates)} is null at index {newStateIndex}");
+                return false;
+            }
+
             LocalStateIndex = newStateIndex;
             WorkingStateIndex = newStateIndex;
-            var newState = AllStates[newStateIndex];
             StateMachineState = newState;
             newState.enabled = true;
             return true;

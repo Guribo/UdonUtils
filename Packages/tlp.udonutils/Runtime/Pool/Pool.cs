@@ -1,12 +1,16 @@
-﻿using System;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Events;
 using TLP.UdonUtils.Runtime.Experimental.Tasks;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
 using VRC.SDKBase;
+
+#if !COMPILER_UDONSHARP && UNITY_EDITOR
+#else
 using VRC.Udon;
+#endif
 
 namespace TLP.UdonUtils.Runtime.Pool
 {
@@ -159,7 +163,8 @@ namespace TLP.UdonUtils.Runtime.Pool
 #endif
 
             if (!Utilities.IsValid(instance)) {
-                Warn($"{toReturn.name} has no UdonSharpBehaviour attached and will thus not be de-initialized");
+                Warn(
+                        $"{toReturn.transform.GetPathInScene()} has no UdonSharpBehaviour attached and will thus not be de-initialized");
             } else {
                 instance.SendCustomEvent(nameof(OnPrepareForReturnToPool));
             }
@@ -170,7 +175,9 @@ namespace TLP.UdonUtils.Runtime.Pool
                 toReturn.transform.parent = transform;
             }
 
-            instance.SetProgramVariable(nameof(PoolableInUse), false);
+            if (Utilities.IsValid(instance)) {
+                instance.SetProgramVariable(nameof(PoolableInUse), false);
+            }
 
             Pooled++;
         }

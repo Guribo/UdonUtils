@@ -128,13 +128,18 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 #endif
             #endregion
 
-            if (!HasStartedOk) {
+            if (!Dirty) {
+                return true;
+            }
+
+            if (!IsReceivingStart && !HasStartedOk) {
                 Error($"{nameof(NotifyIfDirty)}: Not initialized");
                 return false;
             }
 
-            if (!Dirty) {
-                return true;
+            if (!IsModelInitialized) {
+                Error($"{nameof(NotifyIfDirty)}: Model not initialized");
+                return false;
             }
 
             if (!Utilities.IsValid(ChangeEvent)) {
