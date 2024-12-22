@@ -1,6 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Common;
+using TLP.UdonUtils.Runtime.Experimental.Tasks;
 using TLP.UdonUtils.Runtime.Extensions;
 using UdonSharp;
 using UnityEngine;
@@ -13,7 +14,7 @@ namespace TLP.UdonUtils.Runtime.Events
     [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
     [TlpDefaultExecutionOrder(typeof(UdonEvent), ExecutionOrder)]
-    public class UdonEvent : TlpBaseBehaviour
+    public class UdonEvent : Task
     {
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
@@ -29,6 +30,20 @@ namespace TLP.UdonUtils.Runtime.Events
         public bool RaiseOnEnable;
         public bool RaiseOnStart;
 
+        [Tooltip(
+                "When enabled this UdonEvent is notifying listeners in the background. " +
+                "Note that listeners don't always receive the event during the same frame in this case! " +
+                "Use when you have a lot of listeners that are independent of each other and don't require instant " +
+                "notification to prevent hitching.")]
+        public bool NotifyAsync;
+
+        [Tooltip(
+                "Always append the event, if true each listener will receive n events for n calls to Raise()." +
+                "If false and there is already an async event pending but no listener has been notified yet, no new event is added to the queue." +
+                "If false and there is already an async event pending and at least one listener has been notified, up to one event is added to the queue.")]
+        [PublicAPI]
+        public bool UseAsyncEventQueue;
+
         [Tooltip("Name of the method to be called on each listener")]
         [PublicAPI]
         public string ListenerMethod = "OnRaised";
@@ -41,6 +56,12 @@ namespace TLP.UdonUtils.Runtime.Events
 
         private int _nextInvocationFrame;
         internal TlpBaseBehaviour _instigator;
+        internal readonly DataList InstigatorQueue = new DataList();
+
+        #region State
+        private TlpBaseBehaviour _currentAsyncInstigator;
+        private int _listenerIndex;
+        #endregion
 
         #region Unity Lifecycle
         public virtual void OnEnable() {
@@ -114,7 +135,7 @@ namespace TLP.UdonUtils.Runtime.Events
         public virtual bool Raise(TlpBaseBehaviour instigator) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(Raise)} '{ListenerMethod}'");
+            DebugLog($"{nameof(Raise)} '{ListenerMethod}' for instigator={instigator.GetScriptPathInScene()}");
 #endif
             #endregion
 
@@ -128,8 +149,35 @@ namespace TLP.UdonUtils.Runtime.Events
                 return false;
             }
 
+
             _instigator = instigator;
             IsPendingInvocation = false;
+
+
+            if (NotifyAsync) {
+                bool canAddWithoutQueueing = State != TaskState.Running && InstigatorQueue.Count == 0;
+                bool raisingCurrentlyWithoutAdditionalQueued = State == TaskState.Running && InstigatorQueue.Count == 0;
+                if (UseAsyncEventQueue
+                    || canAddWithoutQueueing
+                    || raisingCurrentlyWithoutAdditionalQueued) {
+                    InstigatorQueue.Add(instigator);
+                } else {
+                    #region TLP_DEBUG
+#if TLP_DEBUG
+                    Warn(
+                            $"{nameof(Raise)}: not adding {nameof(instigator)}={instigator.GetScriptPathInScene()} as " +
+                            $"queue is already full");
+#endif
+                    #endregion
+                }
+
+                if (TryScheduleTask(this)) {
+                    return true;
+                }
+
+                Error($"{nameof(Raise)}: failed to schedule");
+                return false;
+            }
 
             foreach (var listener in Listeners) {
                 if (!Utilities.IsValid(listener)) {
@@ -300,6 +348,95 @@ namespace TLP.UdonUtils.Runtime.Events
 
         [PublicAPI]
         public int NextInvocationFrame => IsPendingInvocation ? _nextInvocationFrame : InvalidInvocationFrame;
+        #endregion
+
+
+        #region Overrides
+        public override void OnEvent(string eventName) {
+            switch (eventName) {
+                case TaskScheduler.FinishedTaskCallbackName:
+
+                    #region TLP_DEBUG
+#if TLP_DEBUG
+                    DebugLog_OnEvent(eventName);
+#endif
+                    #endregion
+
+                    break;
+                default:
+                    base.OnEvent(eventName);
+                    break;
+            }
+        }
+        #endregion
+
+        #region Task Implementation
+        protected override bool InitTask() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(InitTask));
+#endif
+            #endregion
+
+            _currentAsyncInstigator = null;
+            _listenerIndex = 0;
+            return true;
+        }
+
+        protected override TaskResult RunStep() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(RunStep));
+#endif
+            #endregion
+
+            if (!Utilities.IsValid(_currentAsyncInstigator)
+                || _listenerIndex < 1
+                || _listenerIndex >= ListenerCount) {
+                if (InstigatorQueue.Count < 1) {
+                    return TaskResult.Succeeded;
+                }
+
+                _listenerIndex = 0;
+                var first = InstigatorQueue[0];
+                InstigatorQueue.RemoveAt(0);
+                if (first.IsNull) {
+                    Warn($"{nameof(RunStep)}: discarding invalid first {nameof(InstigatorQueue)} entry");
+                    return TaskResult.Unknown; // skip null entry
+                }
+
+                _currentAsyncInstigator = (TlpBaseBehaviour)first.Reference;
+                if (!Utilities.IsValid(_currentAsyncInstigator)) {
+                    Warn(
+                            $"{nameof(RunStep)}: first {nameof(InstigatorQueue)} entry is not a {nameof(TlpBaseBehaviour)}");
+                    return TaskResult.Unknown; // skip invalid entry
+                }
+            }
+
+            if (ListenerCount < 1) {
+                InstigatorQueue.Clear();
+                return TaskResult.Succeeded;
+            }
+
+            var listener = Listeners[_listenerIndex];
+            if (!Utilities.IsValid(listener)) {
+                Warn($"{nameof(RunStep)}: Listener at position {_listenerIndex} is not valid");
+                ++_listenerIndex;
+                return TaskResult.Unknown;
+            }
+
+            listener.EventInstigator = _currentAsyncInstigator;
+            if (listener.HasStartedOk) {
+                listener.OnEvent(ListenerMethod);
+            } else {
+                Warn($"{nameof(RunStep)}: Listener {listener.GetScriptPathInScene()} is not ready, skipping");
+            }
+
+            listener.EventInstigator = null;
+
+            ++_listenerIndex;
+            return TaskResult.Unknown;
+        }
         #endregion
 
         #region Internal

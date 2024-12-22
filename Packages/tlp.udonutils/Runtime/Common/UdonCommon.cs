@@ -5,6 +5,7 @@ using TLP.UdonUtils.Runtime.Extensions;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
+using VRC.SDK3.Persistence;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Common
@@ -144,6 +145,7 @@ namespace TLP.UdonUtils.Runtime.Common
         }
 
         public static string UdonTypeNameShort(string udonTypeName) {
+            if (string.IsNullOrEmpty(udonTypeName)) return "";
             string[] productTypeName = udonTypeName.Split('.');
             return productTypeName.Length > 0 ? productTypeName[productTypeName.Length - 1] : udonTypeName;
         }
@@ -213,10 +215,11 @@ namespace TLP.UdonUtils.Runtime.Common
         /// <returns>The path from the scene root to the script provided,
         /// returns an empty string if the provided component is invalid</returns>
         public static string GetScriptPathInScene(this UdonSharpBehaviour component) {
-            if (!Utilities.IsValid(component)) return "";
+            if (!Utilities.IsValid(component)) {
+                return "";
+            }
 
-            return component.transform.GetPathInScene() + "/" +
-                   UdonTypeNameShort(component.GetUdonTypeName());
+            return $"{component.transform.GetPathInScene()}/{UdonTypeNameShort(component.GetUdonTypeName())}";
         }
 
         /// <param name="t"></param>
@@ -225,6 +228,7 @@ namespace TLP.UdonUtils.Runtime.Common
         /// <returns>string in format '[a, b,...,\nc, d]'</returns>
         public static string ToReadableString<T>(this T[] t, int elementsPerLine = 0) {
             var sb = new StringBuilder("[");
+
             int length = t.LengthSafe();
             for (int i = 0; i < length; i++) {
                 sb.Append(t[i]);
@@ -242,6 +246,36 @@ namespace TLP.UdonUtils.Runtime.Common
             sb.Append("]");
             return sb.ToString();
         }
+
+        /// <summary>
+        /// <see cref="ToReadableString{T}"/>
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="elementsPerLine"></param>
+        /// <returns>[keyA: stateA, keyB: stateB,...,\nkeyC: stateC, ...]</returns>
+        public static string PlayerDataInfosToReadableString(this PlayerData.Info[] t, int elementsPerLine = 0) {
+            var sb = new StringBuilder("[");
+
+            int length = t.LengthSafe();
+            for (int i = 0; i < length; i++) {
+                var info = t[i];
+                sb.Append(info.Key).Append(": ").Append(info.State);
+                if (i >= length - 1) {
+                    continue;
+                }
+
+                if (elementsPerLine > 0 && i % elementsPerLine == elementsPerLine - 1) {
+                    sb.Append(",\n");
+                } else {
+                    sb.Append(", ");
+                }
+            }
+
+            sb.Append("]");
+            return sb.ToString();
+        }
+
+
 
         [PublicAPI]
         public static DateTimeOffset SecondsToLocalTime(double lastSeenUnixTimeStampInSeconds) {

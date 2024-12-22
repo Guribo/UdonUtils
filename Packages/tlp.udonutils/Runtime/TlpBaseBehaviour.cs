@@ -306,7 +306,7 @@ namespace TLP.UdonUtils.Runtime
 #endif
 
             if (HasReceivedStart) return;
-
+            IsReceivingStart = true;
             #region TLP_DEBUG
 #if TLP_DEBUG
             if (!_isEarlyStart) {
@@ -319,8 +319,6 @@ namespace TLP.UdonUtils.Runtime
             }
 #endif
             #endregion
-
-            IsReceivingStart = true;
 
             if (SetupAndValidate()) {
                 HasStartedOk = true;

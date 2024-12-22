@@ -101,6 +101,7 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             switch (State) {
                 case TaskState.Pending:
                     State = TaskState.Running;
+                    RunNextStep();
                     break;
                 case TaskState.Running:
                     RunNextStep();
@@ -179,5 +180,26 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         protected abstract TaskResult RunStep();
 
         protected abstract bool InitTask();
+
+        #region Public API
+        public bool TryScheduleTask(TlpBaseBehaviour instigator) {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(TryScheduleTask));
+#endif
+            #endregion
+
+            if (State != TaskState.Finished) {
+                return true;
+            }
+
+            if (TaskScheduler.AddTaskToDefaultScheduler(instigator, this)) {
+                return true;
+            }
+
+            Error($"{nameof(TryScheduleTask)}: Can't add task to default scheduler");
+            return false;
+        }
+        #endregion
     }
 }

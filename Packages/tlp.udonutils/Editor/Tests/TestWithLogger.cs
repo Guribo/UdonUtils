@@ -5,8 +5,9 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using NUnit.Framework;
-using TLP.UdonUtils.Runtime;
 using TLP.UdonUtils.Runtime.Logger;
+using TLP.UdonUtils.Runtime.Sources.FrameCount;
+using TLP.UdonUtils.Runtime.Sources.Time;
 using TLP.UdonUtils.Runtime.Tests.Utils;
 using UnityEditor;
 using UnityEngine;
@@ -48,6 +49,9 @@ namespace TLP.UdonUtils.Editor.Tests
             TlpLogger = new GameObject(TlpLogger.ExpectedGameObjectName()).AddComponent<TlpLogger>();
             Debug.Log($"Created {TlpLogger.ExpectedGameObjectName()}: {TlpLogger == true}");
             TlpLogger.Severity = ELogLevel.Warning;
+            TlpLogger.TimeSource = new GameObject(nameof(ConstantTime)).AddComponent<ConstantTime>();
+            TlpLogger.FrameCount = new GameObject(nameof(ConstantFrameCount)).AddComponent<ConstantFrameCount>();
+            TlpLogger.OnEnable();
 
             UdonTestEnvironment = new UdonTestUtils.UdonTestEnvironment();
             LocalPlayer = UdonTestEnvironment.CreatePlayer();

@@ -36,6 +36,26 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [11.1.0] - 2024-12-22
+
+#### 🚀 Features
+
+- *(EditorUtils)* Move ClearLog, add RecompileAll function with hotkey Ctrl+Shift+R
+- *(UdonCommon)* Add PlayerDataInfosToReadableString function
+- *(Task)* Add TryScheduleTask method to easily schedule a task for execution with the default TaskScheduler
+
+#### 🐛 Bug Fixes
+
+- *(TlpLogger)* Fix whitelisting not working as intended
+
+#### ⚡ Performance
+
+- *(UdonEvent)* Add support to optionally notify listeners in the background for reduced hitching
+
+#### 🧪 Testing
+
+- *(TestWithLogger)* Fix missing time sources
+
 ### [11.0.2] - 2024-12-19
 
 #### 🐛 Bug Fixes

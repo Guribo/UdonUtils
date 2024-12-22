@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Common;
+using TLP.UdonUtils.Runtime.Extensions;
 using TLP.UdonUtils.Runtime.Sources;
 using UdonSharp;
 using UnityEngine;
@@ -79,17 +80,11 @@ namespace TLP.UdonUtils.Runtime.Logger
         public void OnEnable() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(Prefix, nameof(OnEnable), ExecutionOrder, this);
+            Debug.Log(nameof(OnEnable), this);
 #endif
             #endregion
 
-            string expectedName = ExpectedGameObjectName();
-            if (gameObject.name == expectedName) {
-                return;
-            }
-
-            Warn(Prefix, $"Changing name of GameObject '{transform.GetPathInScene()}' to '{expectedName}'", this);
-            gameObject.name = expectedName;
+            Start();
         }
 
         public void Update() {
@@ -146,6 +141,10 @@ namespace TLP.UdonUtils.Runtime.Logger
                 return;
             }
 
+            if (!HasReceivedStart && !IsReceivingStart) {
+                Start();
+            }
+
             if (!AllowedToLog(context)) return;
 
             string completeMessage;
@@ -175,6 +174,10 @@ namespace TLP.UdonUtils.Runtime.Logger
                 return;
             }
 
+            if (!HasReceivedStart && !IsReceivingStart) {
+                Start();
+            }
+
             if (!AllowedToLog(context)) return;
             Debug.Log(
                     DetailedContextInfo
@@ -186,6 +189,10 @@ namespace TLP.UdonUtils.Runtime.Logger
         public virtual void Warn(string logPrefix, string message, Object context) {
             if ((int)Severity < (int)ELogLevel.Warning) {
                 return;
+            }
+
+            if (!HasReceivedStart && !IsReceivingStart) {
+                Start();
             }
 
             if (!AllowedToLog(context)) return;
@@ -200,6 +207,10 @@ namespace TLP.UdonUtils.Runtime.Logger
         public virtual void Error(string logPrefix, string message, Object context) {
             if ((int)Severity < (int)ELogLevel.Assertion) {
                 return;
+            }
+
+            if (!HasReceivedStart && !IsReceivingStart) {
+                Start();
             }
 
             if (!AllowedToLog(context)) return;
@@ -217,14 +228,26 @@ namespace TLP.UdonUtils.Runtime.Logger
         }
 
         protected override bool SetupAndValidate() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            Debug.Log(nameof(SetupAndValidate), this);
+#endif
+            #endregion
+
             if (!Utilities.IsValid(TimeSource)) {
-                Error($"{nameof(TimeSource)} is not set");
+                Debug.LogError($"{nameof(SetupAndValidate)}: {nameof(TimeSource)} not set", this);
                 return false;
             }
 
             if (!Utilities.IsValid(FrameCount)) {
-                Error($"{nameof(FrameCount)} is not set");
+                Debug.LogError($"{nameof(SetupAndValidate)}: {nameof(FrameCount)} not set", this);
                 return false;
+            }
+
+            string expectedName = ExpectedGameObjectName();
+            if (gameObject.name != expectedName) {
+                Warn(Prefix, $"Changing name of GameObject '{transform.GetPathInScene()}' to '{expectedName}'", this);
+                gameObject.name = expectedName;
             }
 
             if (!base.SetupAndValidate()) {
@@ -241,13 +264,13 @@ namespace TLP.UdonUtils.Runtime.Logger
 
         #region Internal
         private void UpdateBlackAndWhiteListLookup() {
-            if (WhiteList != null) {
+            if (WhiteList.LengthSafe() > RuntimeWhiteList.Count) {
                 foreach (var udonSharpBehaviour in WhiteList) {
                     RuntimeWhiteList[udonSharpBehaviour] = true;
                 }
             }
 
-            if (BlackList != null) {
+            if (BlackList.LengthSafe() > RuntimeBlackList.Count) {
                 foreach (var udonSharpBehaviour in BlackList) {
                     RuntimeBlackList[udonSharpBehaviour] = true;
                 }
