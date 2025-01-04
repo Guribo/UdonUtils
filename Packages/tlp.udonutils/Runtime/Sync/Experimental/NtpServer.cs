@@ -24,7 +24,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     [DefaultExecutionOrder(ExecutionOrder)]
     [TlpDefaultExecutionOrder(typeof(NtpServer), ExecutionOrder)]
-    public class NtpServer : CyanPoolEventListener
+    public class NtpServer : TlpBaseBehaviour
     {
         #region ExecutionOrder
         public override int ExecutionOrderReadOnly => ExecutionOrder;
@@ -264,38 +264,6 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
             }
         }
         #endregion
-
-        #region CyanPoolEventListener Overrides
-        public override void _OnLocalPlayerAssigned() {
-            base._OnLocalPlayerAssigned();
-            if (!Utilities.IsValid(playerAssignedPoolObject)) {
-                Error($"CyanPlayerObjectPool did not provide a valid {nameof(playerAssignedPoolObject)}");
-                return;
-            }
-
-            var instance = playerAssignedPoolObject.gameObject;
-            var ownNtpClient = instance.GetComponent<NtpClient>();
-            if (!Utilities.IsValid(ownNtpClient)) {
-                Error(
-                        $"Failed to get {nameof(NtpClient)} from {nameof(playerAssignedPoolObject)} {instance.transform.GetPathInScene()}");
-                return;
-            }
-
-            if (!Networking.IsOwner(Networking.LocalPlayer, ownNtpClient.gameObject)) {
-                Error($"Assigned {nameof(NtpClient)} is not owned by local player");
-                return;
-            }
-
-            OwnNtpClient = ownNtpClient;
-            if (!Utilities.IsValid(NtpTime)) {
-                Error($"{nameof(NtpTime)} not set");
-                return;
-            }
-
-            NtpTime.NtpClient = OwnNtpClient;
-        }
-        #endregion
-
 
         #region Internal
         private int RetrieveLocalPlayerResponseData(out float requestReceiveTime) {

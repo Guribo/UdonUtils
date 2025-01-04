@@ -28,7 +28,24 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
         /// </summary>
         public bool IsModelInitialized { get; private set; }
 
-        public virtual bool Dirty { get; set; }
+        public virtual bool Dirty
+        {
+            get { return _dirty; }
+            set
+            {
+                #region TLP_DEBUG
+#if TLP_DEBUG
+                DebugLog($"{nameof(Dirty)}: {nameof(_dirty)}={value}");
+#endif
+                #endregion
+
+
+                _dirty = value;
+            }
+        }
+
+        private bool _dirty;
+
         public UdonEvent ChangeEvent { get; private set; }
         #endregion
 
@@ -49,7 +66,8 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
             }
 
             if (!string.IsNullOrEmpty(CriticalError)) {
-                Error($"{nameof(Initialize)}: Can not initialize again due to previous critical error: '{CriticalError}'");
+                Error($"{nameof(Initialize)}: Can not initialize again due to previous critical error: " +
+                      $"'{CriticalError}'");
                 return false;
             }
 
@@ -67,7 +85,8 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
             ChangeEvent = changeEvent;
             ChangeEvent.ListenerMethod = OnModelChangedCallbackName;
             if (!ChangeEvent.AddListenerVerified(this, OnModelChangedCallbackName)) {
-                Error($"{nameof(Initialize)}: Adding to {nameof(ChangeEvent)} with callback '{OnModelChangedCallbackName}' failed");
+                Error($"{nameof(Initialize)}: Adding to {nameof(ChangeEvent)} with callback " +
+                      $"'{OnModelChangedCallbackName}' failed");
                 return false;
             }
 
@@ -149,7 +168,8 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 
             if (delayFrames < 1) {
                 if (!ChangeEvent.Raise(this)) {
-                    Error($"{nameof(NotifyIfDirty)}: Failed to raise {nameof(ChangeEvent)} '{ChangeEvent.ListenerMethod}'");
+                    Error(
+                            $"{nameof(NotifyIfDirty)}: Failed to raise {nameof(ChangeEvent)} '{ChangeEvent.ListenerMethod}'");
                     return false;
                 }
 

@@ -3,9 +3,9 @@ using TLP.UdonUtils.Runtime.Adapters.Cyan;
 using TLP.UdonUtils.Runtime.Extensions;
 using TLP.UdonUtils.Runtime.Sources;
 using TLP.UdonUtils.Runtime.Sources.Time;
-using TLP.UdonUtils.Runtime.Sources.Time.Experimental;
 using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.Components;
 using VRC.SDKBase;
 using VRC.Udon.Common;
 
@@ -24,10 +24,11 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
     ///  - differences in framerate on the client and the master player shift the offset due to asymmetry in travel times
     ///    Example: if the client has 10fps and the master 100fps the offset is off by 40-45 milliseconds
     /// </summary>
+    [RequireComponent(typeof(VRCPlayerObject))]
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     [DefaultExecutionOrder(ExecutionOrder)]
     [TlpDefaultExecutionOrder(typeof(NtpClient), ExecutionOrder)]
-    public class NtpClient : CyanPooledObject
+    public class NtpClient : TlpBaseBehaviour
     {
         #region ExecutionOrder
         public override int ExecutionOrderReadOnly => ExecutionOrder;
@@ -288,12 +289,17 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
             }
 
             if (!Utilities.IsValid(TimeSource)) {
-                Error($"{nameof(TimeSource)} not set");
+                Error($"{nameof(SetupAndValidate)}: {nameof(TimeSource)} not set");
                 return false;
             }
 
             if (!Utilities.IsValid(Server)) {
-                Error($"{nameof(Server)} not set");
+                Error($"{nameof(SetupAndValidate)}: {nameof(Server)} not set");
+                return false;
+            }
+
+            if (!Utilities.IsValid(Server.NtpTime)) {
+                Error($"{nameof(SetupAndValidate)}: {nameof(Server)}.{nameof(Server.NtpTime)} not set");
                 return false;
             }
 
@@ -304,27 +310,14 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
             }
 
             ClockOffsetHistory = new float[ClockOffsetSamples];
+            Server.OwnNtpClient = Networking.IsOwner(gameObject) ? this : Server.OwnNtpClient;
+            Server.NtpTime.NtpClient = Server.OwnNtpClient;
+            Server.enabled = true;
+            Server.NtpTime.enabled = true;
 
             return true;
         }
 
-        public override void OnOwnershipTransferred(VRCPlayerApi player) {
-            base.OnOwnershipTransferred(player);
-            if (!HasStartedOk) {
-                Error($"{nameof(OnOwnershipTransferred)}: Not initialized");
-                return;
-            }
-
-            if (Networking.LocalPlayer.IsOwner(gameObject)
-                && (!Utilities.IsValid(Server.OwnNtpClient)
-                    || !Networking.LocalPlayer.IsOwner(Server.OwnNtpClient.gameObject))) {
-                Server.OwnNtpClient = this;
-            }
-
-            PingToMaster = 0f;
-            CurrentClockOffsetSamples = 0;
-            ClockOffsetIndex = 0;
-        }
         #endregion
 
         #region Internal

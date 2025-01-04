@@ -63,6 +63,32 @@ namespace TLP.UdonUtils.Runtime.Events
         private int _listenerIndex;
         #endregion
 
+        #region Overrides
+        protected override bool SetupAndValidate() {
+            if (!base.SetupAndValidate()) {
+                return false;
+            }
+
+            return !RaiseOnStart || Raise(this);
+        }
+
+        public override void OnEvent(string eventName) {
+            switch (eventName) {
+                case TaskScheduler.FinishedTaskCallbackName:
+                    #region TLP_DEBUG
+#if TLP_DEBUG
+                    DebugLog_OnEvent(eventName);
+#endif
+                    #endregion
+                    // to prevent a not implemented error
+                    break;
+                default:
+                    base.OnEvent(eventName);
+                    break;
+            }
+        }
+        #endregion
+
         #region Unity Lifecycle
         public virtual void OnEnable() {
             #region TLP_DEBUG
@@ -74,14 +100,6 @@ namespace TLP.UdonUtils.Runtime.Events
             if (RaiseOnEnable) {
                 Raise(this);
             }
-        }
-
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
-                return false;
-            }
-
-            return !RaiseOnStart || Raise(this);
         }
         #endregion
 
@@ -350,26 +368,6 @@ namespace TLP.UdonUtils.Runtime.Events
         public int NextInvocationFrame => IsPendingInvocation ? _nextInvocationFrame : InvalidInvocationFrame;
         #endregion
 
-
-        #region Overrides
-        public override void OnEvent(string eventName) {
-            switch (eventName) {
-                case TaskScheduler.FinishedTaskCallbackName:
-
-                    #region TLP_DEBUG
-#if TLP_DEBUG
-                    DebugLog_OnEvent(eventName);
-#endif
-                    #endregion
-
-                    break;
-                default:
-                    base.OnEvent(eventName);
-                    break;
-            }
-        }
-        #endregion
-
         #region Task Implementation
         protected override bool InitTask() {
             #region TLP_DEBUG
@@ -436,6 +434,10 @@ namespace TLP.UdonUtils.Runtime.Events
 
             ++_listenerIndex;
             return TaskResult.Unknown;
+        }
+
+        public override int GetNeededSteps() {
+            return ListenerCount;
         }
         #endregion
 

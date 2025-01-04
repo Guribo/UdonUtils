@@ -56,6 +56,7 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 8442621920608039117}
   AutoRetrySendOnFailure: 1
+  PauseSynchronization: 0
   Severity: 5
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
@@ -144,12 +145,14 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 2034953056858183420}
   AutoRetrySendOnFailure: 1
+  PauseSynchronization: 0
   Severity: 5
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
   PoolableInUse: 0
   FactoryKey: PooledUiEvent
   Prototype: {fileID: 4318829638541586288}
+  PoolFactory: {fileID: 0}
   OptionalDefaultPool: {fileID: 1211004798167009764}
 --- !u!114 &2034953056858183420
 MonoBehaviour:
@@ -233,12 +236,14 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 6680917344601875742}
   AutoRetrySendOnFailure: 1
+  PauseSynchronization: 0
   Severity: 5
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
   PoolableInUse: 0
   FactoryKey: PooledUdonEvent
   Prototype: {fileID: 6111743903023207932}
+  PoolFactory: {fileID: 4789317624309829163}
   OptionalDefaultPool: {fileID: 0}
 --- !u!114 &6680917344601875742
 MonoBehaviour:
@@ -322,16 +327,18 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 8517789185665686756}
   AutoRetrySendOnFailure: 1
+  PauseSynchronization: 0
   Severity: 5
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
   PoolableInUse: 0
+  DefaultScheduler: {fileID: 0}
   AttachToParent: 1
   PoolInstancePrefab: {fileID: 0}
   ActivateInstances: 0
   LimitToInitiallyCreated: 0
   InitialInstancesPrePooled: 100
-  InitializationsPerFrame: 10
+  InitializationsPerFrame: 1
   UsesRectTransform: 0
   DisableAfterInitialization: 1
 --- !u!114 &8517789185665686756
@@ -416,12 +423,14 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 2733705685471984802}
   AutoRetrySendOnFailure: 1
+  PauseSynchronization: 0
   Severity: 5
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
   PoolableInUse: 0
   FactoryKey: Pool
   Prototype: {fileID: 7845974241377174339}
+  PoolFactory: {fileID: 0}
   OptionalDefaultPool: {fileID: 1446967263821615308}
 --- !u!114 &2733705685471984802
 MonoBehaviour:
@@ -505,6 +514,7 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 7709440491862845515}
   AutoRetrySendOnFailure: 1
+  PauseSynchronization: 0
   Severity: 5
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
@@ -593,16 +603,18 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 129533002685464714}
   AutoRetrySendOnFailure: 1
+  PauseSynchronization: 0
   Severity: 5
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
   PoolableInUse: 0
+  DefaultScheduler: {fileID: 0}
   AttachToParent: 1
   PoolInstancePrefab: {fileID: 4571074995838135788}
   ActivateInstances: 1
   LimitToInitiallyCreated: 0
   InitialInstancesPrePooled: 100
-  InitializationsPerFrame: 10
+  InitializationsPerFrame: 1
   UsesRectTransform: 0
   DisableAfterInitialization: 1
 --- !u!114 &129533002685464714
@@ -687,13 +699,17 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 792842121549597599}
   AutoRetrySendOnFailure: 1
+  PauseSynchronization: 0
   Severity: 5
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
   PoolableInUse: 0
+  DefaultScheduler: {fileID: 0}
   Listeners: []
   RaiseOnEnable: 0
   RaiseOnStart: 0
+  NotifyAsync: 0
+  UseAsyncEventQueue: 0
   ListenerMethod: OnRaised
 --- !u!114 &792842121549597599
 MonoBehaviour:
@@ -813,16 +829,18 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 730307980033143923}
   AutoRetrySendOnFailure: 1
+  PauseSynchronization: 0
   Severity: 5
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
   PoolableInUse: 0
+  DefaultScheduler: {fileID: 0}
   AttachToParent: 1
   PoolInstancePrefab: {fileID: 2178381853371279503}
   ActivateInstances: 1
   LimitToInitiallyCreated: 0
   InitialInstancesPrePooled: 0
-  InitializationsPerFrame: 10
+  InitializationsPerFrame: 1
   UsesRectTransform: 0
   DisableAfterInitialization: 1
 --- !u!114 &730307980033143923
@@ -907,13 +925,17 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 2745460632760422581}
   AutoRetrySendOnFailure: 1
+  PauseSynchronization: 0
   Severity: 5
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
   PoolableInUse: 0
+  DefaultScheduler: {fileID: 0}
   Listeners: []
   RaiseOnEnable: 0
   RaiseOnStart: 0
+  NotifyAsync: 0
+  UseAsyncEventQueue: 0
   ListenerMethod: OnRaised
 --- !u!114 &2745460632760422581
 MonoBehaviour:

@@ -36,6 +36,30 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [11.2.0] - 2025-01-04
+
+#### 🚀 Features
+
+- *(Task)* Expose DefaultScheduler, add DeInitTask() callback, add EstimatedStepDuration for better framepacing, add GetNeededSteps()
+- *(TaskScheduler)* Add GetProgress() of largest task, add DeInit of tasks, add DynamicIdleLimit which speeds up task processing when player head is not moving
+- *(SyncedEvent)* Add SyncedEventByteArray
+
+#### 🐛 Bug Fixes
+
+- *(UtcTimeSource)* Set sync mode to None to prevent continuous sync on spawned PlayerObjects
+
+#### 🚜 Refactor
+
+- *(NtpTime)* Migrate from CyanPlayerObjects to VRC PlayerObjects
+
+#### ⚙️ Miscellaneous Tasks
+
+- *(Model)* Add debug logs to Dirty flag
+- *(TLP_Essentials)* Update TaskScheduler defaults
+- Bump version
+- Remove WorldVersionCheck from NTP example scene
+- Update assets
+
 ### [11.1.0] - 2024-12-22
 
 #### 🚀 Features

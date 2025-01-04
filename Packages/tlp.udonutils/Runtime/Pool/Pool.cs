@@ -359,6 +359,10 @@ namespace TLP.UdonUtils.Runtime.Pool
             return CreateNextInitialInstance();
         }
 
+        public override int GetNeededSteps() {
+            return InitialInstancesPrePooled / Mathf.Max(1, InitializationsPerFrame);
+        }
+
         protected override bool InitTask() {
             return true;
         }

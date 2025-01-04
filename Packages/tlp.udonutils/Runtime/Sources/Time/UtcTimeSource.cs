@@ -10,7 +10,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
     /// the seconds since 1970/01/01 00:00.000000
     /// <remarks>Only offers a double based time value, float based is zero due to lack of accuracy!</remarks>
     /// </summary>
-    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     [DefaultExecutionOrder(ExecutionOrder)]
     [TlpDefaultExecutionOrder(typeof(UtcTimeSource), ExecutionOrder)]
     public class UtcTimeSource : TimeSource

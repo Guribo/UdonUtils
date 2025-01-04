@@ -39,6 +39,10 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             return TaskResult.Unknown;
         }
 
+        public override int GetNeededSteps() {
+            return 100;
+        }
+
         protected override bool InitTask() {
             _steps = 0;
             return true;

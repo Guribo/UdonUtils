@@ -32,22 +32,22 @@ namespace TLP.UdonUtils.Runtime.Sources.Time.Experimental
         /// <returns>Returns the <see cref="NtpClient"/> time,
         /// returns float.MinValue when initialization failed</returns>
         public override float Time() {
-            if (HasStartedOk) {
+            if (Utilities.IsValid(NtpClient)) {
                 return NtpClient.GetAdjustedLocalTime();
             }
 
-            Error($"{nameof(Time)}: Not initialized");
+            Warn($"{nameof(Time)}: {nameof(NtpClient)} not yet set (player objects not yet loaded)");
             return float.MinValue;
         }
 
         /// <returns><see cref="NtpTime"/> only provides float accuracy,
         /// returns float.MinValue when initialization failed</returns>
         public override double TimeAsDouble() {
-            if (HasStartedOk) {
+            if (Utilities.IsValid(NtpClient)) {
                 return NtpClient.GetAdjustedLocalTime();
             }
 
-            Error($"{nameof(TimeAsDouble)}: Not initialized");
+            Warn($"{nameof(TimeAsDouble)}: {nameof(NtpClient)} not yet set (player objects not yet loaded)");
             return float.MinValue;
         }
         #endregion
