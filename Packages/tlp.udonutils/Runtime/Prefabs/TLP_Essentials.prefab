@@ -31,7 +31,6 @@ Transform:
   m_Children:
   - {fileID: 6267370736182518358}
   - {fileID: 2265343286478920544}
-  - {fileID: 7162028830488724366}
   - {fileID: 3689344319542308622}
   - {fileID: 7998225160445376040}
   m_Father: {fileID: 0}
@@ -100,9 +99,12 @@ MonoBehaviour:
   Pool: {fileID: 0}
   PoolableInUse: 0
   Result: 0
-  MinTimeBudget: 0
+  MinTimeBudget: 0.001
   DynamicLimit: 1
   DynamicIdleLimit: 4
+  PlayerIdleMovementSpeed: 0.03
+  PlayerIdleTurnSpeed: 3
+  MinIterations: 1
 --- !u!114 &427115527607700652
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -356,110 +358,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 5424356712303967377}
   m_PrefabAsset: {fileID: 0}
---- !u!1001 &6651253704901168806
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 4750217398182022344}
-    m_Modifications:
-    - target: {fileID: -4061843791516839671, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-      propertyPath: serializationData.Prefab
-      value: 
-      objectReference: {fileID: -4061843791516839671, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-    - target: {fileID: 1702933771342552926, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-      propertyPath: serializationData.Prefab
-      value: 
-      objectReference: {fileID: 1702933771342552926, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-    - target: {fileID: 4551629900087397672, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4551629900087397672, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4551629900087397672, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4551629900087397672, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4551629900087397672, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4551629900087397672, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4551629900087397672, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4551629900087397672, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4551629900087397672, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4551629900087397672, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4551629900087397674, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-      propertyPath: m_Name
-      value: TLP_WorldVersionCheck
-      objectReference: {fileID: 0}
-    - target: {fileID: 4719702110690222251, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-      propertyPath: serializationData.Prefab
-      value: 
-      objectReference: {fileID: 4719702110690222251, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-    - target: {fileID: 6244067674548546232, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-      propertyPath: serializationData.Prefab
-      value: 
-      objectReference: {fileID: 6244067674548546232, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-    - target: {fileID: 7741135631674443076, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-      propertyPath: serializationData.Prefab
-      value: 
-      objectReference: {fileID: 7741135631674443076, guid: 2d80445bcefab2d40827d6a222e8a947,
-        type: 3}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 2d80445bcefab2d40827d6a222e8a947, type: 3}
---- !u!4 &7162028830488724366 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4551629900087397672, guid: 2d80445bcefab2d40827d6a222e8a947,
-    type: 3}
-  m_PrefabInstance: {fileID: 6651253704901168806}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8754013586442166512
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -491,6 +389,12 @@ PrefabInstance:
       propertyPath: m_Name
       value: TLP_NetworkTime
       objectReference: {fileID: 0}
+    - target: {fileID: 5074114486095191953, guid: 74db761ed76dac04188103d5ff12572c,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 5074114486095191953, guid: 74db761ed76dac04188103d5ff12572c,
+        type: 3}
     - target: {fileID: 6967571258415020094, guid: 74db761ed76dac04188103d5ff12572c,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -546,6 +450,17 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7924284204541701688, guid: 74db761ed76dac04188103d5ff12572c,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 7924284204541701688, guid: 74db761ed76dac04188103d5ff12572c,
+        type: 3}
+    - target: {fileID: 8746002016925906261, guid: 74db761ed76dac04188103d5ff12572c,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

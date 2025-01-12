@@ -30,6 +30,9 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
 
         [Tooltip("Constant time returned by DeltaTime")]
         public float DeltaTimeSeconds;
+
+        [Tooltip("Constant time returned by UnscaledDeltaTime")]
+        public float UnscaledDeltaTimeSeconds;
         #endregion
 
         #region TimeSource Overrides
@@ -59,6 +62,11 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         /// <returns>the constant <see cref="DeltaTimeSeconds"/></returns>
         public override float DeltaTime() {
             return DeltaTimeSeconds;
+        }
+
+        /// <returns>the constant <see cref="UnscaledDeltaTime"/></returns>
+        public override float UnscaledDeltaTime() {
+            return UnscaledDeltaTimeSeconds;
         }
         #endregion
     }

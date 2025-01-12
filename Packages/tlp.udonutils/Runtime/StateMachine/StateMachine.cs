@@ -48,11 +48,11 @@ namespace TLP.UdonUtils.Runtime.StateMachine
         internal int SyncedStateIndex = -1;
 
         [UdonSynced]
-        internal float SyncedTransitionTime;
+        internal double SyncedTransitionTime;
 
         #region Local Copy
         internal int WorkingStateIndex = -1;
-        internal float WorkingTransitionTime;
+        internal double WorkingTransitionTime;
         #endregion
         #endregion
 
@@ -93,7 +93,7 @@ namespace TLP.UdonUtils.Runtime.StateMachine
         /// Scheduled network time of the pending or last state transition.
         /// Can be used to determine exact timing between clients.
         /// </summary>
-        public float TransitionNetworkTime => WorkingTransitionTime;
+        public double TransitionNetworkTime => WorkingTransitionTime;
 
         public StateMachineState StateMachineState { get; internal set; }
 
@@ -159,7 +159,7 @@ namespace TLP.UdonUtils.Runtime.StateMachine
                 if (Utilities.IsValid(OptionalNetworkTime)) {
                     WorkingStateIndex = newStateIndex;
                     ScheduledTransitionTarget = newStateIndex;
-                    WorkingTransitionTime = OptionalNetworkTime.Time() + EventSyncDelay;
+                    WorkingTransitionTime = OptionalNetworkTime.TimeAsDouble() + EventSyncDelay;
                     SendCustomEventDelayedSeconds(nameof(Delayed_ActiveSyncedState), EventSyncDelay);
                     return true;
                 }
@@ -349,13 +349,13 @@ namespace TLP.UdonUtils.Runtime.StateMachine
         }
 
         private bool TryScheduleDelayedTransition() {
-            float delay = WorkingTransitionTime - OptionalNetworkTime.Time();
+            double delay = WorkingTransitionTime - OptionalNetworkTime.Time();
             if (delay <= 0f) {
                 return false;
             }
 
             ScheduledTransitionTarget = WorkingStateIndex;
-            SendCustomEventDelayedSeconds(nameof(Delayed_ActiveSyncedState), delay);
+            SendCustomEventDelayedSeconds(nameof(Delayed_ActiveSyncedState), (float) delay);
             return true;
         }
 

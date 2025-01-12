@@ -36,6 +36,26 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 
 All notable changes to this project will be documented in this file.
 
+### [11.3.0] - 2025-01-12
+
+#### 🚀 Features
+
+- *(Tasks)* Add step delta time, improve scheduler task skipping, add optional run-task-once-per-frame limiter, improve player idle detection
+- *(Task)* Rename new RunStep method to DoTask and keep old method for backward compatibility, add obsolete warning
+- *(TlpNetworkTime)* Use unscaled game time instead of time since level load to prevent slowing down of networked objects
+- *(TimeSources)* Add UnscaledTimeSinceGameStart
+- *(TlpNetworkTime)* Add ReferenceTime to TlpNetworkTime for snapshot compression
+
+#### 🐛 Bug Fixes
+
+- *(TlpAccurateSyncBehaviour)* Fix very inaccurate network time stamps when using float variables
+- *(NtpTime)* Fix noise from lack of floating point accuracy
+
+#### ⚙️ Miscellaneous Tasks
+
+- Revert change of deltaTime
+- Update compiled assets
+
 ### [11.2.0] - 2025-01-04
 
 #### 🚀 Features

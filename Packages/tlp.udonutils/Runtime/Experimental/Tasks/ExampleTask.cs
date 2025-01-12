@@ -24,7 +24,12 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
 
         private const string ExtraWork = "Extra Work";
 
-        protected override TaskResult RunStep() {
+        protected override TaskResult DoTask(float stepDeltaTime) {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+        DebugLog($"{nameof(DoTask)}: {nameof(stepDeltaTime)}={stepDeltaTime}");
+#endif
+#endregion
             if (_steps >= 100) return TaskResult.Succeeded;
 
             var iterations = Random.Range(0, 10);

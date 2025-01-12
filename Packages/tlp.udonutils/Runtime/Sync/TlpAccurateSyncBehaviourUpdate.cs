@@ -28,7 +28,7 @@ namespace TLP.UdonUtils.Runtime.Sync
                 return;
             }
 
-            PredictMovement(GetElapsed(), GameTime.DeltaTime());
+            PredictMovement(GetElapsed(), GameTime.UnscaledDeltaTime());
         }
         #endregion
     }

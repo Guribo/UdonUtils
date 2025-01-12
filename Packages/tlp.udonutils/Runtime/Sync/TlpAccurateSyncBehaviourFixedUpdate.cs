@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -29,7 +30,7 @@ namespace TLP.UdonUtils.Runtime.Sync
                 return;
             }
 
-            PredictMovement(GetElapsed(), GameTime.FixedDeltaTime());
+            PredictMovement(GetElapsed(), NetworkTime.FixedDeltaTime());
         }
         #endregion
     }

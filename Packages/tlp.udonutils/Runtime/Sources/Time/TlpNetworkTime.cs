@@ -1,11 +1,13 @@
 ﻿using System;
 using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Events;
 using TLP.UdonUtils.Runtime.Extensions;
 using TLP.UdonUtils.Runtime.Logger;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
 using VRC.SDKBase;
+using VRC.Udon.Common;
 
 namespace TLP.UdonUtils.Runtime.Sources.Time
 {
@@ -18,7 +20,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
     ///
     /// In summary, it provides an averaged network time that is based on game time for smooth interpolations.
     /// </summary>
-    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     [DefaultExecutionOrder(ExecutionOrder)]
     [TlpDefaultExecutionOrder(typeof(TlpNetworkTime), ExecutionOrder)]
     public class TlpNetworkTime : TimeSource
@@ -45,12 +47,6 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         /// correct drift at half the speed to prevent overshoot/offset oscillation
         /// </summary>
         private const double DriftCompensationRate = 0.5;
-
-        /// <summary>
-        /// If the delta time ever gets lower then this it means that GameTime is most certainly drifting relative
-        /// to real time, making sampling worthless. Used to determine when we should use the RealNetworkTime instead.
-        /// </summary>
-        private const float MaxDeltaTime = 1f / 12f;
         #endregion
 
         #region Dependencies
@@ -75,6 +71,14 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         [Tooltip("Source of frame count, e.g. based on Time.frameCount")]
         [SerializeField]
         internal FrameCountSource FrameCount;
+
+        [Tooltip(
+                "Is raised after the reference time was updated and can be used to switch to the " +
+                "new reference time. The reference time is a snapshot of the current TlpNetworkTime. " +
+                "It can be used to create relative timestamps to decrease the variable size from " +
+                "64-bit double to 32-bit float without loosing accuracy." +
+                "See TlpAccurateSyncBehaviour for an example implementation.")]
+        public UdonEvent OnReferenceTimeUpdated;
         #endregion
 
         #region Settings
@@ -117,14 +121,36 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
 
         [SerializeField]
         [Tooltip(
-                "If the difference between RealNetworkTime and TlpNetworkTime exceeds this value, "
+                "If the difference between RealNetworkTime and TlpNetworkTime exceeds this number of seconds, "
                 + "the TlpNetworkTime is forcefully updated to the RealNetworkTime instead of slowly drifting towards it. "
                 + "This is useful to compensate for network drift caused by e.g. avatars being loaded.")]
         [Range(0f, 1f)]
         internal double DriftThreshold = 0.5f;
+
+        [Tooltip(
+                "When set to 0 no auto refresh of the reference time is performed. " +
+                "Otherwise this defines the number of seconds between auto refreshes of the network reference time. " +
+                "The reference time is used to safe bandwidth by allowing use of 32-bit timestamps in packets. " +
+                "Without relying on the reference time a 64-bit double would be needed after a few hours of playing." +
+                " Default: 600 seconds (10 minutes). " +
+                "On refresh the OnReferenceTimeUpdated event is raised and can be used to switch to the " +
+                "new reference time. See TlpAccurateSyncBehaviour for an example implementation.")]
+        [SerializeField]
+        [Range(0, 3600)]
+        internal int ReferenceTimeRefreshInterval = 600;
         #endregion
 
         #region State
+        [UdonSynced]
+        internal double ReferenceTime;
+
+        /// <summary>
+        /// Snapshot of the TlpNetworkTime value, updates regularly according
+        /// to <see cref="ReferenceTimeRefreshInterval"/>.
+        /// Can be used for delta-compression of packet timestamps.
+        /// </summary>
+        public double WorkingReferenceTime { get; private set; }
+
         /// <summary>
         /// average difference between <see cref="RealNetworkTime"/> and <see cref="GameTime"/> that is currently
         /// being calculated, only ever contains the average when <see cref="Samples"/> samples have been collected/>
@@ -193,8 +219,47 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
             }
 
             Networking.LocalPlayer.SetPlayerTagSafe(nameof(TlpNetworkTime), idString);
-
+            Delayed_RefreshReferenceTime();
             return true;
+        }
+
+        public void Delayed_RefreshReferenceTime() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+        DebugLog(nameof(Delayed_RefreshReferenceTime));
+#endif
+            #endregion
+
+            if (Networking.IsOwner(gameObject)) {
+                MarkNetworkDirty();
+            }
+
+            if (ReferenceTimeRefreshInterval > 0) {
+                SendCustomEventDelayedSeconds(nameof(Delayed_RefreshReferenceTime), ReferenceTimeRefreshInterval);
+            }
+        }
+
+        public override void OnPreSerialization() {
+            if (Utilities.IsValid(GameTime)) {
+                WorkingReferenceTime = TimeAsDouble();
+                ReferenceTime = WorkingReferenceTime;
+
+                Info($"{nameof(OnPreSerialization)}: refreshed reference time to {WorkingReferenceTime:F6}s");
+                if (Utilities.IsValid(OnReferenceTimeUpdated) && !OnReferenceTimeUpdated.Raise(this)) {
+                    Error($"{nameof(OnDeserialization)}: Failed to raise {nameof(OnReferenceTimeUpdated)}");
+                }
+            }
+
+            base.OnPreSerialization();
+        }
+
+        public override void OnDeserialization(DeserializationResult deserializationResult) {
+            base.OnDeserialization(deserializationResult);
+            WorkingReferenceTime = ReferenceTime;
+            Info($"{nameof(OnDeserialization)}: refreshed reference time to {WorkingReferenceTime:F6}s");
+            if (Utilities.IsValid(OnReferenceTimeUpdated) && !OnReferenceTimeUpdated.Raise(this)) {
+                Error($"{nameof(OnDeserialization)}: Failed to raise {nameof(OnReferenceTimeUpdated)}");
+            }
         }
         #endregion
 
@@ -289,6 +354,11 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
                 return false;
             }
 
+            if (!Utilities.IsValid(OnReferenceTimeUpdated)) {
+                Error($"{nameof(OnReferenceTimeUpdated)} is not set");
+                return false;
+            }
+
             return true;
         }
 
@@ -296,6 +366,12 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         /// Ensures that the current delta between game time and network time is used and sampling is reset.
         /// </summary>
         internal void ForceSynchronizeTime() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+        DebugLog(nameof(ForceSynchronizeTime));
+#endif
+            #endregion
+
             SampledRealServerTime = RealNetworkTime.TimeAsDouble();
             _incompleteAverageOffset = GetNetworkGameTimeDelta();
             _previousAverageOffset = _incompleteAverageOffset;
@@ -321,7 +397,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
             _frameLastUpdated = FrameCount.Frame();
             SampledRealServerTime = RealNetworkTime.TimeAsDouble();
             ExactError = SampledRealServerTime - (GameTime.TimeAsDouble() + GetGameTimeOffset());
-            if (Math.Abs(ExactError) > DriftThreshold || GameTime.DeltaTime() >= MaxDeltaTime) {
+            if (Math.Abs(ExactError) > DriftThreshold) {
                 ForceSynchronizeTime();
                 ExactError = 0f;
             }
@@ -370,6 +446,12 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         /// accurate sampling over a set duration.
         /// </summary>
         private void ResetSampling() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+        DebugLog(nameof(ResetSampling));
+#endif
+            #endregion
+
             _incompleteAverageOffset = 0;
             _offsetSampleCount = 0;
 

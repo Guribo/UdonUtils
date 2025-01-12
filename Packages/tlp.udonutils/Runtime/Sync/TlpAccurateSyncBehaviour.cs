@@ -5,6 +5,7 @@ using TLP.UdonUtils.Runtime.Extensions;
 using TLP.UdonUtils.Runtime.Physics;
 using TLP.UdonUtils.Runtime.Recording;
 using TLP.UdonUtils.Runtime.Sources;
+using TLP.UdonUtils.Runtime.Sources.Time;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -47,17 +48,43 @@ namespace TLP.UdonUtils.Runtime.Sync
         #endregion
 
         #region NetworkState
+        /// <summary>
+        /// Compressed SendTime relative to the latest <see cref="TlpNetworkTime.ReferenceTime"/> snapshot.
+        /// </summary>
         [UdonSynced]
-        [NonSerialized]
-        public float SyncedSendTime = float.MinValue;
+        private float _syncedSendTime;
+
+        /// <summary>
+        /// snapshot of the <see cref="TlpNetworkTime"/> for delta-compression.
+        /// </summary>
+        private double _referenceTime;
+
+        /// <summary>
+        /// Get: SendTime decompressed using the latest <see cref="TlpNetworkTime.ReferenceTime"/> snapshot.
+        /// Set: Compresses SendTime using the latest <see cref="TlpNetworkTime.ReferenceTime"/> snapshot.
+        /// </summary>
+        public double SyncedSendTime
+        {
+            get => _syncedSendTime + _referenceTime;
+            set => _syncedSendTime = (float)(value - _referenceTime);
+        }
 
         #region Working Copy
+        /// <summary>
+        /// Time when the last update was sent in seconds of <see cref="NetworkTime"/>.
+        /// </summary>
         [NonSerialized]
         public double WorkingSendTime = double.MinValue;
 
+        /// <summary>
+        /// Time when the last update was received in seconds of <see cref="NetworkTime"/>.
+        /// </summary>
         [NonSerialized]
         public double ReceiveTime = double.MinValue;
 
+        /// <summary>
+        /// In seconds, time between <see cref="ReceiveTime"/> and <see cref="WorkingSendTime"/>.
+        /// </summary>
         [NonSerialized]
         public double Latency;
         #endregion
@@ -80,7 +107,13 @@ namespace TLP.UdonUtils.Runtime.Sync
 
         public override void OnDeserialization(DeserializationResult deserializationResult) {
             base.OnDeserialization(deserializationResult);
-            if (ReceivedNetworkStateIsOutdated()) {
+
+            if (!HasStartedOk) {
+                Error($"{nameof(OnDeserialization)}: Not initialized");
+                return;
+            }
+
+            if (!ReceivedNetworkStateIsNewer()) {
                 return;
             }
 
@@ -90,7 +123,14 @@ namespace TLP.UdonUtils.Runtime.Sync
                     WorkingSendTime);
             Backlog.Add(Snapshot, 3 * PredictionReduction);
 
-            Latency = GetAge();
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog($"{nameof(GetAge)}: {NetworkTime.TimeAsDouble()} - {WorkingSendTime}");
+
+#endif
+            #endregion
+
+            Latency = ReceiveTime - WorkingSendTime;
 #if TLP_DEBUG
             DebugLog($"Latency VRC = {deserializationResult.Latency():F6} vs own {Latency:F6}");
 #endif
@@ -114,6 +154,21 @@ namespace TLP.UdonUtils.Runtime.Sync
                 return false;
             }
 
+            if (NetworkTime.GetUdonTypeID() == GetUdonTypeID<TlpNetworkTime>()) {
+                var tlpTimeSource = (TlpNetworkTime)NetworkTime;
+                if (Utilities.IsValid(tlpTimeSource)) {
+                    _referenceTime = tlpTimeSource.ReferenceTime;
+                    if (Utilities.IsValid(tlpTimeSource.OnReferenceTimeUpdated)
+                        && !tlpTimeSource.OnReferenceTimeUpdated.AddListenerVerified(
+                                this,
+                                nameof(OnNetworkTimeShifted))) {
+                        Error(
+                                $"{nameof(SetupAndValidate)}: Failed to add listener to {nameof(tlpTimeSource.OnReferenceTimeUpdated)}");
+                        return false;
+                    }
+                }
+            }
+
             if (!Utilities.IsValid(Backlog)) {
                 Error($"{nameof(Backlog)} not set");
                 return false;
@@ -125,6 +180,20 @@ namespace TLP.UdonUtils.Runtime.Sync
 
             Error($"{nameof(Snapshot)} not set");
             return false;
+        }
+
+        public override void OnEvent(string eventName) {
+            switch (eventName) {
+                case nameof(OnNetworkTimeShifted):
+#if TLP_DEBUG
+DebugLog_OnEvent(eventName);
+#endif
+                    OnNetworkTimeShifted();
+                    break;
+                default:
+                    base.OnEvent(eventName);
+                    break;
+            }
         }
         #endregion
 
@@ -165,7 +234,7 @@ namespace TLP.UdonUtils.Runtime.Sync
 #endif
             #endregion
 
-            SyncedSendTime = (float) WorkingSendTime;
+            SyncedSendTime = WorkingSendTime;
         }
         #endregion
 
@@ -180,24 +249,30 @@ namespace TLP.UdonUtils.Runtime.Sync
             return GetAge() - PredictionReduction;
         }
 
-        private bool ReceivedNetworkStateIsOutdated() {
+        private bool ReceivedNetworkStateIsNewer() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(ReceivedNetworkStateIsOutdated));
+            DebugLog(nameof(ReceivedNetworkStateIsNewer));
 #endif
             #endregion
 
-            if (SyncedSendTime > WorkingSendTime) {
-                #region TLP_DEBUG
-#if TLP_DEBUG
-                DebugLog($"Valid {nameof(SyncedSendTime)} received: {SyncedSendTime:F6} > {WorkingSendTime:F6}");
-#endif
-                #endregion
-
+            if (SyncedSendTime < WorkingSendTime) {
+                Warn(
+                        $"{nameof(ReceivedNetworkStateIsNewer)}: Received late {nameof(SyncedSendTime)}={SyncedSendTime:F6}s; previous {nameof(WorkingSendTime)}={WorkingSendTime:F6}s");
                 return false;
             }
 
-            Warn($"Received outdated {nameof(SyncedSendTime)}: {SyncedSendTime:F6} <=  {WorkingSendTime:F6}");
+            if (SyncedSendTime > NetworkTime.TimeAsDouble()) {
+                Warn(
+                        $"{nameof(ReceivedNetworkStateIsNewer)}: Received {nameof(SyncedSendTime)}={SyncedSendTime:F6}s from the future (current time={NetworkTime.TimeAsDouble():F6}s)");
+                return false;
+            }
+            #region TLP_DEBUG
+#if TLP_DEBUG
+                DebugLog($"{nameof(ReceivedNetworkStateIsNewer)}: Valid {nameof(SyncedSendTime)} received: {SyncedSendTime:F6} > {WorkingSendTime:F6}");
+#endif
+            #endregion
+
             return true;
         }
 
@@ -210,6 +285,23 @@ namespace TLP.UdonUtils.Runtime.Sync
             #endregion
 
             return NetworkTime.TimeAsDouble() - WorkingSendTime;
+        }
+
+        private void OnNetworkTimeShifted() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+        DebugLog(nameof(OnNetworkTimeShifted));
+#endif
+            #endregion
+
+            var tlpTimeSource = (TlpNetworkTime)NetworkTime;
+            if (Utilities.IsValid(tlpTimeSource)) {
+                _referenceTime = tlpTimeSource.ReferenceTime;
+            }
+
+            if (Networking.IsOwner(gameObject)) {
+                MarkNetworkDirty();
+            }
         }
         #endregion
 

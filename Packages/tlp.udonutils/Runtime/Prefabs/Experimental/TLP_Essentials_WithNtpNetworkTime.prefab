@@ -53,13 +53,7 @@ MonoBehaviour:
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
-    SerializationNodes:
-    - Name: playerAssignedPlayer
-      Entry: 6
-      Data: 
-    - Name: playerUnassignedPlayer
-      Entry: 6
-      Data: 
+    SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 7970511507110054663}
   AutoRetrySendOnFailure: 1
   PauseSynchronization: 0
@@ -67,10 +61,6 @@ MonoBehaviour:
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
   PoolableInUse: 0
-  playerAssignedIndex: 0
-  playerAssignedPoolObject: {fileID: 0}
-  playerUnassignedIndex: 0
-  playerUnassignedPoolObject: {fileID: 0}
   NtpTime: {fileID: 708306108791684133}
   OwnNtpClient: {fileID: 0}
   RequestReceiveTimes:
@@ -167,8 +157,8 @@ MonoBehaviour:
   PoolableInUse: 0
   TimeSource: {fileID: 7034228327513173934}
   Server: {fileID: 9190438804556659353}
-  RequestInterval: 5
-  ClockOffsetSamples: 20
+  RequestInterval: 1
+  ClockOffsetSamples: 100
   RequestSendTime: 0
 --- !u!114 &2522726997625912079
 MonoBehaviour:
@@ -418,6 +408,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1383566945948572167, guid: a2e29b4f6c24d5a49851f212381a8bf5,
         type: 3}
+    - target: {fileID: 1478366527712808648, guid: a2e29b4f6c24d5a49851f212381a8bf5,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 1478366527712808648, guid: a2e29b4f6c24d5a49851f212381a8bf5,
+        type: 3}
     - target: {fileID: 1859223435513190606, guid: a2e29b4f6c24d5a49851f212381a8bf5,
         type: 3}
       propertyPath: serializationData.Prefab
@@ -494,6 +490,12 @@ PrefabInstance:
       propertyPath: _syncMethod
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4545927269470322529, guid: a2e29b4f6c24d5a49851f212381a8bf5,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 4545927269470322529, guid: a2e29b4f6c24d5a49851f212381a8bf5,
+        type: 3}
     - target: {fileID: 4750217398182022344, guid: a2e29b4f6c24d5a49851f212381a8bf5,
         type: 3}
       propertyPath: m_LocalPosition.x

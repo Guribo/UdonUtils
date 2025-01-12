@@ -8,7 +8,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
     /// Implementation of <see cref="TimeSource"/>
     /// that returns the Unity time since the level was loaded./>
     /// </summary>
-    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     [DefaultExecutionOrder(ExecutionOrder)]
     [TlpDefaultExecutionOrder(typeof(TimeSinceLevelLoad), ExecutionOrder)]
     public class TimeSinceLevelLoad : TimeSource
@@ -17,7 +17,6 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
 
         [PublicAPI]
         public new const int ExecutionOrder = StopwatchTime.ExecutionOrder + 1;
-
 
         /// <returns><see cref="UnityEngine.Time.timeSinceLevelLoad"/></returns>
         public override float Time() {

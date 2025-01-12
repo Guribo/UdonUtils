@@ -381,12 +381,12 @@ namespace TLP.UdonUtils.Runtime.Events
             return true;
         }
 
-        protected override TaskResult RunStep() {
+        protected override TaskResult DoTask(float stepDeltaTime) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(RunStep));
+        DebugLog($"{nameof(DoTask)}: {nameof(stepDeltaTime)}={stepDeltaTime}");
 #endif
-            #endregion
+#endregion
 
             if (!Utilities.IsValid(_currentAsyncInstigator)
                 || _listenerIndex < 1
@@ -399,14 +399,14 @@ namespace TLP.UdonUtils.Runtime.Events
                 var first = InstigatorQueue[0];
                 InstigatorQueue.RemoveAt(0);
                 if (first.IsNull) {
-                    Warn($"{nameof(RunStep)}: discarding invalid first {nameof(InstigatorQueue)} entry");
+                    Warn($"{nameof(DoTask)}: discarding invalid first {nameof(InstigatorQueue)} entry");
                     return TaskResult.Unknown; // skip null entry
                 }
 
                 _currentAsyncInstigator = (TlpBaseBehaviour)first.Reference;
                 if (!Utilities.IsValid(_currentAsyncInstigator)) {
                     Warn(
-                            $"{nameof(RunStep)}: first {nameof(InstigatorQueue)} entry is not a {nameof(TlpBaseBehaviour)}");
+                            $"{nameof(DoTask)}: first {nameof(InstigatorQueue)} entry is not a {nameof(TlpBaseBehaviour)}");
                     return TaskResult.Unknown; // skip invalid entry
                 }
             }
@@ -418,7 +418,7 @@ namespace TLP.UdonUtils.Runtime.Events
 
             var listener = Listeners[_listenerIndex];
             if (!Utilities.IsValid(listener)) {
-                Warn($"{nameof(RunStep)}: Listener at position {_listenerIndex} is not valid");
+                Warn($"{nameof(DoTask)}: Listener at position {_listenerIndex} is not valid");
                 ++_listenerIndex;
                 return TaskResult.Unknown;
             }
@@ -427,7 +427,7 @@ namespace TLP.UdonUtils.Runtime.Events
             if (listener.HasStartedOk) {
                 listener.OnEvent(ListenerMethod);
             } else {
-                Warn($"{nameof(RunStep)}: Listener {listener.GetScriptPathInScene()} is not ready, skipping");
+                Warn($"{nameof(DoTask)}: Listener {listener.GetScriptPathInScene()} is not ready, skipping");
             }
 
             listener.EventInstigator = null;

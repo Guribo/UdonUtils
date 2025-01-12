@@ -53,5 +53,13 @@ namespace TLP.UdonUtils.Runtime.Sources
         public virtual float DeltaTime() {
             return UnityEngine.Time.deltaTime;
         }
+
+        /// <summary>
+        /// Delta time of this source, not clamped or scaled.
+        /// </summary>
+        /// <returns>Time in seconds</returns>
+        public virtual float UnscaledDeltaTime() {
+            return UnityEngine.Time.unscaledDeltaTime;
+        }
     }
 }

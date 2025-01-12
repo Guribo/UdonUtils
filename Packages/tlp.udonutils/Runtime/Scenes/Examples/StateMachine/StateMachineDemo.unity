@@ -545,12 +545,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 204123248}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1 &226432453 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7162028830488724364, guid: a2e29b4f6c24d5a49851f212381a8bf5,
-    type: 3}
-  m_PrefabInstance: {fileID: 951364592}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &238646726 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2592995490271990850, guid: a2e29b4f6c24d5a49851f212381a8bf5,
@@ -735,12 +729,6 @@ MonoBehaviour:
   Pool: {fileID: 0}
   PoolableInUse: 0
   ThingToToggle: {fileID: 204123248}
---- !u!1 &339707709 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7162028830363197434, guid: a2e29b4f6c24d5a49851f212381a8bf5,
-    type: 3}
-  m_PrefabInstance: {fileID: 951364592}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &358170787
 GameObject:
   m_ObjectHideFlags: 0
@@ -812,18 +800,6 @@ Transform:
 --- !u!1 &469707809 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6267370736182518356, guid: a2e29b4f6c24d5a49851f212381a8bf5,
-    type: 3}
-  m_PrefabInstance: {fileID: 951364592}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &648918289 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7061053460461279348, guid: a2e29b4f6c24d5a49851f212381a8bf5,
-    type: 3}
-  m_PrefabInstance: {fileID: 951364592}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &677737496 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7162028828498753258, guid: a2e29b4f6c24d5a49851f212381a8bf5,
     type: 3}
   m_PrefabInstance: {fileID: 951364592}
   m_PrefabAsset: {fileID: 0}
@@ -946,6 +922,12 @@ Canvas:
 --- !u!1 &722017518 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8900891061798147521, guid: a2e29b4f6c24d5a49851f212381a8bf5,
+    type: 3}
+  m_PrefabInstance: {fileID: 951364592}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &737240348 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1212208764829148268, guid: a2e29b4f6c24d5a49851f212381a8bf5,
     type: 3}
   m_PrefabInstance: {fileID: 951364592}
   m_PrefabAsset: {fileID: 0}
@@ -1204,6 +1186,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 210995436698093338, guid: a2e29b4f6c24d5a49851f212381a8bf5,
         type: 3}
+    - target: {fileID: 236143122604717836, guid: a2e29b4f6c24d5a49851f212381a8bf5,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 236143122604717836, guid: a2e29b4f6c24d5a49851f212381a8bf5,
+        type: 3}
+      propertyPath: serializedProgramAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 01cfbc35bb0edec449e740ee0efc8021,
+        type: 2}
     - target: {fileID: 422664684679654714, guid: a2e29b4f6c24d5a49851f212381a8bf5,
         type: 3}
       propertyPath: _syncMethod
@@ -2407,12 +2400,6 @@ MonoBehaviour:
   Pool: {fileID: 0}
   PoolableInUse: 0
   ThingToToggle: {fileID: 897229121}
---- !u!1 &1704030245 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3647225028873143287, guid: a2e29b4f6c24d5a49851f212381a8bf5,
-    type: 3}
-  m_PrefabInstance: {fileID: 951364592}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1787983409
 GameObject:
   m_ObjectHideFlags: 0
@@ -3265,7 +3252,7 @@ MonoBehaviour:
   AllowCollisionOwnershipTransfer: 1
   Reliable: 0
   _syncMethod: 1
-  serializedProgramAsset: {fileID: 11400000, guid: 28b8d99b0d4918143a376df511cfc6ee,
+  serializedProgramAsset: {fileID: 11400000, guid: 0bc44973df447ac408e52a42d68a250e,
     type: 2}
   programSource: {fileID: 11400000, guid: 566cc00e27d5822449529a3785eae366, type: 2}
   serializedPublicVariablesBytesString: Ai8AAAAAATIAAABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlAFQAYQBiAGwAZQAsACAAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4AAAAAAAYBAAAAAAAAACcBBAAAAHQAeQBwAGUAAWgAAABTAHkAcwB0AGUAbQAuAEMAbwBsAGwAZQBjAHQAaQBvAG4AcwAuAEcAZQBuAGUAcgBpAGMALgBMAGkAcwB0AGAAMQBbAFsAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4ALgBJAG4AdABlAHIAZgBhAGMAZQBzAC4ASQBVAGQAbwBuAFYAYQByAGkAYQBiAGwAZQAsACAAVgBSAEMALgBVAGQAbwBuAC4AQwBvAG0AbQBvAG4AXQBdACwAIABtAHMAYwBvAHIAbABpAGIAAQEJAAAAVgBhAHIAaQBhAGIAbABlAHMALwEAAAABaAAAAFMAeQBzAHQAZQBtAC4AQwBvAGwAbABlAGMAdABpAG8AbgBzAC4ARwBlAG4AZQByAGkAYwAuAEwAaQBzAHQAYAAxAFsAWwBWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAEkAbgB0AGUAcgBmAGEAYwBlAHMALgBJAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlACwAIABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgBdAF0ALAAgAG0AcwBjAG8AcgBsAGkAYgABAAAABgQAAAAAAAAAAi8CAAAAAUsAAABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAuAFUAZABvAG4AVgBhAHIAaQBhAGIAbABlAGAAMQBbAFsAUwB5AHMAdABlAG0ALgBCAG8AbwBsAGUAYQBuACwAIABtAHMAYwBvAHIAbABpAGIAXQBdACwAIABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgACAAAABgIAAAAAAAAAJwEEAAAAdAB5AHAAZQABFwAAAFMAeQBzAHQAZQBtAC4AUwB0AHIAaQBuAGcALAAgAG0AcwBjAG8AcgBsAGkAYgAnAQoAAABTAHkAbQBiAG8AbABOAGEAbQBlAAEUAAAAZABpAHMAYQBiAGwAZQBBAHYAYQB0AGEAcgBTAGMAYQBsAGkAbgBnACcBBAAAAHQAeQBwAGUAARgAAABTAHkAcwB0AGUAbQAuAEIAbwBvAGwAZQBhAG4ALAAgAG0AcwBjAG8AcgBsAGkAYgArAQUAAABWAGEAbAB1AGUAAAcFAjACAAAAAwAAAAYCAAAAAAAAACcBBAAAAHQAeQBwAGUAARcAAABTAHkAcwB0AGUAbQAuAFMAdAByAGkAbgBnACwAIABtAHMAYwBvAHIAbABpAGIAJwEKAAAAUwB5AG0AYgBvAGwATgBhAG0AZQABEwAAAGEAbAB3AGEAeQBzAEUAbgBmAG8AcgBjAGUASABlAGkAZwBoAHQAJwEEAAAAdAB5AHAAZQABGAAAAFMAeQBzAHQAZQBtAC4AQgBvAG8AbABlAGEAbgAsACAAbQBzAGMAbwByAGwAaQBiACsBBQAAAFYAYQBsAHUAZQAABwUCLwMAAAABSgAAAFYAUgBDAC4AVQBkAG8AbgAuAEMAbwBtAG0AbwBuAC4AVQBkAG8AbgBWAGEAcgBpAGEAYgBsAGUAYAAxAFsAWwBTAHkAcwB0AGUAbQAuAFMAaQBuAGcAbABlACwAIABtAHMAYwBvAHIAbABpAGIAXQBdACwAIABWAFIAQwAuAFUAZABvAG4ALgBDAG8AbQBtAG8AbgAEAAAABgIAAAAAAAAAJwEEAAAAdAB5AHAAZQABFwAAAFMAeQBzAHQAZQBtAC4AUwB0AHIAaQBuAGcALAAgAG0AcwBjAG8AcgBsAGkAYgAnAQoAAABTAHkAbQBiAG8AbABOAGEAbQBlAAENAAAAbQBpAG4AaQBtAHUAbQBIAGUAaQBnAGgAdAAnAQQAAAB0AHkAcABlAAEXAAAAUwB5AHMAdABlAG0ALgBTAGkAbgBnAGwAZQAsACAAbQBzAGMAbwByAGwAaQBiAB8BBQAAAFYAYQBsAHUAZQDNzEw+BwUCMAMAAAAFAAAABgIAAAAAAAAAJwEEAAAAdAB5AHAAZQABFwAAAFMAeQBzAHQAZQBtAC4AUwB0AHIAaQBuAGcALAAgAG0AcwBjAG8AcgBsAGkAYgAnAQoAAABTAHkAbQBiAG8AbABOAGEAbQBlAAENAAAAbQBhAHgAaQBtAHUAbQBIAGUAaQBnAGgAdAAnAQQAAAB0AHkAcABlAAEXAAAAUwB5AHMAdABlAG0ALgBTAGkAbgBnAGwAZQAsACAAbQBzAGMAbwByAGwAaQBiAB8BBQAAAFYAYQBsAHUAZQAAAKBABwUHBQcF
@@ -3434,26 +3421,6 @@ MonoBehaviour:
     ID: 21
     SerializedTypeNames:
     - VRC.Udon.UdonBehaviour
-  - gameObject: {fileID: 226432453}
-    ID: 22
-    SerializedTypeNames:
-    - VRC.Udon.UdonBehaviour
-  - gameObject: {fileID: 677737496}
-    ID: 23
-    SerializedTypeNames:
-    - VRC.Udon.UdonBehaviour
-  - gameObject: {fileID: 339707709}
-    ID: 24
-    SerializedTypeNames:
-    - VRC.Udon.UdonBehaviour
-  - gameObject: {fileID: 1704030245}
-    ID: 25
-    SerializedTypeNames:
-    - VRC.Udon.UdonBehaviour
-  - gameObject: {fileID: 648918289}
-    ID: 26
-    SerializedTypeNames:
-    - VRC.Udon.UdonBehaviour
   - gameObject: {fileID: 3480278762663670689}
     ID: 27
     SerializedTypeNames:
@@ -3495,6 +3462,10 @@ MonoBehaviour:
     ID: 36
     SerializedTypeNames:
     - VRC.Udon.UdonBehaviour
+    - VRC.Udon.UdonBehaviour
+  - gameObject: {fileID: 737240348}
+    ID: 37
+    SerializedTypeNames:
     - VRC.Udon.UdonBehaviour
   portraitCameraPositionOffset: {x: 0, y: 0, z: 0}
   portraitCameraRotationOffset: {x: 0, y: 1, z: 0, w: -0.00000004371139}

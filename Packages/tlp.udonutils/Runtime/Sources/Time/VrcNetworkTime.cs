@@ -19,7 +19,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TimeSinceLevelLoad.ExecutionOrder + 1;
+        public new const int ExecutionOrder = UnscaledTimeSinceGameStart.ExecutionOrder + 1;
 
 
         protected override bool SetupAndValidate() {

@@ -355,7 +355,12 @@ namespace TLP.UdonUtils.Runtime.Pool
         #endregion
 
         #region Task Implementation
-        protected override TaskResult RunStep() {
+        protected override TaskResult DoTask(float stepDeltaTime) {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+        DebugLog($"{nameof(DoTask)}: {nameof(stepDeltaTime)}={stepDeltaTime}");
+#endif
+            #endregion
             return CreateNextInitialInstance();
         }
 

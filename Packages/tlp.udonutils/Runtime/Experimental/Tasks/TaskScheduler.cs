@@ -27,8 +27,7 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         public const string FinishedTaskCallbackName = "OnTaskFinished";
         public const string GameObjectName = "TLP_TaskScheduler";
 
-        private const float Centimeter = 0.01f;
-        private const int MinHeadIdleFrames = 50;
+        private const int MinPlayerIdleFrames = 50;
         #endregion
 
         #region State
@@ -38,10 +37,11 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         private double _realDeltaTime;
         private int _taskIndex;
         private Task _taskWithMostSteps;
-        private Vector3 _lastHeadPosition;
-        private Quaternion _lastHeadRotation;
+        private Vector3 _lastHeadPosition, _lastLeftHandPosition, _lastRightHandPosition;
+        private Quaternion _lastHeadRotation, _lastLeftHandRotation, _lastRightHandRotation;
         private int _lastNotIdle;
         private bool _wasIdle;
+        private float _averageIterations;
 
         #region "Integral" part of PID
         internal float I = 0.02f;
@@ -78,6 +78,18 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                 "player head is detected to be not moving much.")]
         [Range(1f, 8f)]
         public float DynamicIdleLimit = 4f;
+
+        [Tooltip(
+                "[m/s]; In desktop movement speed of the player head below which the player is considered idle. "
+                + "In VR additionally used for checking hand movement.")]
+        public float PlayerIdleMovementSpeed = 0.03f;
+
+        [Tooltip(
+                "[degrees/s]; In desktop turn speed of the camera below which the player is considered idle. "
+                + "In VR used for checking hand and head rotation speed.")]
+        public float PlayerIdleTurnSpeed = 3f;
+
+        public int MinIterations = 1;
         #endregion
 
         #region Lifecycle
@@ -94,24 +106,23 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                 return;
             }
 
-            float startTime = Time.realtimeSinceStartup;
+            double startTime = Time.realtimeSinceStartupAsDouble;
             float dynamicLimit = DynamicIdleLimit > DynamicLimit && IsPlayerIdle() ? DynamicIdleLimit : DynamicLimit;
 
             // reduced PID controller to just "I"
-            float targetDeltaTime = Time.fixedUnscaledDeltaTime * dynamicLimit;
+            float targetDeltaTime = Time.fixedDeltaTime * dynamicLimit;
             float currentError = targetDeltaTime * Growth - (float)_realDeltaTime;
             Result = Mathf.Clamp(Result + I * currentError, 0, targetDeltaTime);
 
             int iteration = 0;
-            while (PendingTasks.Count > 0
-                   && (iteration < 1
-                       || Time.realtimeSinceStartup - startTime < MinTimeBudget ||
-                       (Time.realtimeSinceStartup - startTime <= Result &&
-                        Time.realtimeSinceStartup - _timeCompleted < targetDeltaTime))) {
-                float iterationStartTime = Time.realtimeSinceStartup;
+            int skipCount = 0;
+            int totalSkips = 0;
+            // ensure we start with a different task each frame
+            _taskIndex = Time.frameCount % Mathf.Max(1, PendingTasks.Count);
+            while (true) {
+                if (PendingTasks.Count < 1) break;
 
                 _taskIndex.MoveIndexRightLooping(PendingTasks.Count);
-                ++iteration;
                 var pendingTask = PendingTasks[_taskIndex];
                 if (pendingTask.IsNull) {
                     RemoveTask(null, _taskIndex);
@@ -126,14 +137,31 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                     continue;
                 }
 
-                float remainingTime = Result - (Time.realtimeSinceStartup - startTime);
-                if (iteration > 1 && remainingTime < task.EstimatedStepDuration) {
-                    if (_taskIndex == 0) {
-                        // prevent infinite looping in case every single task would exceed the time budget
-                        break;
+                double iterationStartTime = Time.realtimeSinceStartupAsDouble;
+                ++iteration;
+                if (iteration > MinIterations) {
+                    double spentTime = iterationStartTime - startTime;
+                    double timeSinceLastCompletion = iterationStartTime - _timeCompleted;
+                    if (spentTime > MinTimeBudget &&
+                        (spentTime > Result || timeSinceLastCompletion > targetDeltaTime)) break;
+
+                    double remainingTime = Mathf.Max(MinTimeBudget, Result) - spentTime;
+                    if (remainingTime < task.EstimatedStepDuration) {
+                        #region TLP_DEBUG
+#if TLP_DEBUG
+                        DebugLog($"{nameof(PostLateUpdate)}: {nameof(task)}={task.GetScriptPathInScene()} would take too long");
+#endif
+                        #endregion
+                        ++skipCount;
+                        ++totalSkips;
+                        if (skipCount >= PendingTasks.Count) {
+                            // prevent infinite looping in case every single task would exceed the time budget
+                            break;
+                        }
+
+                        // skip heavy task in 2nd or later iterations as it would go over time budget
+                        continue;
                     }
-                    // skip heavy task in 2nd or later iterations as it would go over time budget
-                    continue;
                 }
 
                 if (task.State == TaskState.Pending) {
@@ -144,7 +172,27 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                     }
                 }
 
-                if (task.Run() != TaskState.Finished) {
+                var taskState = task.Run();
+                if (task.Result != TaskResult.Blocked) {
+                    skipCount = 0;
+                } else {
+                    #region TLP_DEBUG
+#if TLP_DEBUG
+                    DebugLog($"{nameof(PostLateUpdate)}: {nameof(task)}={task.GetScriptPathInScene()} is blocked");
+#endif
+#endregion
+                    ++skipCount;
+                    ++totalSkips;
+                    if (skipCount >= PendingTasks.Count) {
+                        // prevent infinite looping in case every single task would exceed the time budget
+                        break;
+                    }
+
+                    // skip heavy task in 2nd or later iterations as it would go over time budget
+                    continue;
+                }
+
+                if (taskState != TaskState.Finished) {
                     if (!ReferenceEquals(task, _taskWithMostSteps)
                         && (!Utilities.IsValid(_taskWithMostSteps)
                             || _taskWithMostSteps.State == TaskState.Finished
@@ -158,21 +206,19 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
 
                 if (Utilities.IsValid(task)) {
                     // 1. check in case the task was destroyed in RemoveTask after notifying the instigator
-                    // 2. update average time to prevent overshoot
-                    task.UpdateEstimatedStepDuration(Time.realtimeSinceStartup - iterationStartTime);
+                    // 2. update average time to prevent overshoot in the future
+                    task.UpdateEstimatedStepDuration((float)(Time.realtimeSinceStartupAsDouble - iterationStartTime));
                 }
             }
 
-            #region TLP_DEBUG
+            double newTimeCompleted = Time.realtimeSinceStartupAsDouble;
+            _realDeltaTime = newTimeCompleted - _timeCompleted;
+            _timeCompleted = newTimeCompleted;
+            _averageIterations = Mathf.Lerp(_averageIterations, iteration, 0.1f);
 #if TLP_DEBUG
-            if (PendingTasks.Count > 0) {
-                Info($"{nameof(PostLateUpdate)}: Completed {iteration} task iterations");
-            }
+            Info(
+                    $"{nameof(PostLateUpdate)}: Completed {iteration} iterations in {1000 * (newTimeCompleted - startTime):F6}ms, skipped task steps={totalSkips}, avg. iterations={_averageIterations:F1}, real dt={1000 * _realDeltaTime:F3}ms");
 #endif
-            #endregion
-
-            _realDeltaTime = Time.realtimeSinceStartupAsDouble - _timeCompleted;
-            _timeCompleted = Time.realtimeSinceStartupAsDouble;
         }
         #endregion
 
@@ -182,15 +228,40 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             if (!Utilities.IsValid(player)) return false;
             var head = player.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
 
-            bool headsIsNotMoving = (head.position - _lastHeadPosition).magnitude < Centimeter * Time.deltaTime;
-            bool headIsNotRotating = Quaternion.Angle(head.rotation, _lastHeadRotation) < /* 1 degree/second*/
-                                     Time.deltaTime;
-            bool isIdle = headsIsNotMoving && headIsNotRotating;
+            float playerIdleMovementSpeed = PlayerIdleMovementSpeed * Time.deltaTime;
+            float playerIdleTurnSpeed = PlayerIdleTurnSpeed * Time.deltaTime;
+
+            bool headsIsNotMoving = (head.position - _lastHeadPosition).magnitude < playerIdleMovementSpeed;
+            bool headIsNotRotating = Quaternion.Angle(head.rotation, _lastHeadRotation) < playerIdleTurnSpeed;
             _lastHeadPosition = head.position;
             _lastHeadRotation = head.rotation;
+            bool isIdle = headsIsNotMoving && headIsNotRotating;
+
+            if (isIdle && player.IsUserInVR()) {
+                var leftHand = player.GetTrackingData(VRCPlayerApi.TrackingDataType.LeftHand);
+                var rightHand = player.GetTrackingData(VRCPlayerApi.TrackingDataType.RightHand);
+
+                bool leftHandIsNotMoving =
+                        (leftHand.position - _lastLeftHandPosition).magnitude < playerIdleMovementSpeed;
+                bool leftHandIsNotRotating =
+                        Quaternion.Angle(leftHand.rotation, _lastLeftHandRotation) < playerIdleTurnSpeed;
+
+                bool rightHandIsNotMoving =
+                        (rightHand.position - _lastRightHandPosition).magnitude < playerIdleMovementSpeed;
+                bool rightHandIsNotRotating =
+                        Quaternion.Angle(rightHand.rotation, _lastRightHandRotation) < playerIdleTurnSpeed;
+
+                isIdle = leftHandIsNotMoving && leftHandIsNotRotating && rightHandIsNotMoving && rightHandIsNotRotating;
+
+                _lastLeftHandPosition = leftHand.position;
+                _lastRightHandPosition = rightHand.position;
+                _lastLeftHandRotation = leftHand.rotation;
+                _lastRightHandRotation = rightHand.rotation;
+            }
+
             if (!isIdle) {
                 if (_wasIdle) {
-                    // as soon as player movement is detected again, after bing idle,
+                    // as soon as player movement is detected again, after being idle,
                     // reset PID result to prevent any hitching due to slow adjustment of PID loop
                     Result = 0;
                     _wasIdle = false;
@@ -200,7 +271,7 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                 return false;
             }
 
-            if (Time.frameCount < _lastNotIdle + MinHeadIdleFrames) {
+            if (Time.frameCount < _lastNotIdle + MinPlayerIdleFrames) {
                 return false;
             }
 

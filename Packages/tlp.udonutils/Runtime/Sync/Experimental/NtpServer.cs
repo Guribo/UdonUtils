@@ -1,6 +1,5 @@
 ﻿using System;
 using JetBrains.Annotations;
-using TLP.UdonUtils.Runtime.Adapters.Cyan;
 using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Extensions;
 using TLP.UdonUtils.Runtime.Sources.Time.Experimental;
@@ -49,7 +48,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         /// </summary>
         [HideInInspector]
         [UdonSynced]
-        public float[] RequestReceiveTimes = new float[1];
+        public double[] RequestReceiveTimes = new double[1];
 
         /// <summary>
         /// Player IDs of the clients who sent the sync request.
@@ -64,7 +63,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         /// </summary>
         [HideInInspector]
         [UdonSynced]
-        public float ResponseSendTime;
+        public double ResponseSendTime;
         #endregion
 
         #region State
@@ -72,26 +71,26 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         internal DataDictionary ClientIndices = new DataDictionary();
         internal DataList Clients = new DataList();
 
-        private float _nextRequestTime = float.MinValue;
+        private double _nextRequestTime = float.MinValue;
         internal int[] WorkingClientOwners = new int[1];
-        internal float[] WorkingRequestReceiveTimes = new float[1];
-        internal float WorkingResponseSentTime;
+        internal double[] WorkingRequestReceiveTimes = new double[1];
+        internal double WorkingResponseSentTime;
         #endregion
 
         #region Public
-        public bool GetLatestClientRequest(NtpClient client, out float requestTime, out float receiveTime) {
+        public bool GetLatestClientRequest(NtpClient client, out double requestTime, out double receiveTime) {
             if (!ClientsRequestTimes.ContainsKey(client)) {
                 requestTime = 0f;
                 receiveTime = 0f;
                 return false;
             }
 
-            requestTime = ClientsRequestTimes[client].Float;
+            requestTime = ClientsRequestTimes[client].Double;
             receiveTime = WorkingRequestReceiveTimes[ClientIndices[client].Int];
             return true;
         }
 
-        public bool AddRequest(NtpClient client, float receiveTime) {
+        public bool AddRequest(NtpClient client, double receiveTime) {
             int clientIndex;
             if (!Utilities.IsValid(client)) {
                 return false;
@@ -140,13 +139,13 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         public override void OnPlayerLeft(VRCPlayerApi player) {
             base.OnPlayerLeft(player);
 
-            RequestReceiveTimes = new float[1];
+            RequestReceiveTimes = new double[1];
             ClientOwners = new int[1];
             ResponseSendTime = 0;
             ClientIndices.Clear();
             Clients.Clear();
             WorkingClientOwners = new int[1];
-            WorkingRequestReceiveTimes = new float[1];
+            WorkingRequestReceiveTimes = new double[1];
             WorkingResponseSentTime = 0;
         }
 
@@ -191,7 +190,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
             #region TLP_DEBUG
 #if TLP_DEBUG
             string log = "";
-            foreach (float receiveTime in RequestReceiveTimes) {
+            foreach (double receiveTime in RequestReceiveTimes) {
                 log += $"{receiveTime:F4}, ";
             }
 
@@ -223,12 +222,12 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
                 return;
             }
 
-            float responseReceiveTime = OwnNtpClient.GetRawTime();
+            double responseReceiveTime = OwnNtpClient.GetRawTime();
 
             #region TLP_DEBUG
 #if TLP_DEBUG
             string log = "";
-            foreach (float receiveTime in RequestReceiveTimes) {
+            foreach (double receiveTime in RequestReceiveTimes) {
                 log += $"{receiveTime:F4}, ";
             }
 
@@ -244,7 +243,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
 #endif
             #endregion
 
-            int index = RetrieveLocalPlayerResponseData(out float requestReceiveTime);
+            int index = RetrieveLocalPlayerResponseData(out double requestReceiveTime);
             if (!Networking.IsOwner(Networking.LocalPlayer, OwnNtpClient.gameObject)) {
                 Error($"Not owning {nameof(OwnNtpClient)}");
                 return;
@@ -266,7 +265,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         #endregion
 
         #region Internal
-        private int RetrieveLocalPlayerResponseData(out float requestReceiveTime) {
+        private int RetrieveLocalPlayerResponseData(out double requestReceiveTime) {
             int lengthSafe = ClientOwners.LengthSafe();
             int playerId = Networking.LocalPlayer.PlayerIdSafe();
             int index = -1;

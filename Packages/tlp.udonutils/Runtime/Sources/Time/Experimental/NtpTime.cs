@@ -33,7 +33,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time.Experimental
         /// returns float.MinValue when initialization failed</returns>
         public override float Time() {
             if (Utilities.IsValid(NtpClient)) {
-                return NtpClient.GetAdjustedLocalTime();
+                return (float) NtpClient.GetAdjustedLocalTime();
             }
 
             Warn($"{nameof(Time)}: {nameof(NtpClient)} not yet set (player objects not yet loaded)");
