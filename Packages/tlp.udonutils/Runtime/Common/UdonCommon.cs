@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Text;
 using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Events;
 using TLP.UdonUtils.Runtime.Extensions;
+using TLP.UdonUtils.Runtime.Logger;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
@@ -145,7 +147,10 @@ namespace TLP.UdonUtils.Runtime.Common
         }
 
         public static string UdonTypeNameShort(string udonTypeName) {
-            if (string.IsNullOrEmpty(udonTypeName)) return "";
+            if (string.IsNullOrEmpty(udonTypeName)) {
+                return "";
+            }
+
             string[] productTypeName = udonTypeName.Split('.');
             return productTypeName.Length > 0 ? productTypeName[productTypeName.Length - 1] : udonTypeName;
         }
@@ -207,7 +212,10 @@ namespace TLP.UdonUtils.Runtime.Common
         /// <returns>The path from the scene root to the component provided,
         /// returns an empty string if the provided component is invalid</returns>
         public static string GetComponentPathInScene(this Component component) {
-            if (!Utilities.IsValid(component)) return "";
+            if (!Utilities.IsValid(component)) {
+                return "";
+            }
+
             return component.transform.GetPathInScene() + "/" + component.GetType().Name;
         }
 
@@ -275,12 +283,171 @@ namespace TLP.UdonUtils.Runtime.Common
             return sb.ToString();
         }
 
-
-
         [PublicAPI]
         public static DateTimeOffset SecondsToLocalTime(double lastSeenUnixTimeStampInSeconds) {
             var dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds((long)lastSeenUnixTimeStampInSeconds);
             return TimeZoneInfo.ConvertTime(dateTimeOffset, TimeZoneInfo.Local);
+        }
+
+        /// <summary>
+        /// Get any PlayerData component of the given type that belongs
+        /// to the given player.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="UdonSharpBehaviour.OnPlayerRestored"/> must have been called by VRChat for that player
+        /// to guarantee the player has all PlayerData components assigned.
+        /// </remarks>
+        /// <param name="player"></param>
+        /// <param name="component">the first it finds or null if not found</param>
+        /// <typeparam name="T">Class-type of the component</typeparam>
+        /// <returns>true if a component was found</returns>
+        public static bool TryGetPlayerDataComponent<T>(this VRCPlayerApi player, out T component) where T : Component {
+            var objects = Networking.GetPlayerObjects(player);
+            if (objects.LengthSafe() == 0) {
+                TlpLogger.StaticError(
+                        $"{nameof(TryGetPlayerDataComponent)}: {player.DisplayNameSafe()} is missing PlayerData objects (not yet created?)",
+                        null);
+                component = null;
+                return false;
+            }
+
+            foreach (var gameObject in objects) {
+                var found = gameObject.GetComponentInChildren<T>(true);
+                if (!Utilities.IsValid(found)) {
+                    continue;
+                }
+
+                component = found;
+                return true;
+            }
+
+            TlpLogger.StaticError(
+                    $"{nameof(TryGetPlayerDataComponent)}: {player.DisplayNameSafe()} is missing PlayerData components!",
+                    null);
+            // player was not fully initialized
+            // because each player should have AT LEAST one of the component
+            component = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Get all PlayerData components of the given type that belong
+        /// to the given player.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="UdonSharpBehaviour.OnPlayerRestored"/> must have been called by VRChat for that player
+        /// to guarantee the player has all PlayerData components assigned.
+        /// </remarks>
+        /// <param name="player"></param>
+        /// <param name="inOutComponents">in-out appends any found component to that list, but will not be modified on error</param>
+        /// <typeparam name="T">Class-type of the components</typeparam>
+        /// <returns>true if at least component was found, false otherwise</returns>
+        public static bool TryGetAllPlayerDataComponents<T>(this VRCPlayerApi player, DataList inOutComponents)
+                where T : Component {
+            var objects = Networking.GetPlayerObjects(player);
+            if (objects.LengthSafe() == 0) {
+                TlpLogger.StaticError(
+                        $"{nameof(TryGetAllPlayerDataComponents)}<{typeof(T).Name}>: {player.DisplayNameSafe()} is missing PlayerData objects (not yet created?)",
+                        null);
+                return false;
+            }
+
+            int size = inOutComponents.Count;
+            foreach (var gameObject in objects) {
+                var found = gameObject.GetComponentsInChildren<T>(true);
+                if (found.LengthSafe() == 0) {
+                    continue;
+                }
+
+                foreach (var foundComponent in found) {
+                    if (Utilities.IsValid(foundComponent)) {
+                        inOutComponents.Add(foundComponent);
+                    }
+                }
+            }
+
+            if (size == inOutComponents.Count) {
+                TlpLogger.StaticError(
+                        $"{nameof(TryGetAllPlayerDataComponents)}<{typeof(T).Name}>: {player.DisplayNameUniqueSafe()} is missing PlayerData components!",
+                        null);
+                return false; // a player was not fully initialized
+                // because each player should have AT LEAST one of the components
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Get all PlayerData components of the given type of all players.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="UdonSharpBehaviour.OnPlayerRestored"/> must have been called by VRChat for that player
+        /// to guarantee each player has all PlayerData components assigned.
+        /// </remarks>
+        /// <param name="player"></param>
+        /// <param name="components">all components found or null if not found</param>
+        /// <typeparam name="T">Class-type of the components</typeparam>
+        /// <returns>true if at least one component was for each player, false otherwise</returns>
+        public static bool TryGetPlayerDataComponentsOfAllPlayers<T>(DataList components)
+                where T : Component {
+            var players = VRCPlayerApi.GetPlayers(new VRCPlayerApi[VRCPlayerApi.GetPlayerCount()]);
+            var newComponents = new DataList();
+            foreach (var player in players) {
+                if (!player.TryGetAllPlayerDataComponents<T>(newComponents)) {
+                    return false;
+                }
+            }
+
+            components.AddRange(newComponents);
+            return true;
+        }
+
+        /// <summary>
+        /// Retrieves a player-specific component associated with the given player, using caching to optimize performance.
+        /// </summary>
+        /// <param name="player">The player for whom the component is being retrieved.</param>
+        /// <param name="instigator">The instigating script initiating the retrieval process.</param>
+        /// <param name="cached">A reference to the cached component, if available, to avoid redundant lookups.</param>
+        /// <typeparam name="T">The type of the component to retrieve.</typeparam>
+        /// <returns>The player-specific component of type <typeparamref name="T"/> if found, or null if the component is not restored or unavailable.</returns>
+        public static T GetPlayerComponent<T>(this VRCPlayerApi player, TlpBaseBehaviour instigator, ref T cached)
+                where T : Component {
+            if (Utilities.IsValid(cached)) {
+                return cached;
+            }
+
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            TlpLogger.StaticDebugLog(
+                    $"{nameof(GetPlayerComponent)} for {instigator.GetScriptPathInScene()}: {player.DisplayNameUniqueSafe()}",
+                    null,
+                    instigator);
+#endif
+            #endregion
+
+            if (!PlayerDataRestoredEvent.IsPlayerDataRestored(player)) {
+                TlpLogger.StaticWarning(
+                        $"{nameof(GetPlayerComponent)} for {instigator.GetScriptPathInScene()}: {player.DisplayNameUniqueSafe()} not yet restored",
+                        null,
+                        instigator);
+                return null;
+            }
+
+            if (TryGetPlayerDataComponent(player, out cached)) {
+                return cached;
+            }
+
+            TlpLogger.StaticError(
+                    $"{nameof(GetPlayerComponent)} for {instigator.GetScriptPathInScene()}: Component not found for {player.DisplayNameUniqueSafe()}",
+                    null,
+                    instigator);
+            return null;
+        }
+
+        public static VRCPlayerApi.TrackingDataType ToHandTrackingDataType(this VRC_Pickup.PickupHand hand) {
+            return hand == VRC_Pickup.PickupHand.Left
+                    ? VRCPlayerApi.TrackingDataType.LeftHand
+                    : VRCPlayerApi.TrackingDataType.RightHand;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.Serialization;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Player
@@ -10,23 +11,24 @@ namespace TLP.UdonUtils.Runtime.Player
     [TlpDefaultExecutionOrder(typeof(LateBoneFollower), ExecutionOrder)]
     public class LateBoneFollower : TlpBaseBehaviour
     {
-
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TrackingDataFollower.ExecutionOrder + 1;
 
 
-        public HumanBodyBones humanBodyBone;
+        [FormerlySerializedAs("humanBodyBone")]
+        public HumanBodyBones HumanBodyBone;
 
         public override void PostLateUpdate() {
-            var localPlayer = Networking.LocalPlayer;
-            if (Utilities.IsValid(localPlayer)) {
-                transform.SetPositionAndRotation(
-                        localPlayer.GetBonePosition(humanBodyBone),
-                        localPlayer.GetBoneRotation(humanBodyBone)
-                );
+            if (!HasStartedOk || !enabled) {
+                return;
             }
+
+            transform.SetPositionAndRotation(
+                    LocalPlayer.GetBonePosition(HumanBodyBone),
+                    LocalPlayer.GetBoneRotation(HumanBodyBone)
+            );
         }
     }
 }

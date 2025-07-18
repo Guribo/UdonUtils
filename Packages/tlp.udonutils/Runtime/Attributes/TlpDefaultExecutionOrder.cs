@@ -11,6 +11,7 @@ public class TlpDefaultExecutionOrder : DefaultExecutionOrder
     private static int s_lowestFailedOrder = int.MaxValue;
 
     public TlpDefaultExecutionOrder(Type type, int order) : base(order) {
+#if TLP_DEBUG
         if (!s_executionOrdersByType.Add(type)) {
             Debug.LogWarning($"Type {type} already exists");
             return;
@@ -27,5 +28,6 @@ public class TlpDefaultExecutionOrder : DefaultExecutionOrder
         }
 
         Debug.LogWarning($"ExecutionOrder value {order} of {type} is already in use by {s_executionOrders[order]}");
+#endif
     }
 }

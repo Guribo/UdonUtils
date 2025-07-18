@@ -8,7 +8,7 @@ Please note that there is no explicit documentation available. The code is chang
 
 ## Installation
 
-1. Install/Add VRChat World SDK 3.7 to your project
+1. Install/Add VRChat World SDK 3.8.2 to your project
 2. Install/Add CyanPlayerObjectPool to your project: https://cyanlaser.github.io/CyanPlayerObjectPool/
 3. Install/Add TLP UdonUtils to your project: https://guribo.github.io/TLP/
 
@@ -32,16 +32,60 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 3. PATCH version: backward compatible bug fixes were implemented
    - Implication: after updating remove potential workarounds you added
 
-## Changelog
+### [11.4.1] - 2025-07-18
 
-All notable changes to this project will be documented in this file.
+#### 🐛 Bug Fixes
 
+- *(Readme)* Update VRC SDK version in instructions
+### [11.4.0] - 2025-07-18
+
+#### 🚀 Features
+
+- *(execution-order)* Add AiMotion constants to execution order
+- *(logging)* Make logging methods public
+- *(runtime)* Add LocalPlayer property and improve Start flow
+- *(networking)* Add EnsureNetworkOwnership method
+- *(network)* Add ownership validation to EnsureLocalOwnership
+- *(udonutils)* Add StationState class for tracking station usage
+- Add methods for player data component retrieval
+- *(StationState)* Add validation methods and dependency checks
+- *(UdonCommon)* Enhance player data component retrieval and logging
+- *(UdonCommon)* Add component retrieval with callback support
+- *(UdonUtils)* Add tool for fixing UdonSharp backing behaviours
+- *(LateBoneFollower)* Enhance behavior with safety checks and refactor serialization
+- *(TlpDefaultExecutionOrder)* Disable dev warnings and errors in releases
+
+#### 🐛 Bug Fixes
+
+- *(tracking)* Ensure TrackingDataFollower checks initialization state
+- *(ownership)* Add error message for failed ownership assignment
+- *(ui-event)* Update sync mode to prevent unintended behavior
+- *(PlayerDataRestoredEvent)* Improve error logging for invalid local player and update tag usage
+- *(TlpBaseBehaviour)* Improve error messages for HasStartedOk access violations
+- *(TrackingDataFollower)* Ensure component respects enabled state
+
+#### 🚜 Refactor
+
+- *(UdonCommon)* Rename methods and improve logging consistency
+- *(UdonCommon)* Remove GetPlayerComponentWithCallback method again as it doesn't work as intended in VRC
+
+#### 📚 Documentation
+
+- *(StationState)* Add usage remarks to clarify script behavior
+
+#### 🧪 Testing
+
+- *(UdonTestUtils)* Fix new players being added to list twice
+- *(TestWithLogger)* Fix regression caused by introduced LocalPlayer variable
+
+#### ⚙️ Miscellaneous Tasks
+
+- Bump version and minimum VRC World SDK version to 3.8.2
 ### [11.3.1] - 2025-06-02
 
 #### ⚙️ Miscellaneous Tasks
 
 - Bump version and update VRChat worlds dependency
-
 ### [11.3.0] - 2025-01-12
 
 #### 🚀 Features
@@ -61,7 +105,6 @@ All notable changes to this project will be documented in this file.
 
 - Revert change of deltaTime
 - Update compiled assets
-
 ### [11.2.0] - 2025-01-04
 
 #### 🚀 Features
@@ -85,7 +128,6 @@ All notable changes to this project will be documented in this file.
 - Bump version
 - Remove WorldVersionCheck from NTP example scene
 - Update assets
-
 ### [11.1.0] - 2024-12-22
 
 #### 🚀 Features
@@ -105,7 +147,6 @@ All notable changes to this project will be documented in this file.
 #### 🧪 Testing
 
 - *(TestWithLogger)* Fix missing time sources
-
 ### [11.0.2] - 2024-12-19
 
 #### 🐛 Bug Fixes
@@ -119,13 +160,11 @@ All notable changes to this project will be documented in this file.
 #### 🚜 Refactor
 
 - *(Task)* Magic strings to const variables
-
 ### [11.0.1] - 2024-12-13
 
 #### 🐛 Bug Fixes
 
 - *(TaskScheduler)* Ensure it turns off without tasks
-
 ### [11.0.0] - 2024-12-11
 
 #### 🚀 Features
@@ -204,13 +243,11 @@ All notable changes to this project will be documented in this file.
 - Update assets
 - Update assets
 - Bump version
-
 ### [10.0.1] - 2024-11-02
 
 #### 🐛 Bug Fixes
 
 - *(ExecuteAfter)* Address compiler error caused by special exception
-
 ### [10.0.0] - 2024-11-02
 
 #### 🚀 Features
@@ -221,13 +258,11 @@ All notable changes to this project will be documented in this file.
 #### 🐛 Bug Fixes
 
 - *(RigidbodyVelocityProvider)* Add missing dependency validation
-
 ### [9.0.0] - 2024-08-20
 
 #### 🚀 Features
 
 - Update events and lists, improve error handling, set some missing execution orders
-
 ### [8.2.1] - 2024-08-18
 
 #### 🐛 Bug Fixes
@@ -238,7 +273,6 @@ All notable changes to this project will be documented in this file.
 
 - Prevent error log spam when logger is missing
 - Add support for com.vrchat.worlds 3.7.x
-
 ### [8.2.0] - 2024-06-02
 
 #### 🚀 Features
@@ -248,13 +282,11 @@ All notable changes to this project will be documented in this file.
 #### 🐛 Bug Fixes
 
 - *(UtcTimeSource)* Prevent usage of utc float time due to accuracy problems
-
 ### [8.1.1] - 2024-05-27
 
 #### 🐛 Bug Fixes
 
 - *(NtpTime)* Fix new master not maintaining current time offset when old master leaves
-
 ### [8.1.0] - 2024-05-25
 
 #### 🚀 Features
@@ -268,7 +300,6 @@ All notable changes to this project will be documented in this file.
 #### ⚙️ Miscellaneous Tasks
 
 - Bump version
-
 ### [8.0.0] - 2024-05-25
 
 #### 🚀 Features
@@ -280,7 +311,6 @@ All notable changes to this project will be documented in this file.
 #### 🚜 Refactor
 
 - Remove unused code
-
 ### [7.0.0] - 2024-05-16
 
 #### 🚀 Features
@@ -291,13 +321,11 @@ All notable changes to this project will be documented in this file.
 #### ⚙️ Miscellaneous Tasks
 
 - Update test scene
-
 ### [6.1.2] - 2024-05-10
 
 #### ⚙️ Miscellaneous Tasks
 
 - Support com.vrchat.worlds 3.6.x and Unity 2022.3.22
-
 ### [6.1.1] - 2024-05-03
 
 #### 🚀 Features
@@ -311,56 +339,47 @@ All notable changes to this project will be documented in this file.
 #### ⚙️ Miscellaneous Tasks
 
 - Prevent creating new branches on Github
-
 ### [6.0.0] - 2024-04-19
 
 #### 🚀 Features
 
 - *(TlpNetworkTime)* Add ExactError property and instant Drift compensation with DriftThreshold
 - *(Sync)* [**breaking**] Change network timestamp resolution from float to double
-
 ### [5.3.0] - 2024-04-14
 
 #### 🚀 Features
 
 - *(TlpNetworkTime)* Add ExactError property
-
 ### [5.2.4] - 2024-04-14
 
 #### 🐛 Bug Fixes
 
 - *(VrcNetworkTime)* Ensure that there is a single point of truth throughout a given frame for VRChats network time
-
 ### [5.2.3] - 2024-04-14
 
 #### 🐛 Bug Fixes
 
 - *(Build)* Fix compiler errors caused by test utils
-
 ### [5.2.2] - 2024-04-14
 
 #### 🐛 Bug Fixes
 
 - *(Logging)* Fix logs not mentioning script name correctly
-
 ### [5.2.1] - 2024-04-13
 
 #### 🐛 Bug Fixes
 
 - Split get scene path functions and fix C## error in test utils
-
 ### [5.2.0] - 2024-04-13
 
 #### 🚀 Features
 
 - *(testing)* Add base scripts for easy unit testing
-
 ### [5.1.0] - 2024-04-11
 
 #### 🚀 Features
 
 - *(Prefabs)* Add ui prefabs and fonts
-
 ### [5.0.0] - 2024-04-07
 
 #### 🚀 Features
@@ -375,13 +394,11 @@ All notable changes to this project will be documented in this file.
 #### ⚙️ Miscellaneous Tasks
 
 - Bump version
-
 ### [4.0.1] - 2024-04-07
 
 #### 🐛 Bug Fixes
 
 - *(SanityTest)* Correct object name
-
 ### [4.0.0] - 2024-04-07
 
 #### 🚀 Features
@@ -407,25 +424,21 @@ All notable changes to this project will be documented in this file.
 #### ⚙️ Miscellaneous Tasks
 
 - Bump version
-
 ### [3.0.0] - 2024-03-30
 
 #### ⚙️ Miscellaneous Tasks
 
 - Bump version
-
 ### [3.0.0-rc.3] - 2024-03-30
 
 #### 🚀 Features
 
 - *(TimeSource)* Add DeltaTime getter, reformat codebase
-
 ### [3.0.0-rc.2] - 2024-03-29
 
 #### 🚀 Features
 
 - *(TlpAccurateSyncBehaviour)* Add setup checks to start
-
 ### [3.0.0-rc.1] - 2024-03-28
 
 #### 🚀 Features
@@ -437,7 +450,6 @@ All notable changes to this project will be documented in this file.
 - Append changelog to readme
 - Prepare release 3.0.0
 - Revert deletion of Testing folder
-
 ### [2.0.0] - 2023-11-16
 
 #### 🚀 Features
@@ -469,7 +481,6 @@ All notable changes to this project will be documented in this file.
 #### 🧪 Testing
 
 - Add some missing method implementations
-
 ### [1.1.1] - 2023-10-05
 
 #### 🚀 Features
@@ -479,7 +490,6 @@ All notable changes to this project will be documented in this file.
 #### 🐛 Bug Fixes
 
 - Namespace
-
 ### [1.1.0] - 2023-10-05
 
 #### 🚀 Features
@@ -488,7 +498,6 @@ All notable changes to this project will be documented in this file.
 - Move udon pool into utils
 - Remove no longer needed asmdef
 - Update version
-
 ### [1.0.1] - 2023-10-03
 
 #### 🚀 Features
@@ -497,7 +506,6 @@ All notable changes to this project will be documented in this file.
 - Remove old readme content, update exporter
 - Add legacy folder
 - Update asmdef after update to latest udonsharp version
-
 ### [1.0.0] - 2023-09-13
 
 #### 🚀 Features
@@ -719,7 +727,6 @@ All notable changes to this project will be documented in this file.
 - Add serialized programs
 - Remove programs
 - Update serialization
-
 ### [0.0.3] - 2021-01-08
 
 #### 🚀 Features
@@ -753,7 +760,6 @@ All notable changes to this project will be documented in this file.
 
 - Update
 - Add udonsharp as dependency
-
 ### [0.0.4] - 2021-06-12
 
 #### 🚀 Features
@@ -779,7 +785,4 @@ All notable changes to this project will be documented in this file.
 #### ⚙️ Miscellaneous Tasks
 
 - Change file structure
-
 ### [0.0.1] - 2020-04-22
-
-<!-- generated by git-cliff -->

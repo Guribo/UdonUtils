@@ -41,7 +41,7 @@ namespace TLP.UdonUtils.Runtime.Player
         }
 
         public override void PostLateUpdate() {
-            if (!Utilities.IsValid(Player)) {
+            if (!Utilities.IsValid(Player) || !HasStartedOk || !enabled) {
                 return;
             }
 

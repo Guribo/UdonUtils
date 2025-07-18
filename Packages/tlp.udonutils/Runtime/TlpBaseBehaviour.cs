@@ -121,6 +121,7 @@ namespace TLP.UdonUtils.Runtime
             }
         }
 
+        protected VRCPlayerApi LocalPlayer { get; private set; }
 
         [PublicAPI]
         public bool IsPendingSerialization() {
@@ -228,6 +229,31 @@ namespace TLP.UdonUtils.Runtime
 #endif
         }
 
+        /// <summary>
+        /// Ensures that the local player owns the network instance of the current game object.
+        /// If the local player does not currently have ownership, ownership is set to them.
+        /// </summary>
+        /// <returns>
+        /// Returns true if the local player successfully owns the network instance of the game object,
+        /// false if ownership is not successfully established or the behavior is not initialized correctly.
+        /// </returns>
+        public bool EnsureLocalOwnership() {
+            if (!HasStartedOk) {
+                return false;
+            }
+
+            if (!Networking.IsOwner(gameObject)) {
+                Networking.SetOwner(LocalPlayer, gameObject);
+            }
+
+            if (Networking.IsOwner(gameObject)) {
+                return true;
+            }
+
+            Error($"{this.GetScriptPathInScene()} can not be owned by local player");
+            return false;
+        }
+
         #region RPCs
         /// <summary>
         /// Called by remote clients when they unpause synchronization
@@ -239,7 +265,7 @@ namespace TLP.UdonUtils.Runtime
 #endif
             #endregion
 
-            var unused = MarkNetworkDirty();
+            bool unused = MarkNetworkDirty();
         }
         #endregion
         #endregion
@@ -258,10 +284,17 @@ namespace TLP.UdonUtils.Runtime
         {
             get
             {
-                if (_hasStartedSuccessfully) return true;
-                if (HasReceivedStart || IsReceivingStart) {
-                    Warn(
-                            $"Accessing {nameof(HasStartedOk)} during {nameof(Start)} or after validation failed");
+                if (_hasStartedSuccessfully) {
+                    return true;
+                }
+
+                if (HasReceivedStart) {
+                    Error($"Accessing {nameof(HasStartedOk)} after validation failed");
+                    return false;
+                }
+
+                if (IsReceivingStart) {
+                    Error($"Accessing {nameof(HasStartedOk)} during {nameof(Start)}");
                     return false;
                 }
 
@@ -305,8 +338,12 @@ namespace TLP.UdonUtils.Runtime
         internal void Start() {
 #endif
 
-            if (HasReceivedStart) return;
+            if (HasReceivedStart) {
+                return;
+            }
+
             IsReceivingStart = true;
+
             #region TLP_DEBUG
 #if TLP_DEBUG
             if (!_isEarlyStart) {
@@ -320,7 +357,8 @@ namespace TLP.UdonUtils.Runtime
 #endif
             #endregion
 
-            if (SetupAndValidate()) {
+            LocalPlayer = Networking.LocalPlayer;
+            if (SetupAndValidate() && IsSet(LocalPlayer, nameof(LocalPlayer))) {
                 HasStartedOk = true;
             } else {
                 HasStartedOk = false;
@@ -376,7 +414,7 @@ namespace TLP.UdonUtils.Runtime
 
         protected TlpLogger Logger { private set; get; }
 
-        protected void DebugLog(string message) {
+        public void DebugLog(string message) {
 #if TLP_DEBUG
             if ((int)Severity < (int)ELogLevel.Debug) {
                 return;
@@ -390,7 +428,7 @@ namespace TLP.UdonUtils.Runtime
 #endif
         }
 
-        protected void Info(string message) {
+        public void Info(string message) {
             if ((int)Severity < (int)ELogLevel.Info) {
                 return;
             }
@@ -402,7 +440,7 @@ namespace TLP.UdonUtils.Runtime
             }
         }
 
-        protected void Warn(string message) {
+        public void Warn(string message) {
             if ((int)Severity < (int)ELogLevel.Warning) {
                 return;
             }
@@ -430,7 +468,7 @@ namespace TLP.UdonUtils.Runtime
             gameObject.SetActive(false);
         }
 
-        protected void Error(string message) {
+        public void Error(string message) {
             if ((int)Severity < (int)ELogLevel.Assertion) {
                 return;
             }
@@ -568,6 +606,15 @@ namespace TLP.UdonUtils.Runtime
         #endregion
 
         #region Internal
+        protected bool IsSet(object variable, string variableName) {
+            if (Utilities.IsValid(variable)) {
+                return true;
+            }
+
+            Error($"{variableName} is not set");
+            return false;
+        }
+
         private static bool MissingLoggerLogged() {
             var localPlayer = Networking.LocalPlayer;
             if (!Utilities.IsValid(localPlayer)) {

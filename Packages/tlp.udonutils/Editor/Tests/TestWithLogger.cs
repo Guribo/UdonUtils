@@ -51,10 +51,15 @@ namespace TLP.UdonUtils.Editor.Tests
             TlpLogger.Severity = ELogLevel.Warning;
             TlpLogger.TimeSource = new GameObject(nameof(ConstantTime)).AddComponent<ConstantTime>();
             TlpLogger.FrameCount = new GameObject(nameof(ConstantFrameCount)).AddComponent<ConstantFrameCount>();
-            TlpLogger.OnEnable();
 
             UdonTestEnvironment = new UdonTestUtils.UdonTestEnvironment();
             LocalPlayer = UdonTestEnvironment.CreatePlayer();
+            TlpLogger.OnEnable();
+        }
+
+        [Test]
+        public void SanityTest() {
+            Assert.IsTrue(true);
         }
 
         [TearDown]

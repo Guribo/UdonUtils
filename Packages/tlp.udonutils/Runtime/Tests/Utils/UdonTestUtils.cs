@@ -260,7 +260,6 @@ namespace TLP.UdonUtils.Runtime.Tests.Utils
 
             public VRCPlayerApi CreatePlayer(bool master = false) {
                 var newPlayer = new VRCPlayerApi();
-                newPlayer.AddToList();
                 var player = new PlayerData(newPlayer);
 
                 if (newPlayer.isLocal) {

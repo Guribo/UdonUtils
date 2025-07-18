@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace TLP.UdonUtils.Runtime.Events
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
     [TlpDefaultExecutionOrder(typeof(UiEvent), ExecutionOrder)]
     public class UiEvent : UdonEvent

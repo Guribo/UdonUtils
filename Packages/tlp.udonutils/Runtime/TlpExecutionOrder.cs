@@ -27,7 +27,10 @@ namespace TLP.UdonUtils.Runtime
         public const int PlayerMotionStart = VehicleMotionEnd + 1;
         public const int PlayerMotionEnd = PlayerMotionStart + SectionWidth;
 
-        public const int WeaponsStart = PlayerMotionEnd + 1;
+        public const int AiMotionStart = PlayerMotionEnd + 1;
+        public const int AiMotionEnd = AiMotionStart + SectionWidth;
+
+        public const int WeaponsStart = AiMotionEnd + 1;
         public const int WeaponsEnd = WeaponsStart + SectionWidth;
 
         public const int CameraStart = WeaponsEnd + 1;
@@ -63,6 +66,8 @@ namespace TLP.UdonUtils.Runtime
                 { VehicleMotionEnd, nameof(VehicleMotionEnd) },
                 { PlayerMotionStart, nameof(PlayerMotionStart) },
                 { PlayerMotionEnd, nameof(PlayerMotionEnd) },
+                { AiMotionStart, nameof(AiMotionStart) },
+                { AiMotionEnd, nameof(AiMotionEnd) },
                 { WeaponsStart, nameof(WeaponsStart) },
                 { WeaponsEnd, nameof(WeaponsEnd) },
                 { CameraStart, nameof(CameraStart) },

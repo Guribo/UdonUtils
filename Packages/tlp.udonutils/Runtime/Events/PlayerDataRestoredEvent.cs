@@ -61,11 +61,11 @@ namespace TLP.UdonUtils.Runtime.Events
         public static bool IsPlayerDataRestored(VRCPlayerApi player) {
             var localPlayer = Networking.LocalPlayer;
             if (!Utilities.IsValid(localPlayer)) {
-                Debug.LogWarning($"{nameof(IsPlayerDataRestored)}: {nameof(localPlayer)} invalid");
+                TlpLogger.StaticError($"{nameof(IsPlayerDataRestored)}: {nameof(localPlayer)} invalid", null);
                 return false;
             }
 
-            string playerTag = localPlayer.GetPlayerTag(PlayerTagPrefix + player.DisplayNameUniqueSafe());
+            string playerTag = localPlayer.GetPlayerTag($"{PlayerTagPrefix}{player.DisplayNameUnique()}");
 
             #region TLP_DEBUG
 #if TLP_DEBUG
