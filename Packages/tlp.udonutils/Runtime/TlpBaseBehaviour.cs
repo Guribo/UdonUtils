@@ -303,9 +303,13 @@ namespace TLP.UdonUtils.Runtime
                     return false;
                 }
 
+#if TLP_DEBUG
                 _isEarlyStart = true;
+#endif
                 Start();
+#if TLP_DEBUG
                 _isEarlyStart = false;
+#endif
                 return _hasStartedSuccessfully;
             }
             set
@@ -319,7 +323,9 @@ namespace TLP.UdonUtils.Runtime
         }
 
         private bool _hasStartedSuccessfully;
+#if TLP_DEBUG
         private bool _isEarlyStart;
+#endif
         #endregion
 
 
@@ -669,7 +675,6 @@ namespace TLP.UdonUtils.Runtime
 
         #region Debugging
 #if TLP_DEBUG
-
         protected void DebugLog_OnEvent(string eventName) {
             DebugLog($"{nameof(OnEvent)}: {eventName} (Instigator: {EventInstigator.GetScriptPathInScene()})");
         }

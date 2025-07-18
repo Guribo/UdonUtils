@@ -32,6 +32,17 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 3. PATCH version: backward compatible bug fixes were implemented
    - Implication: after updating remove potential workarounds you added
 
+### [11.4.3] - 2025-07-18
+
+#### 🚀 Features
+
+- *(TlpBaseBehaviour)* Add debug conditional for `_isEarlyStart` flag
+- *(TlpDefaultExecutionOrder)* Add debug conditional around execution order tracking
+- *(TlpBaseBehaviour)* Add debug conditional around `_isEarlyStart` flag
+
+#### ⚙️ Miscellaneous Tasks
+
+- Bump package version to 11.4.2
 ### [11.4.1] - 2025-07-18
 
 #### 🐛 Bug Fixes
