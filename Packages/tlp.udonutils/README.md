@@ -32,6 +32,11 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 3. PATCH version: backward compatible bug fixes were implemented
    - Implication: after updating remove potential workarounds you added
 
+### [11.5.2] - 2025-10-02
+
+#### 🐛 Bug Fixes
+
+- Wrong text prefab reference breaking some prefabs
 ### [11.5.1] - 2025-10-02
 
 #### 🐛 Bug Fixes
