@@ -2,50 +2,86 @@
 using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Extensions;
 using TLP.UdonUtils.Runtime.Logger;
-using TLP.UdonUtils.Runtime.Player;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
 using VRC.SDKBase;
 
+#if UNITY_EDITOR
+using TLP.UdonUtils.Runtime.Events;
+using UnityEditor;
+#endif
+
+#if UNITY_EDITOR
+namespace TLP.UdonUtils.Editor.Events
+{
+    [CustomEditor(typeof(PlayerDataRestoredEvent))]
+    public class PlayerDataRestoredEventEditor : UnityEditor.Editor
+    {
+        private const string Description =
+                "Event system that tracks when players have their persistent data restored in VRChat worlds.\n\n" +
+                "This component automatically detects when a player's data is loaded and maintains a registry of restored players using player tags. " +
+                "It stores restoration timestamps and provides both event notifications and static methods to check player data status.\n\n" +
+                "Key Features:\n" +
+                "• Raises events when player data is restored\n" +
+                "• Maintains a list of players with restored data\n" +
+                "• Provides static IsPlayerDataRestored() method for queries\n" +
+                "• Automatically cleans up when players leave\n" +
+                "• Uses player tags for persistent tracking across the world\n\n" +
+                "Use this to coordinate systems that depend on player data being available, such as user preferences, save data, or personalized content.";
+
+        public override void OnInspectorGUI() {
+            EditorGUILayout.HelpBox(Description, MessageType.Info);
+
+            DrawDefaultInspector();
+        }
+    }
+}
+#endif
+
 namespace TLP.UdonUtils.Runtime.Events
 {
-    /// <summary>
-    /// Notifies that a player had its persistent data loaded,
-    /// stores this information in the local players playerTags
-    /// using the <see cref="PlayerTagPrefix"/> + the players displayname as key,
-    /// the value is the current time since level load (double as culture invariant string)
-    /// </summary>
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
     [TlpDefaultExecutionOrder(typeof(PlayerDataRestoredEvent), ExecutionOrder)]
     public class PlayerDataRestoredEvent : UdonEvent
     {
+        #region ExecutionOrder
+        [PublicAPI]
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
         public new const int ExecutionOrder = TlpExecutionOrder.WorldInitStart + 10;
+        #endregion
 
-        public const string PlayerTagPrefix = "TLP/PlayerDataRestoredEvent/PlayerName/";
+        private const string PlayerTagPrefix = "TLP/PlayerDataRestoredEvent/PlayerName/";
+
+        [PublicAPI]
         public VRCPlayerApi RestoredPlayer { get; private set; }
+
+        [PublicAPI]
         public readonly DataList RestoredPlayers = new DataList();
 
         public override void OnPlayerRestored(VRCPlayerApi player) {
+            string uniquePlayerName = player.DisplayNameUniqueSafe();
+
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog($"{nameof(OnPlayerRestored)}: {uniquePlayerName}");
+#endif
+            #endregion
+
             if (!Utilities.IsValid(player)) {
                 Error($"{nameof(OnPlayerRestored)}: invalid player received");
                 return;
             }
 
-            var localPlayer = Networking.LocalPlayer;
-            if (!Utilities.IsValid(localPlayer)) {
-                Error($"{nameof(OnPlayerRestored)}: {nameof(localPlayer)} invalid");
+            if (!HasStartedOk) {
                 return;
             }
 
-            string uniquePlayerName = player.DisplayNameUnique();
-            Info($"{nameof(OnPlayerRestored)}: {uniquePlayerName}");
-
             // store the information globally accessible in the player tags until the player leaves again
-            localPlayer.SetPlayerTag(
+            LocalPlayer.SetPlayerTag(
                     PlayerTagPrefix + uniquePlayerName,
                     Time.timeSinceLevelLoadAsDouble.ToString(CultureInfo.InvariantCulture));
             if (!RestoredPlayers.Contains(uniquePlayerName)) {
@@ -54,7 +90,10 @@ namespace TLP.UdonUtils.Runtime.Events
 
             // notify all listeners with the restored player temporarily available
             RestoredPlayer = player;
-            Raise(this);
+            if (!Raise(this)) {
+                Error($"{nameof(OnPlayerRestored)}: Failed to raise event");
+            }
+
             RestoredPlayer = null;
         }
 
@@ -83,43 +122,48 @@ namespace TLP.UdonUtils.Runtime.Events
         /// </summary>
         /// <param name="player"></param>
         public override void OnPlayerLeft(VRCPlayerApi player) {
-            if (!Utilities.IsValid(player)) {
-                Error($"{nameof(OnPlayerLeft)}: invalid player received");
-                SendCustomEventDelayedFrames(nameof(UpdateRestoredPlayers), 1);
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog($"{nameof(OnPlayerLeft)}: {player.DisplayNameUniqueSafe()}");
+#endif
+            #endregion
+
+            if (!HasStartedOk) {
                 return;
             }
 
-            if (!Utilities.IsValid(Networking.LocalPlayer)) {
+            if (!Utilities.IsValid(player)) {
+                Error($"{nameof(OnPlayerLeft)}: invalid player received");
+                SendCustomEventDelayedFrames(nameof(Delayed_UpdateRestoredPlayers), 1);
                 return;
             }
 
             string playerName = player.displayName;
-            Networking.LocalPlayer.SetPlayerTag(PlayerTagPrefix + playerName);
+            LocalPlayer.SetPlayerTag(PlayerTagPrefix + playerName);
             RestoredPlayers.RemoveAll(playerName);
         }
 
         #region Overrides
         public override void OnEnable() {
             base.OnEnable();
-            UpdateRestoredPlayers();
+            Delayed_UpdateRestoredPlayers();
         }
         #endregion
 
         #region Delayed
-        public void UpdateRestoredPlayers() {
+        public void Delayed_UpdateRestoredPlayers() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(UpdateRestoredPlayers));
+            DebugLog(nameof(Delayed_UpdateRestoredPlayers));
 #endif
             #endregion
 
-            var localPlayer = Networking.LocalPlayer;
-            if (!Utilities.IsValid(localPlayer)) {
+            if (!HasStartedOk) {
                 return;
             }
 
             var existingPlayers = CreateExistingPlayerLookupTable(out var existingPlayerNames);
-            RemovePlayersWhoFailedLeaving(existingPlayerNames, localPlayer);
+            RemovePlayersWhoFailedLeaving(existingPlayerNames, LocalPlayer);
             AddRestoredButMissingPlayers(existingPlayers);
         }
         #endregion

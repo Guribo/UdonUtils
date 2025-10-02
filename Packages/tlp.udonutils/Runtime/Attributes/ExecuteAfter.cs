@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -78,6 +77,12 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
             int max = 0;
             foreach (var type in typesToDependOn) {
                 max = DetermineMaxOrderFromType(ownType, type, dependency, max);
+            }
+
+            if (max == int.MaxValue) {
+                Debug.LogError($"Can not set {ownType.Name} to {max} + 1 due already having reached int.MaxValue");
+                dependency.Order = max;
+                return max;
             }
 
             // as we want to execute AFTER the found, highest execution order value we increment by 1

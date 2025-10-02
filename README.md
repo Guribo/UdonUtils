@@ -32,6 +32,36 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 3. PATCH version: backward compatible bug fixes were implemented
    - Implication: after updating remove potential workarounds you added
 
+### [11.5.0] - 2025-10-02
+
+#### 🚀 Features
+
+- Add TlpFixedUpdateRate for adjustable fixed update rate
+- Add experimental Unity scene for NTP tests
+- *(TestWithLogger)* Add TlpNetworkTime initialization helper
+- *(TlpDefaultExecutionOrder)* Add validation for type consistency and duplicate target types
+- *(UdonUtils)* Add EnableDuringOccupation component for trigger-based GameObject toggling
+- *(UdonUtils)* Add PlayOnEnable for audio playback handling
+- *(TlpDefaultExecutionOrder)* Add lower limit validation for execution order
+- *(TlpDefaultExecutionOrder)* Add upper limit validation for execution order
+- *(UdonUtils)* Add ResultHelper for standardized success/error handling
+- *(UdonUtils)* Enhance ResultHelper with null checks and reference unwrapping
+- *(PlayerDataRestoredEvent)* Add custom editor and enhance debugging
+- *(UdonUtils)* Adjust fixed update rate constraints and cleanup unused code
+- *(UdonUtils)* Add FrameRateRandomizer for fluctuating framerate simulation
+- Add Domain Reload menu option for development
+
+#### 🎨 Styling
+
+- Improve execution order logs
+
+#### 🧪 Testing
+
+- Fix dependency issue caused by max int execution order in test setup
+
+#### ⚙️ Miscellaneous Tasks
+
+- Bump version and dependencies
 ### [11.4.3] - 2025-07-18
 
 #### 🚀 Features

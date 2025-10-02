@@ -5,6 +5,8 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using NUnit.Framework;
+using TLP.UdonUtils.Runtime.EditorOnly;
+using TLP.UdonUtils.Runtime.Events;
 using TLP.UdonUtils.Runtime.Logger;
 using TLP.UdonUtils.Runtime.Sources.FrameCount;
 using TLP.UdonUtils.Runtime.Sources.Time;
@@ -27,6 +29,13 @@ namespace TLP.UdonUtils.Editor.Tests
 
         protected UdonTestUtils.UdonTestEnvironment UdonTestEnvironment;
         protected VRCPlayerApi LocalPlayer;
+        protected ConstantTime GameTime, RealNetworkTime;
+        protected ConstantFrameCount FrameCount;
+
+        /// <summary>
+        /// Create on-demand with <see cref="CreateTlpNetworkTime"/>
+        /// </summary>
+        protected TlpNetworkTime NetworkTime;
 
         public void ClearLog() {
             var assembly = Assembly.GetAssembly(typeof(UnityEditor.Editor));
@@ -164,6 +173,18 @@ namespace TLP.UdonUtils.Editor.Tests
             while (Time.realtimeSinceStartup - time < duration) {
                 yield return null;
             }
+        }
+
+        protected void CreateTlpNetworkTime() {
+            NetworkTime = new GameObject("TLP_NetworkTime").AddComponent<TlpNetworkTime>();
+            GameTime = new GameObject("TLP_GameTime").AddComponent<ConstantTime>();
+            RealNetworkTime = new GameObject("TLP_RealNetworkTime").AddComponent<ConstantTime>();
+            FrameCount = new GameObject("TLP_FrameCount").AddComponent<ConstantFrameCount>();
+            NetworkTime.RealNetworkTime = RealNetworkTime;
+            NetworkTime.GameTime = GameTime;
+            NetworkTime.FrameCount = FrameCount;
+            NetworkTime.OnReferenceTimeUpdated = new GameObject("OnReferenceTimeUpdated").AddComponent<UdonEvent>();
+            NetworkTime.Start();
         }
     }
 }
