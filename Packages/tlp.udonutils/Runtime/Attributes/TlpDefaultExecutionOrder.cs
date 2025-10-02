@@ -1,12 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using TLP.UdonUtils.Runtime.Logger;
+
+using UnityEngine;
+#if TLP_DEBUG
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-using UnityEngine;
-#if TLP_DEBUG
+using System.Collections.Generic;
+using System.Text;
+using TLP.UdonUtils.Runtime.Logger;
 using System.Linq;
 using System.Reflection;
 #endif
@@ -14,7 +15,7 @@ using System.Reflection;
 [AttributeUsage(AttributeTargets.Class)]
 public class TlpDefaultExecutionOrder : DefaultExecutionOrder
 {
-#if UNITY_EDITOR
+#if TLP_DEBUG
     [MenuItem("Tools/TLP/UdonUtils/TLP ExecutionOrder/Validate Type Consistency")]
     public static void ValidateTlpDefaultExecutionOrder() {
         var executingAssembly = Assembly.GetExecutingAssembly();

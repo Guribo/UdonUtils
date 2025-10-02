@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: HorizontalLookAt
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 84be70a347e7f7548a6dbd2f39544264,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 09492df2aca9e0c48bfe0dc24e358a3d,
     type: 2}
   udonAssembly: ".data_start\r\n\r\n    .export weight\r\n    \r\n    __instance_0:
     %VRCUdonUdonBehaviour, this\r\n    __symbolName_0: %SystemString, null\r\n   
