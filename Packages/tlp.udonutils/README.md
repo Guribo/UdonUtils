@@ -32,6 +32,17 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 3. PATCH version: backward compatible bug fixes were implemented
    - Implication: after updating remove potential workarounds you added
 
+### [11.5.3] - 2025-10-03
+
+#### 🧪 Testing
+
+- Update test runner prefab
+
+#### ⚙️ Miscellaneous Tasks
+
+- Refresh demo worlds
+- Update version
+- Refresh license
 ### [11.5.2] - 2025-10-02
 
 #### 🐛 Bug Fixes

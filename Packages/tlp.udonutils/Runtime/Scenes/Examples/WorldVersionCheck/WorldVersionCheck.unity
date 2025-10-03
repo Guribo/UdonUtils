@@ -192,6 +192,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   spawns:
   - {fileID: 1370159669}
+  spawnRadius: 0
   spawnOrder: 2
   spawnOrientation: 0
   ReferenceCamera: {fileID: 1610477115}
@@ -701,17 +702,17 @@ PrefabInstance:
     - target: {fileID: -4061843791516839671, guid: 2d80445bcefab2d40827d6a222e8a947,
         type: 3}
       propertyPath: Build
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -4061843791516839671, guid: 2d80445bcefab2d40827d6a222e8a947,
         type: 3}
       propertyPath: Timestamp
-      value: 1736661039
+      value: 1759524501
       objectReference: {fileID: 0}
     - target: {fileID: -4061843791516839671, guid: 2d80445bcefab2d40827d6a222e8a947,
         type: 3}
       propertyPath: SyncedBuild
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: -4061843791516839671, guid: 2d80445bcefab2d40827d6a222e8a947,
         type: 3}
@@ -803,6 +804,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 6244067674548546232, guid: 2d80445bcefab2d40827d6a222e8a947,
         type: 3}
+    - target: {fileID: 7433314128707768366, guid: 2d80445bcefab2d40827d6a222e8a947,
+        type: 3}
+      propertyPath: _syncMethod
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7741135631674443076, guid: 2d80445bcefab2d40827d6a222e8a947,
         type: 3}
       propertyPath: serializationData.Prefab
