@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: TlpSingleton
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: bb045dcdca5418f458f45c7cafbf6786,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 95532b7e3d06cda4ab0502306c44e630,
     type: 2}
   udonAssembly: 
   assemblyError: 

@@ -57,6 +57,7 @@ MonoBehaviour:
     SerializationNodes: []
   _udonSharpBackingUdonBehaviour: {fileID: 7345900874189439178}
   AutoRetrySendOnFailure: 1
+  PauseSynchronization: 0
   Severity: 3
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
@@ -135,7 +136,7 @@ PrefabInstance:
     - target: {fileID: 4744860875553947781, guid: 35c94401a6fc51848b296cf017c164b2,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.0001287582
+      value: 0.00001706399
       objectReference: {fileID: 0}
     - target: {fileID: 4767075559095277335, guid: 35c94401a6fc51848b296cf017c164b2,
         type: 3}
@@ -181,6 +182,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.y
       value: 720
+      objectReference: {fileID: 0}
+    - target: {fileID: 4767075559095277335, guid: 35c94401a6fc51848b296cf017c164b2,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4767075559095277335, guid: 35c94401a6fc51848b296cf017c164b2,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4767075559095277335, guid: 35c94401a6fc51848b296cf017c164b2,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4767075559095277335, guid: 35c94401a6fc51848b296cf017c164b2,
         type: 3}
@@ -276,7 +292,7 @@ PrefabInstance:
     - target: {fileID: 6399851813772155178, guid: 35c94401a6fc51848b296cf017c164b2,
         type: 3}
       propertyPath: m_Size
-      value: 0.999947
+      value: 0.99999666
       objectReference: {fileID: 0}
     - target: {fileID: 8068367645899776678, guid: 35c94401a6fc51848b296cf017c164b2,
         type: 3}
@@ -286,6 +302,11 @@ PrefabInstance:
     - target: {fileID: 8068367645899776678, guid: 35c94401a6fc51848b296cf017c164b2,
         type: 3}
       propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8068367645899776678, guid: 35c94401a6fc51848b296cf017c164b2,
+        type: 3}
+      propertyPath: m_AnchorMin.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8405989591180086734, guid: 35c94401a6fc51848b296cf017c164b2,

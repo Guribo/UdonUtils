@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: TestPlayerDataPersistence
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 3712a0217040f5749936130139b248bd,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 9f651caf446904d478d87e6f6568381f,
     type: 2}
   udonAssembly: 
   assemblyError: 

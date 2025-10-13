@@ -15,7 +15,7 @@ using System.Reflection;
 [AttributeUsage(AttributeTargets.Class)]
 public class TlpDefaultExecutionOrder : DefaultExecutionOrder
 {
-#if TLP_DEBUG
+#if TLP_DEBUG && UNITY_EDITOR
     [MenuItem("Tools/TLP/UdonUtils/TLP ExecutionOrder/Validate Type Consistency")]
     public static void ValidateTlpDefaultExecutionOrder() {
         var executingAssembly = Assembly.GetExecutingAssembly();
@@ -27,7 +27,7 @@ public class TlpDefaultExecutionOrder : DefaultExecutionOrder
 #endif
 
 
-#if TLP_DEBUG
+#if TLP_DEBUG && UNITY_EDITOR
     private static readonly Dictionary<int, Type> s_executionOrders = new Dictionary<int, Type>();
     private static readonly Dictionary<Type, int> s_knownTypes = new Dictionary<Type, int>();
 
@@ -106,7 +106,7 @@ public class TlpDefaultExecutionOrder : DefaultExecutionOrder
 #endif
     public TlpDefaultExecutionOrder(Type type, int newExecutionOrder, int lowerLimit = int.MinValue, int upperLimit = int.MaxValue) : base(
             newExecutionOrder) {
-#if TLP_DEBUG
+#if TLP_DEBUG && UNITY_EDITOR
         _targetType = type;
 
         if (newExecutionOrder <= lowerLimit) {

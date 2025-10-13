@@ -13,6 +13,29 @@ using VRC.Udon.Common.Interfaces;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
+#if UNITY_EDITOR
+using UdonSharpEditor;
+using UnityEditor;
+#endif
+
+#if UNITY_EDITOR
+namespace TLP.UdonVoiceUtils.Editor.Core
+{
+    /// <summary>
+    /// Custom base editor to be used to easily provide some description to a script
+    /// </summary>
+    public abstract class TlpBehaviourEditor : UnityEditor.Editor
+    {
+        protected abstract string GetDescription();
+        public override void OnInspectorGUI() {
+            if (UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target, false, false)) return;
+            EditorGUILayout.HelpBox(GetDescription(), MessageType.Info);
+            base.OnInspectorGUI();
+        }
+    }
+}
+#endif
+
 namespace TLP.UdonUtils.Runtime
 {
     /// <summary>
