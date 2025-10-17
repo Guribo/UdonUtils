@@ -1,7 +1,7 @@
 {
   "name": "tlp.udonutils",
   "displayName": "TLP UdonUtils",
-  "version": "11.5.7",
+  "version": "11.5.8",
   "description": "Contains the base scripts/tools for TLP packages as well as prefabs and potentially helpful scripts for VRChat worlds.",
   "gitDependencies": {},
   "legacyFolders": {
@@ -15,7 +15,7 @@
   },
   "vpmDependencies": {
     "com.vrchat.worlds": "^3.9.0",
-    "com.cyan.playerobjectpool": "^1.1.9"
+    "com.cyan.playerobjectpool": "^1.1.2"
   },
   "unity": "2022.3"
 }
