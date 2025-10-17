@@ -32,6 +32,11 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 3. PATCH version: backward compatible bug fixes were implemented
    - Implication: after updating remove potential workarounds you added
 
+### [11.5.7] - 2025-10-17
+
+#### 🐛 Bug Fixes
+
+- *(package.json)* Try yet another version pattern
 ### [11.5.6] - 2025-10-17
 
 #### 🐛 Bug Fixes
