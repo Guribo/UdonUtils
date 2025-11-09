@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Assertions;
+using VRC.SDK3.Rendering;
 using VRC.SDKBase;
 using Object = UnityEngine.Object;
 
@@ -64,12 +65,15 @@ namespace TLP.UdonUtils.Runtime.Tests.Utils
                 public readonly VRCPlayerApi VrcPlayerApi;
                 public readonly int ID;
                 public readonly HashSet<GameObject> Owns = new HashSet<GameObject>();
-                public float VoiceRangeFar = 25f;
-                public float VoiceRangeNear = 1f;
                 public float HitPoints;
                 public readonly Dictionary<string, string> Tags = new Dictionary<string, string>();
                 public bool IsMaster;
                 public float EyeHeight = 1.5f;
+                public float VoiceGain;
+                public bool VoiceLowPass;
+                public float VoiceRangeFar = 25f;
+                public float VoiceDistanceNear = 1f;
+                public float VoiceVolumetricRadius;
                 public bool InVr { get; set; } = false;
 
 
@@ -110,11 +114,17 @@ namespace TLP.UdonUtils.Runtime.Tests.Utils
                         new VRCPlayerApi.TrackingData(player.GetPosition(), player.GetRotation());
                 VRCPlayerApi._GetPlayerById = i => _idToPlayer.ContainsKey(i) ? _idToPlayer[i].VrcPlayerApi : null;
 
-                VRCPlayerApi._SetVoiceGain = (api, f) => { };
-                VRCPlayerApi._SetVoiceLowpass = (api, f) => { };
-                VRCPlayerApi._SetVoiceDistanceFar = (api, value) => _vrcPlayerToPlayer[api].VoiceRangeFar = value;
-                VRCPlayerApi._SetVoiceDistanceNear = (api, f) => { };
-                VRCPlayerApi._SetVoiceVolumetricRadius = (api, f) => { };
+                VRCPlayerApi._GetVoiceGain = api => _vrcPlayerToPlayer[api].VoiceGain;
+                VRCPlayerApi._GetVoiceLowpass = api => _vrcPlayerToPlayer[api].VoiceLowPass;
+                VRCPlayerApi._GetVoiceDistanceFar = api => _vrcPlayerToPlayer[api].VoiceRangeFar;
+                VRCPlayerApi._GetVoiceDistanceNear = api => _vrcPlayerToPlayer[api].VoiceDistanceNear;
+                VRCPlayerApi._GetVoiceVolumetricRadius = api => _vrcPlayerToPlayer[api].VoiceVolumetricRadius;
+
+                VRCPlayerApi._SetVoiceGain = (api, f) => { _vrcPlayerToPlayer[api].VoiceGain = f;};
+                VRCPlayerApi._SetVoiceLowpass = (api, f) => { _vrcPlayerToPlayer[api].VoiceLowPass = f;};
+                VRCPlayerApi._SetVoiceDistanceFar =(api, f) => { _vrcPlayerToPlayer[api].VoiceRangeFar = f;};
+                VRCPlayerApi._SetVoiceDistanceNear = (api, f) => { _vrcPlayerToPlayer[api].VoiceDistanceNear = f;};
+                VRCPlayerApi._SetVoiceVolumetricRadius = (api, f) => { _vrcPlayerToPlayer[api].VoiceVolumetricRadius = f;};
 
                 VRCPlayerApi._SetAvatarAudioGain = (api, f) => { };
                 VRCPlayerApi._SetAvatarAudioCustomCurve = (api, f) => { };
@@ -170,9 +180,6 @@ namespace TLP.UdonUtils.Runtime.Tests.Utils
                 VRCPlayerApi._TeleportToOrientationLerp = TeleportToOrientationLerp;
                 VRCPlayerApi._TeleportTo = TeleportTo;
                 VRCPlayerApi._TeleportToOrientation = TeleportToOrientation;
-
-                VRCPlayerApi._GetVoiceDistanceFar = api => _vrcPlayerToPlayer[api].VoiceRangeFar;
-                VRCPlayerApi._GetVoiceDistanceNear = api => _vrcPlayerToPlayer[api].VoiceRangeNear;
             }
 
             private void TeleportToOrientation(

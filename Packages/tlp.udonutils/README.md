@@ -4,13 +4,14 @@
 
 Contains the base scripts/tools for TLP packages as well as prefabs and potentially helpful scripts for VRChat worlds.
 
-Please note that there is no explicit documentation available. The code is changing less frequently now and relatively stableand where it made sense there is some documentation in the code.
+Please note that there is no explicit documentation available.
+The code contains tooltips and descriptions of classes where it makes sense.
+Theses are being added over time where it makes sense.
 
 ## Installation
 
 1. Install/Add VRChat World SDK 3.9.0 to your project
-2. Install/Add CyanPlayerObjectPool to your project: https://cyanlaser.github.io/CyanPlayerObjectPool/
-3. Install/Add TLP UdonUtils to your project: https://guribo.github.io/TLP/
+2. Install/Add TLP UdonUtils to your project: https://guribo.github.io/TLP/
 
 ## Setup
 
@@ -32,6 +33,16 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 3. PATCH version: backward compatible bug fixes were implemented
    - Implication: after updating remove potential workarounds you added
 
+### [12.0.0] - 2025-11-09
+
+#### 🚀 Features
+
+- *(UdonTestUtils)* Implement some missing methods
+- *(Adapters)* [**breaking**] Remove Cyan Object Pool adapter and dependencies (use VRChat player objects instead)
+
+#### ⚙️ Miscellaneous Tasks
+
+- Remove repeated docker image building
 ### [11.5.8] - 2025-10-17
 
 #### 🐛 Bug Fixes

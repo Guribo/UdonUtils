@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: EnableDuringOccupation
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 7832e5e6063e6c34085b269b5111d11c,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 78252cd5f6caccf4dbba0a5b905b44fa,
     type: 2}
   udonAssembly: 
   assemblyError: 
