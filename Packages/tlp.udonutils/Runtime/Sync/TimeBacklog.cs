@@ -15,6 +15,7 @@ namespace TLP.UdonUtils.Runtime.Sync
     public abstract class TimeBacklog : TlpBaseBehaviour
     {
         public override int ExecutionOrderReadOnly => ExecutionOrder;
+        public int Length => _timeStamps.Count;
 
         [PublicAPI]
         public new const int ExecutionOrder = TimeSnapshot.ExecutionOrder + 1;
@@ -53,6 +54,15 @@ namespace TLP.UdonUtils.Runtime.Sync
             return _timeStamps.Count > 1
                    && serverTime >= _timeStamps[0].Double
                    && serverTime <= _timeStamps[_timeStamps.Count - 1].Double;
+        }
+
+        public bool TryGetFirstTimestamp(out double timestamp) {
+            timestamp = 0;
+            if (_timeStamps.Count == 0) {
+                return false;
+            }
+            timestamp = _timeStamps[0].Double;
+            return true;
         }
     }
 }

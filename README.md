@@ -13,12 +13,66 @@ Theses are being added over time where it makes sense.
 1. Install/Add VRChat World SDK 3.9.0 to your project
 2. Install/Add TLP UdonUtils to your project: https://guribo.github.io/TLP/
 
+## Uninstall
+
+### Via Tools (recommended)
+
+1. Remove TLP UdonUtils from your project via VCC or [ALCOM](https://vrc-get.anatawa12.com/alcom/)
+2. Go to **Edit > Project Settings > Player > Script Compilation** and remove `TLP_UDONUTILS` from the list
+3. You may also remove anything else starting with `TLP_` 
+   1. Only applies if you used other TLP packages or enabled debug/test mode
+
+### Manually via Filesystem
+
+1. Remove the `Packages/tlp.udonutils` folder from your project
+2. Remove the following lines from `Packages/packages-lock.json`:
+   ```json
+    "tlp.udonutils": {
+      "version": "file:tlp.udonutils",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+   ```
+3. Remove in a similar fassion from the `Packages/vpm-manifest.json` if present in there
+4. In the Unity project go to **Edit > Project Settings > Player > Script Compilation** and remove `TLP_UDONUTILS` from the list
+5. You may also remove anything else starting with `TLP_`
+   1. Only applies if you used other TLP packages or enabled debug/test mode
+
 ## Setup
 
 1. Add `TLP_Essentials` prefab to your scene to get the core components
    1. TLPLogger - *for logging anything TLP related (mandatory)*
    2. WorldVersionCheck - *Warns users if a player with a new world version joins*
    3. TLPNetworkTime - *Much more accurate VRC network time provider (sub-millisecond accuracy)*
+
+## Enable Debug Mode
+
+> Disclaimer: There is no negative performance impact when debug mode is disabled
+> as the logging code is not compiled into builds.
+
+Debug mode is disabled by default. When enabled it will log additional information to the console.
+This logging is quite excessive and should only be enabled for debugging purposes.
+If you see no debug logs in the console/log files, ensure that the 
+
+1. Go to **Edit > Project Settings > Player > Script Compilation** and add `TLP_DEBUG` to the list
+2. Find the `TLP_Logger` prefab in your scene 
+3. Set to logging severity `Debug`, be default it is set to `Info`.
+
+## Disable Debug Mode
+
+1. Go to **Edit > Project Settings > Player > Script Compilation** and remove `TLP_DEBUG` from the list
+2. Find the `TLP_Logger` prefab in your scene and set to logging severity `Info` or higher
+
+## Test Mode
+
+Similar to debug mode, test mode is disabled by default but can be enabled 
+by adding `TLP_UNIT_TESTING` to the list of script compilation symbols.
+
+Test mode is intended to be used for unit testing and should not be enabled in production builds.
+It will enable certain workarounds for parts of the VRChat SDK that can not easily be mocked.
+
+> Note: Releases of UdonUtils don't contain the unit tests used for development as they are not relevant for 99% of users.
 
 ## Versioning
 
@@ -33,6 +87,35 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 3. PATCH version: backward compatible bug fixes were implemented
    - Implication: after updating remove potential workarounds you added
 
+### [13.0.0] - 2026-04-12
+
+#### 🚀 Features
+
+- *(LatencyTester)* Use NetworkEvents by default, Manual Sync via settings still available
+- *(Sync)* Add accesors for some backlog data
+- *(TlpAccurateSyncBehaviour)* Refactor validation and expose new validation hook
+- *(TransformBacklog)* [**breaking**] Add velocity
+- *(Editor)* Add TLP_UDONUTILS define whenever UdonUtils is added to a project
+- *(UdonUtils)* Add Harmony patch to disable UnityEventFilter during play mode testing when TLP_UNIT_TESTING is enabled
+- *(Prefabs)* Add TLP_FixedUpdateRate and TLP_TaskScheduler prefabs
+- *(UdonUtils)* Add Harmony patch to disable UdonSharpCompiler for unit testing
+- *(Editor)* Add tool to fix serialized Udon program asset GUIDs in git repositories
+
+#### 🐛 Bug Fixes
+
+- *(TlpAccuracteSyncBehaviour)* Fix potential division by 0 when message with same server time arrives
+- *(TlpNetworkTime)* Fix instant synchronization and ensure initialization/updates accross public accessors
+- *(LatencyChecker)* Improve moving average calculation and add threshold handling
+
+#### 📚 Documentation
+
+- *(TlpFixedUpdateRate)* Enhance documentation and improve API clarity
+
+#### ⚙️ Miscellaneous Tasks
+
+- Add manual job to automate tag creation
+- Ensure package version and git history match
+- Improve tag existence checks and enhance logging
 ### [12.0.0] - 2025-11-09
 
 #### 🚀 Features

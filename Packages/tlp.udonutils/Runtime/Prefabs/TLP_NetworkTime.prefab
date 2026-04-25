@@ -246,7 +246,8 @@ MonoBehaviour:
   Samples: 256
   AutoAdjustSampleCount: 1
   SamplingDuration: 5
-  DriftThreshold: 0.5
+  DriftThreshold: 0.10000000149011612
+  ReferenceTimeRefreshInterval: 600
 --- !u!114 &8746002016925906261
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -422,6 +423,7 @@ MonoBehaviour:
   Pool: {fileID: 0}
   PoolableInUse: 0
   DefaultScheduler: {fileID: 0}
+  LimitToOncePerFrame: 0
   Listeners: []
   RaiseOnEnable: 0
   RaiseOnStart: 0

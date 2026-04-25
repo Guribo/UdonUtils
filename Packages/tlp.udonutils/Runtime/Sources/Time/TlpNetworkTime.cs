@@ -2,7 +2,6 @@
 using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Events;
 using TLP.UdonUtils.Runtime.Extensions;
-using TLP.UdonUtils.Runtime.Logger;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -66,7 +65,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         internal TimeSource RealNetworkTime;
 
         /// <summary>
-        /// Source of frame count, e.g. based on <see cref="Time.frameCount"/>
+        /// Source of frame count, e.g. based on <see cref="UnityEngine.Time.frameCount"/>
         /// </summary>
         [Tooltip("Source of frame count, e.g. based on Time.frameCount")]
         [SerializeField]
@@ -125,7 +124,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
                 + "the TlpNetworkTime is forcefully updated to the RealNetworkTime instead of slowly drifting towards it. "
                 + "This is useful to compensate for network drift caused by e.g. avatars being loaded.")]
         [Range(0f, 1f)]
-        internal double DriftThreshold = 0.5f;
+        internal double DriftThreshold = 0.1f;
 
         [Tooltip(
                 "When set to 0 no auto refresh of the reference time is performed. " +
@@ -169,11 +168,6 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         /// </summary>
         private double _previousAverageOffset;
 
-        /// <summary>
-        /// Delta to the <see cref="RealNetworkTime"/> that is used correct for drift over the
-        /// next <see cref="Samples"/> frames
-        /// </summary>
-        public double AverageError { get; private set; }
 
         /// <summary>
         /// Number of  <see cref="RealNetworkTime"/> samples currently collected, resets every time
@@ -185,6 +179,27 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         /// used to prevent calculating the time multiple times for the current frame
         /// </summary>
         private int _frameLastUpdated = -1;
+
+        /// <summary>
+        /// Represents the precise error value between the network time and the local game time,
+        /// computed as the difference between the real network time and the adjusted local game time.
+        /// This value helps in identifying and correcting any time drift during synchronization.
+        /// </summary>
+        private double _exactError;
+
+        /// <summary>
+        /// Represents the calculated average error between the expected and actual network time samples.
+        /// This value is used to measure and adjust time synchronization accuracy.
+        /// </summary>
+        private double _averageError;
+
+        /// <summary>
+        /// Indicates whether a time synchronization operation is desired.
+        /// This flag is set when an update makes synchronization necessary or
+        /// a forced synchronization is triggered. It helps manage conditions
+        /// where network and game time discrepancies exceed the allowed threshold.
+        /// </summary>
+        private bool _wantsSync;
         #endregion
 
         #region U# Lifecycle
@@ -226,7 +241,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         public void Delayed_RefreshReferenceTime() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-        DebugLog(nameof(Delayed_RefreshReferenceTime));
+            DebugLog(nameof(Delayed_RefreshReferenceTime));
 #endif
             #endregion
 
@@ -267,12 +282,18 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         /// <returns>The <see cref="TlpNetworkTime"/> based on game
         /// time with an over multiple frames calculated offset and drift compensation</returns>
         public override float Time() {
+            if (!HasStartedOk) {
+                return 0;
+            }
             return (float)GetNetworkTime();
         }
 
         /// <returns>The <see cref="TlpNetworkTime"/> based on game
         /// time with an over multiple frames calculated offset and drift compensation</returns>
         public override double TimeAsDouble() {
+            if (!HasStartedOk) {
+                return 0;
+            }
             return GetNetworkTime();
         }
 
@@ -314,7 +335,35 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         /// <summary>
         /// Current delta to the provided network time: (<see cref="RealNetworkTime"/> - <see cref="TlpNetworkTime"/>)
         /// </summary>
-        public double ExactError { get; private set; }
+        public double ExactError
+        {
+            get
+            {
+                if (!HasStartedOk) {
+                    return 0;
+                }
+
+                double _ = GetNetworkTime(); // ensure everything is updated first if outdated
+                return _exactError;
+            }
+        }
+
+        /// <summary>
+        /// Delta to the <see cref="RealNetworkTime"/> that is used correct for drift over the
+        /// next <see cref="Samples"/> frames
+        /// </summary>
+        public double AverageError
+        {
+            get
+            {
+                if (!HasStartedOk) {
+                    return 0;
+                }
+                
+                double _ = GetNetworkTime(); // ensure everything is updated first if outdated
+                return _averageError;
+            }
+        }
 
         /// <summary>
         /// Exact server time used as the latest sample
@@ -364,18 +413,27 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
 
         /// <summary>
         /// Ensures that the current delta between game time and network time is used and sampling is reset.
+        /// Executes either instantly if there was no update in the last frame or delayed if there was one.
         /// </summary>
         internal void ForceSynchronizeTime() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-        DebugLog(nameof(ForceSynchronizeTime));
+            DebugLog(nameof(ForceSynchronizeTime));
 #endif
             #endregion
 
+            if (UpdatedThisFrame()) {
+                _wantsSync = true;
+                return;
+            }
+
+            _wantsSync = false;
             SampledRealServerTime = RealNetworkTime.TimeAsDouble();
-            _incompleteAverageOffset = GetNetworkGameTimeDelta();
-            _previousAverageOffset = _incompleteAverageOffset;
-            _averageOffset = _incompleteAverageOffset;
+            _previousAverageOffset = GetNetworkGameTimeDelta();
+            _averageOffset = _previousAverageOffset;
+            _averageError = 0;
+            _exactError = 0;
+            _frameLastUpdated = FrameCount.Frame();
             ResetSampling();
         }
 
@@ -394,13 +452,14 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
                 return;
             }
 
-            _frameLastUpdated = FrameCount.Frame();
+            
             SampledRealServerTime = RealNetworkTime.TimeAsDouble();
-            ExactError = SampledRealServerTime - (GameTime.TimeAsDouble() + GetGameTimeOffset());
-            if (Math.Abs(ExactError) > DriftThreshold) {
+            _exactError = SampledRealServerTime - (GameTime.TimeAsDouble() + GetGameTimeOffset());
+            if (_wantsSync || Math.Abs(_exactError) > DriftThreshold) {
                 ForceSynchronizeTime();
-                ExactError = 0f;
+                return;
             }
+            _frameLastUpdated = FrameCount.Frame(); // update after ForceSynchronizeTime as it also has a frame check
 
             _incompleteAverageOffset += GetNetworkGameTimeDelta() / Samples;
             ++_offsetSampleCount;
@@ -436,7 +495,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         /// </summary>
         private void EvaluateError() {
             _previousAverageOffset = GetGameTimeOffset();
-            AverageError = _incompleteAverageOffset - _averageOffset;
+            _averageError = _incompleteAverageOffset - _averageOffset;
             _averageOffset = _incompleteAverageOffset;
         }
 
@@ -448,7 +507,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         private void ResetSampling() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-        DebugLog(nameof(ResetSampling));
+            DebugLog(nameof(ResetSampling));
 #endif
             #endregion
 

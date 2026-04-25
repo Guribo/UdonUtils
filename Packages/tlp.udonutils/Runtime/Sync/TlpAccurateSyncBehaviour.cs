@@ -118,9 +118,7 @@ namespace TLP.UdonUtils.Runtime.Sync
             }
 
             CreateWorkingCopyOfNetworkState();
-            RecordSnapshot(
-                    Snapshot,
-                    WorkingSendTime);
+            RecordSnapshot(Snapshot, WorkingSendTime);
             Backlog.Add(Snapshot, 3 * PredictionReduction);
 
             #region TLP_DEBUG
@@ -140,53 +138,31 @@ namespace TLP.UdonUtils.Runtime.Sync
         }
         #endregion
 
-        #region Hook Implementations
+        #region Overrides
         protected override bool SetupAndValidate() {
             if (!base.SetupAndValidate()) return false;
 
-            if (!Utilities.IsValid(GameTime)) {
-                Error($"{nameof(GameTime)} not set");
-                return false;
-            }
-
             if (!Utilities.IsValid(NetworkTime)) {
-                Error($"{nameof(NetworkTime)} not set");
-                return false;
-            }
-
-            if (NetworkTime.GetUdonTypeID() == GetUdonTypeID<TlpNetworkTime>()) {
-                var tlpTimeSource = (TlpNetworkTime)NetworkTime;
-                if (Utilities.IsValid(tlpTimeSource)) {
-                    _referenceTime = tlpTimeSource.ReferenceTime;
-                    if (Utilities.IsValid(tlpTimeSource.OnReferenceTimeUpdated)
-                        && !tlpTimeSource.OnReferenceTimeUpdated.AddListenerVerified(
-                                this,
-                                nameof(OnNetworkTimeShifted))) {
-                        Error(
-                                $"{nameof(SetupAndValidate)}: Failed to add listener to {nameof(tlpTimeSource.OnReferenceTimeUpdated)}");
-                        return false;
-                    }
+                NetworkTime = TlpNetworkTime.GetInstance();
+                if (!Utilities.IsValid(NetworkTime)) {
+                    Error($"{nameof(NetworkTime)} is not set and fallback '{nameof(TlpNetworkTime)}' was not found");
+                    return false;
                 }
             }
 
-            if (!Utilities.IsValid(Backlog)) {
-                Error($"{nameof(Backlog)} not set");
+            if (!TryListeningToOptionalTlpNetworktimeUpdates()) {
                 return false;
             }
 
-            if (Utilities.IsValid(Snapshot)) {
-                return true;
-            }
-
-            Error($"{nameof(Snapshot)} not set");
-            return false;
+            return CheckDependencies();
         }
+
 
         public override void OnEvent(string eventName) {
             switch (eventName) {
                 case nameof(OnNetworkTimeShifted):
 #if TLP_DEBUG
-DebugLog_OnEvent(eventName);
+                    DebugLog_OnEvent(eventName);
 #endif
                     OnNetworkTimeShifted();
                     break;
@@ -197,115 +173,7 @@ DebugLog_OnEvent(eventName);
         }
         #endregion
 
-        #region Hooks
-        protected virtual void RecordSnapshot(TimeSnapshot timeSnapshot, double mostRecentServerTime) {
-            #region TLP_DEBUG
-#if TLP_DEBUG
-            DebugLog($"{nameof(RecordSnapshot)}: {nameof(mostRecentServerTime)} = {mostRecentServerTime}s");
-#endif
-            #endregion
-
-            timeSnapshot.ServerTime = mostRecentServerTime;
-        }
-
-        /// <summary>
-        /// Hook that allows predicting movement based on elapsed time since the latest received network snapshot.
-        /// </summary>
-        /// <param name="receivedSnapshotAge">number of seconds that have passed relative to
-        /// <see cref="TimeSource"/> time since the recording of the latest <see cref="SyncedSendTime"/></param>
-        /// <param name="deltaTime">time since previous update</param>
-        protected abstract void PredictMovement(double receivedSnapshotAge, float deltaTime);
-
-        protected virtual void CreateWorkingCopyOfNetworkState() {
-            #region TLP_DEBUG
-#if TLP_DEBUG
-            DebugLog(nameof(CreateWorkingCopyOfNetworkState));
-#endif
-            #endregion
-
-            ReceiveTime = NetworkTime.TimeAsDouble();
-            WorkingSendTime = SyncedSendTime;
-        }
-
-        protected virtual void CreateNetworkStateFromWorkingState() {
-            #region TLP_DEBUG
-#if TLP_DEBUG
-            DebugLog(nameof(CreateNetworkStateFromWorkingState));
-#endif
-            #endregion
-
-            SyncedSendTime = WorkingSendTime;
-        }
-        #endregion
-
-        #region Internal
-        internal double GetElapsed() {
-            #region TLP_DEBUG
-#if TLP_DEBUG
-            DebugLog(nameof(GetElapsed));
-#endif
-            #endregion
-
-            return GetAge() - PredictionReduction;
-        }
-
-        private bool ReceivedNetworkStateIsNewer() {
-            #region TLP_DEBUG
-#if TLP_DEBUG
-            DebugLog(nameof(ReceivedNetworkStateIsNewer));
-#endif
-            #endregion
-
-            if (SyncedSendTime < WorkingSendTime) {
-                Warn(
-                        $"{nameof(ReceivedNetworkStateIsNewer)}: Received late {nameof(SyncedSendTime)}={SyncedSendTime:F6}s; previous {nameof(WorkingSendTime)}={WorkingSendTime:F6}s");
-                return false;
-            }
-
-            if (SyncedSendTime > NetworkTime.TimeAsDouble()) {
-                Warn(
-                        $"{nameof(ReceivedNetworkStateIsNewer)}: Received {nameof(SyncedSendTime)}={SyncedSendTime:F6}s from the future (current time={NetworkTime.TimeAsDouble():F6}s)");
-                return false;
-            }
-            #region TLP_DEBUG
-#if TLP_DEBUG
-                DebugLog($"{nameof(ReceivedNetworkStateIsNewer)}: Valid {nameof(SyncedSendTime)} received: {SyncedSendTime:F6} > {WorkingSendTime:F6}");
-#endif
-            #endregion
-
-            return true;
-        }
-
-        internal double GetAge() {
-            #region TLP_DEBUG
-#if TLP_DEBUG
-            DebugLog($"{nameof(GetAge)}: {NetworkTime.TimeAsDouble()} - {WorkingSendTime}");
-
-#endif
-            #endregion
-
-            return NetworkTime.TimeAsDouble() - WorkingSendTime;
-        }
-
-        private void OnNetworkTimeShifted() {
-            #region TLP_DEBUG
-#if TLP_DEBUG
-        DebugLog(nameof(OnNetworkTimeShifted));
-#endif
-            #endregion
-
-            var tlpTimeSource = (TlpNetworkTime)NetworkTime;
-            if (Utilities.IsValid(tlpTimeSource)) {
-                _referenceTime = tlpTimeSource.ReferenceTime;
-            }
-
-            if (Networking.IsOwner(gameObject)) {
-                MarkNetworkDirty();
-            }
-        }
-        #endregion
-
-        #region Public
+        #region Public API
         /// <param name="position"></param>
         /// <param name="velocity"></param>
         /// <param name="acceleration"></param>
@@ -362,6 +230,164 @@ DebugLog_OnEvent(eventName);
 
             // apply deltaRotation in world space
             newRotation = rawDeltaRotation * rotation.normalized;
+        }
+        #endregion
+
+        #region Hooks
+        protected virtual void RecordSnapshot(TimeSnapshot timeSnapshot, double mostRecentServerTime) {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog($"{nameof(RecordSnapshot)}: {nameof(mostRecentServerTime)} = {mostRecentServerTime}s");
+#endif
+            #endregion
+
+            timeSnapshot.ServerTime = mostRecentServerTime;
+        }
+
+        /// <summary>
+        /// Hook that allows predicting movement based on elapsed time since the latest received network snapshot.
+        /// </summary>
+        /// <param name="receivedSnapshotAge">number of seconds that have passed relative to
+        /// <see cref="TimeSource"/> time since the recording of the latest <see cref="SyncedSendTime"/></param>
+        /// <param name="deltaTime">time since previous update</param>
+        /// <param name="predictedVelocity">predicted velocity in world space</param>
+        protected abstract void PredictMovement(
+                double receivedSnapshotAge,
+                float deltaTime
+        );
+
+        protected virtual void CreateWorkingCopyOfNetworkState() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(CreateWorkingCopyOfNetworkState));
+#endif
+            #endregion
+
+            ReceiveTime = NetworkTime.TimeAsDouble();
+            WorkingSendTime = SyncedSendTime;
+        }
+
+        protected virtual void CreateNetworkStateFromWorkingState() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(CreateNetworkStateFromWorkingState));
+#endif
+            #endregion
+
+            SyncedSendTime = WorkingSendTime;
+        }
+        #endregion
+
+
+        #region Internal
+        protected internal double GetElapsed() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(GetElapsed));
+#endif
+            #endregion
+
+            return GetAge() - PredictionReduction;
+        }
+
+        private bool ReceivedNetworkStateIsNewer() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(ReceivedNetworkStateIsNewer));
+#endif
+            #endregion
+
+            if (SyncedSendTime < WorkingSendTime) {
+                Warn(
+                        $"{nameof(ReceivedNetworkStateIsNewer)}: Received late {nameof(SyncedSendTime)}={SyncedSendTime:F6}s; previous {nameof(WorkingSendTime)}={WorkingSendTime:F6}s");
+                return false;
+            }
+
+            if (SyncedSendTime >= NetworkTime.TimeAsDouble()) {
+                Warn(
+                        $"{nameof(ReceivedNetworkStateIsNewer)}: Received {nameof(SyncedSendTime)}={SyncedSendTime:F6}s from the future (current time={NetworkTime.TimeAsDouble():F6}s)");
+                return false;
+            }
+
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(
+                    $"{nameof(ReceivedNetworkStateIsNewer)}: Valid {nameof(SyncedSendTime)} received: {SyncedSendTime:F6} > {WorkingSendTime:F6}");
+#endif
+            #endregion
+
+            return true;
+        }
+
+        internal double GetAge() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog($"{nameof(GetAge)}: {NetworkTime.TimeAsDouble()} - {WorkingSendTime}");
+
+#endif
+            #endregion
+
+            return NetworkTime.TimeAsDouble() - WorkingSendTime;
+        }
+
+        private void OnNetworkTimeShifted() {
+            #region TLP_DEBUG
+#if TLP_DEBUG
+            DebugLog(nameof(OnNetworkTimeShifted));
+#endif
+            #endregion
+
+            var tlpTimeSource = (TlpNetworkTime)NetworkTime;
+            if (Utilities.IsValid(tlpTimeSource)) {
+                _referenceTime = tlpTimeSource.ReferenceTime;
+            }
+
+            if (Networking.IsOwner(gameObject)) {
+                MarkNetworkDirty();
+            }
+        }
+
+
+        private bool TryListeningToOptionalTlpNetworktimeUpdates() {
+            if (NetworkTime.GetUdonTypeID() != GetUdonTypeID<TlpNetworkTime>()) {
+                return true;
+            }
+
+            var tlpTimeSource = (TlpNetworkTime)NetworkTime;
+            if (!Utilities.IsValid(tlpTimeSource)) {
+                return true;
+            }
+
+            _referenceTime = tlpTimeSource.ReferenceTime;
+            if (!Utilities.IsValid(tlpTimeSource.OnReferenceTimeUpdated)
+                || tlpTimeSource.OnReferenceTimeUpdated.AddListenerVerified(
+                        this,
+                        nameof(OnNetworkTimeShifted))) {
+                return true;
+            }
+
+            Error($"{nameof(SetupAndValidate)}: Failed listening to {nameof(tlpTimeSource.OnReferenceTimeUpdated)}");
+            return false;
+        }
+
+        protected virtual bool CheckDependencies() {
+            if (!IsSet(GameTime, nameof(GameTime))) {
+                return false;
+            }
+
+            if (!IsSet(NetworkTime, nameof(NetworkTime))) {
+                return false;
+            }
+
+            if (!IsSet(Backlog, nameof(Backlog))) {
+                return false;
+            }
+
+            if (!IsSet(Snapshot, nameof(Snapshot))) {
+                return false;
+            }
+
+            return true;
         }
         #endregion
     }

@@ -17,5 +17,6 @@ namespace TLP.UdonUtils.Runtime.Sync
 
         public Quaternion Rotation;
         public Vector3 Position;
+        public Vector3 Velocity;
     }
 }

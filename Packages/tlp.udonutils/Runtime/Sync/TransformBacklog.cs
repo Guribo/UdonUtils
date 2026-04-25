@@ -19,10 +19,11 @@ namespace TLP.UdonUtils.Runtime.Sync
         [PublicAPI]
         public new const int ExecutionOrder = TransformSnapshot.ExecutionOrder + 1;
 
+        private readonly DataList _velocityBackLog = new DataList();
         private readonly DataList _positionBackLog = new DataList();
         private readonly DataList _rotationBackLog = new DataList();
 
-        public bool Interpolate(float time, out Vector3 position, out Quaternion rotation) {
+        public bool Interpolate(float time, out Vector3 position, out Vector3 velocity, out Quaternion rotation) {
             DebugLog($"{nameof(Interpolate)}: {nameof(time)} = {time}s");
             int index = 0;
             int lastIndex = _timeStamps.Count - 1;
@@ -32,16 +33,19 @@ namespace TLP.UdonUtils.Runtime.Sync
 
             if (index == 0) {
                 var positionToken = _positionBackLog[0];
+                var velocityToken = _velocityBackLog[0];
                 var rotationToken = _rotationBackLog[0];
                 if (positionToken.Error == DataError.None
                     && rotationToken.Error == DataError.None) {
                     position = (Vector3)positionToken.Reference;
                     rotation = (Quaternion)rotationToken.Reference;
+                    velocity = (Vector3)velocityToken.Reference;
                     return true;
                 }
 
                 position = Vector3.zero;
                 rotation = Quaternion.identity;
+                velocity = Vector3.zero;
                 return false;
             }
 
@@ -50,6 +54,7 @@ namespace TLP.UdonUtils.Runtime.Sync
             double timeStampB = _timeStamps[previousIndex].Double;
 
             var positionToken3 = _positionBackLog[previousIndex];
+            var velocityToken3 = _velocityBackLog[previousIndex];
             var rotationToken3 = _rotationBackLog[previousIndex];
 
             float interpolationRatio = Mathf.InverseLerp(
@@ -59,12 +64,19 @@ namespace TLP.UdonUtils.Runtime.Sync
             );
 
             var positionToken2 = _positionBackLog[index];
+            var velocityToken2 = _velocityBackLog[index];
             var rotationToken2 = _rotationBackLog[index];
 
             position = Vector3.Lerp(
                     (Vector3)positionToken2.Reference,
                     (Vector3)positionToken3.Reference,
                     interpolationRatio);
+
+            velocity = Vector3.Lerp(
+                    (Vector3)velocityToken2.Reference,
+                    (Vector3)velocityToken3.Reference,
+                    interpolationRatio);
+
             rotation = Quaternion.Slerp(
                     (Quaternion)rotationToken2.Reference,
                     (Quaternion)rotationToken3.Reference,
@@ -81,9 +93,14 @@ namespace TLP.UdonUtils.Runtime.Sync
             var transformSnapShot = (TransformSnapshot)snapshot;
 
             _positionBackLog.Add(new DataToken(transformSnapShot.Position));
+            _velocityBackLog.Add(new DataToken(transformSnapShot.Velocity));
             _rotationBackLog.Add(new DataToken(transformSnapShot.Rotation));
             while (_positionBackLog.Count > _timeStamps.Count) {
                 _positionBackLog.RemoveAt(0);
+            }
+
+            while (_velocityBackLog.Count > _timeStamps.Count) {
+                _velocityBackLog.RemoveAt(0);
             }
 
             while (_rotationBackLog.Count > _timeStamps.Count) {

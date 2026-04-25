@@ -6,21 +6,45 @@ using Debug = UnityEngine.Debug;
 
 namespace Tlp.UdonUtils.Runtime
 {
+    /// <summary>
+    /// Overrides VRChat's <see cref="Time.fixedDeltaTime"/>.
+    /// 
+    /// This component continuously applies the target fixed delta time each frame, using the
+    /// configured physics/update tick rate. Intended to be used as a singleton via a scene GameObject named
+    /// <c>TLP_FixedUpdateRate</c>.
+    /// </summary>
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     [DefaultExecutionOrder(ExecutionOrder)]
     [TlpDefaultExecutionOrder(typeof(TlpFixedUpdateRate), ExecutionOrder)]
     public class TlpFixedUpdateRate : TlpSingleton
     {
         #region ExecutionOrder
+        /// <summary>
+        /// <inheritdoc cref="ExecutionOrder"/>
+        /// </summary>
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
+        /// <summary>
+        /// Run as early as VRChat permits to ensure the override is valid for the entire frame, including VRChat's
+        /// own scripts like player movement etc.
+        /// </summary>
         [PublicAPI]
         public new const int ExecutionOrder = TlpExecutionOrder.Min;
         #endregion
 
+        /// <summary>
+        /// Initial target fixed update rate (in ticks/second) applied during setup.
+        /// </summary>
+        [Tooltip("Initial target fixed update rate (in ticks/second) applied during setup.")]
         [SerializeField]
         private float InitialFixedUpdateRate = 64f;
 
+        /// <summary>
+        /// Gets or sets the target fixed update rate (in ticks/second).
+        /// 
+        /// Setting this value clamps it to a safe range and updates the internally cached target fixed delta time
+        /// (<c>1 / rate</c>), which is then applied to <see cref="Time.fixedDeltaTime"/>.
+        /// </summary>
         public float UpdateRate
         {
             set
@@ -36,9 +60,12 @@ namespace Tlp.UdonUtils.Runtime
 
         #region PublicAPI
         /// <summary>
-        /// Searches for the GameObject TLP_FixedUpdateRate in the scene in order to get its TlpFixedUpdateRate component
+        /// Finds and returns the active <see cref="TlpFixedUpdateRate"/> instance from a scene GameObject named
+        /// <c>TLP_FixedUpdateRate</c>.
         /// </summary>
-        /// <returns>the found component or null if not found</returns>
+        /// <returns>
+        /// The located <see cref="TlpFixedUpdateRate"/> component, or <c>null</c> if the GameObject cannot be found.
+        /// </returns>
         public static TlpFixedUpdateRate GetInstance() {
             var instance = GameObject.Find("TLP_FixedUpdateRate");
             if (instance) {
