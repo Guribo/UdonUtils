@@ -72,7 +72,19 @@ by adding `TLP_UNIT_TESTING` to the list of script compilation symbols.
 Test mode is intended to be used for unit testing and should not be enabled in production builds.
 It will enable certain workarounds for parts of the VRChat SDK that can not easily be mocked.
 
-> Note: Releases of UdonUtils don't contain the unit tests used for development as they are not relevant for 99% of users.
+> Note: Releases of UdonUtils include basic editor tests for setup verification, such as the SanityTest. Full development unit tests are not included as they are not relevant for most users.
+
+## Running Unit Tests
+
+The package includes a basic `SanityTest` in the editor tests that verifies NSubstitute mocking functionality. This test is optional and only runs if NSubstitute is available.
+
+To enable and run the SanityTest:
+
+1. Install NSubstitute (e.g., via [NuGetForUnity](https://github.com/GlitchEnzo/NuGetForUnity)).
+2. Add `NSUBSTITUTE` to the Scripting Define Symbols in **Edit > Project Settings > Player > Script Compilation**.
+3. Run the tests using Unity's Test Runner (Window > General > Test Runner).
+
+If NSubstitute is not installed or the `NSUBSTITUTE` symbol is not defined, the test will be skipped without any compilation errors. This allows users to use the package without being required to install NSubstitute.
 
 ## Versioning
 
@@ -87,6 +99,11 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 3. PATCH version: backward compatible bug fixes were implemented
    - Implication: after updating remove potential workarounds you added
 
+### [14.0.1] - 2026-05-01
+
+#### 🐛 Bug Fixes
+
+- *(tests)* Add conditional support for NSubstitute-based unit tests
 ### [14.0.0] - 2026-05-01
 
 #### 🚀 Features

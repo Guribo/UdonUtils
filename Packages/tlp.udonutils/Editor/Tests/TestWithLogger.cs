@@ -6,7 +6,9 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using HarmonyLib;
 using JetBrains.Annotations;
+#if NSUBSTITUTE
 using NSubstitute;
+#endif
 using NUnit.Framework;
 using TLP.UdonUtils.Runtime;
 using TLP.UdonUtils.Runtime.EditorOnly;
@@ -62,7 +64,8 @@ namespace TLP.UdonUtils.Editor.Tests
             DestroyLoggerInstance();
             DestroyGameObjects(SceneManager.GetActiveScene().GetRootGameObjects());
         }
-        
+
+#if NSUBSTITUTE
         [Test]
         public void SanityTest() {
             // Arrange
@@ -74,6 +77,7 @@ namespace TLP.UdonUtils.Editor.Tests
             // Assert
             mock.Received().OnEvent("Foo");
         }
+#endif
         
         public static void ClearLog() {
             var assembly = Assembly.GetAssembly(typeof(UnityEditor.Editor));
