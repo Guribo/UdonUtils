@@ -1,5 +1,6 @@
 ﻿using System;
 using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Extensions;
 using UdonSharp;
 using UnityEngine;
@@ -52,7 +53,7 @@ namespace TLP.UdonUtils.Runtime.Player
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.DefaultStart + 1;
+        public new const int ExecutionOrder = StationState.ExecutionOrder + 1;
         #endregion
 
         #region Configuration

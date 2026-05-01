@@ -1,5 +1,6 @@
 ﻿using System;
 using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Audio;
 using TLP.UdonUtils.Runtime.Events;
 using UdonSharp;
 using UnityEngine;
@@ -22,7 +23,7 @@ namespace TLP.UdonUtils.Runtime.Player
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = AudioEvent.ExecutionOrder + 1;
+        public new const int ExecutionOrder = PlayOnEnable.ExecutionOrder + 1;
 
         #region Dependencies
         [FormerlySerializedAs("audioSource")]

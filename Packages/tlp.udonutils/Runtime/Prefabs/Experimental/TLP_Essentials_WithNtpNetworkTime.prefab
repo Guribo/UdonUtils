@@ -496,6 +496,22 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 4545927269470322529, guid: a2e29b4f6c24d5a49851f212381a8bf5,
         type: 3}
+    - target: {fileID: 4631208041613940007, guid: a2e29b4f6c24d5a49851f212381a8bf5,
+        type: 3}
+      propertyPath: Severity
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4631208041613940007, guid: a2e29b4f6c24d5a49851f212381a8bf5,
+        type: 3}
+      propertyPath: InitialFixedUpdateRate
+      value: 128
+      objectReference: {fileID: 0}
+    - target: {fileID: 4631208041613940007, guid: a2e29b4f6c24d5a49851f212381a8bf5,
+        type: 3}
+      propertyPath: serializationData.Prefab
+      value: 
+      objectReference: {fileID: 4631208041613940007, guid: a2e29b4f6c24d5a49851f212381a8bf5,
+        type: 3}
     - target: {fileID: 4750217398182022344, guid: a2e29b4f6c24d5a49851f212381a8bf5,
         type: 3}
       propertyPath: m_LocalPosition.x

@@ -43,27 +43,13 @@ namespace TLP.UdonUtils.Runtime.Sync
 
             Component topBehaviour;
             if (!Utilities.IsValid(start)) {
-                // find the top most udon behaviour
-                topBehaviour = UdonCommon.FindTopComponent(typeof(UdonBehaviour), go.transform);
+                topBehaviour = UdonCommon.FindTopComponent(typeof(Transform), go.transform);
                 if (!Utilities.IsValid(topBehaviour)) {
-                    Debug.LogWarning(
-                            $"{nameof(TransferOwnership)}: GameObject {go.name} " +
-                            $"has no parent UdonBehaviour which could change ownership"
-                    );
-
-                    topBehaviour = UdonCommon.FindTopComponent(typeof(UdonSharpBehaviour), go.transform);
-                    if (!Utilities.IsValid(topBehaviour)) {
-                        Debug.LogError(
-                                $"{nameof(TransferOwnership)}: GameObject {go.name} " +
-                                $"also has no parent UdonSharpBehaviour which could change ownership"
-                        );
-                        return false;
-                    }
+                    topBehaviour = go.transform;
                 }
             } else {
                 topBehaviour = start.transform;
             }
-
 
             var allTransforms = topBehaviour.transform.GetComponentsInChildren<Transform>(true);
 

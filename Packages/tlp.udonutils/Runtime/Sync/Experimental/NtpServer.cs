@@ -194,15 +194,15 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
                 log += $"{receiveTime:F4}, ";
             }
 
-            Warn($"Response send time: {WorkingResponseSentTime:F9}");
-            Warn($"Sending: {nameof(RequestReceiveTimes)}: {RequestReceiveTimes.LengthSafe()} elements; [{log}]");
+            DebugLog($"Response send time: {WorkingResponseSentTime:F9}");
+            DebugLog($"Sending: {nameof(RequestReceiveTimes)}: {RequestReceiveTimes.LengthSafe()} elements; [{log}]");
 
             log = "";
             foreach (int clientId in ClientOwners) {
                 log += $"{clientId}, ";
             }
 
-            Warn($"Sending: {nameof(ClientOwners)}: {ClientOwners.LengthSafe()} elements; [{log}]");
+            DebugLog($"Sending: {nameof(ClientOwners)}: {ClientOwners.LengthSafe()} elements; [{log}]");
 #endif
             #endregion
         }
@@ -231,15 +231,15 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
                 log += $"{receiveTime:F4}, ";
             }
 
-            Warn($"Response receive time: {responseReceiveTime:F9}");
-            Warn($"Received: {nameof(RequestReceiveTimes)}: {RequestReceiveTimes.LengthSafe()} elements; [{log}]");
+            DebugLog($"Response receive time: {responseReceiveTime:F9}");
+            DebugLog($"Received: {nameof(RequestReceiveTimes)}: {RequestReceiveTimes.LengthSafe()} elements; [{log}]");
 
             log = "";
             foreach (int clientId in ClientOwners) {
                 log += $"{clientId}, ";
             }
 
-            Warn($"Received: {nameof(ClientOwners)}: {ClientOwners.LengthSafe()} elements; [{log}]");
+            DebugLog($"Received: {nameof(ClientOwners)}: {ClientOwners.LengthSafe()} elements; [{log}]");
 #endif
             #endregion
 

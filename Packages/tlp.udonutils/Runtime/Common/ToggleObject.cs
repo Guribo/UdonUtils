@@ -1,6 +1,5 @@
 ﻿using JetBrains.Annotations;
-using TLP.UdonUtils.Runtime.Recording;
-using TLP.UdonUtils.Runtime.Sync;
+using TLP.UdonUtils.Runtime.Events;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -15,7 +14,7 @@ namespace TLP.UdonUtils.Runtime.Common
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TransformBacklog.ExecutionOrder + 1;
+        public new const int ExecutionOrder = ObjectSpawner.ExecutionOrder + 1;
 
         public AudioSource activationSound;
         public AudioSource deactivationSound;

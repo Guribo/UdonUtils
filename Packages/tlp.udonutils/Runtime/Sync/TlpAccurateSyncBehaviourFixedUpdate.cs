@@ -30,7 +30,13 @@ namespace TLP.UdonUtils.Runtime.Sync
                 return;
             }
 
-            PredictMovement(GetElapsed(), NetworkTime.FixedDeltaTime());
+            float predictionReduction = GetTotalPredictionReduction();
+            double networkTime = NetworkTime.TimeAsDouble();
+            PredictMovement(networkTime, 
+                            networkTime - predictionReduction, 
+                            networkTime - WorkingSendTime - predictionReduction, 
+                            predictionReduction,
+                            NetworkTime.FixedDeltaTime());
         }
         #endregion
     }

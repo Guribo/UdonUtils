@@ -2,6 +2,7 @@ using System;
 using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Logger;
+using TLP.UdonUtils.Runtime.Physics;
 using TLP.UdonUtils.Runtime.Sync.SyncedEvents;
 using UdonSharp;
 using UnityEngine;
@@ -17,7 +18,7 @@ namespace TLP.UdonUtils.Runtime.Factories
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = ObjectSpawner.ExecutionOrder + 1;
+        public new const int ExecutionOrder = InertiaTensor.ExecutionOrder + 1;
 
         public const string FactoriesGameObjectName = "TLP_Factories";
 

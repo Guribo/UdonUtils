@@ -419,6 +419,16 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4394365305682713924, guid: 0aa85b587a699e14a94e0590cd64bf81,
         type: 3}
+      propertyPath: Severity
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4394365305682713924, guid: 0aa85b587a699e14a94e0590cd64bf81,
+        type: 3}
+      propertyPath: InitialFixedUpdateRate
+      value: 128
+      objectReference: {fileID: 0}
+    - target: {fileID: 4394365305682713924, guid: 0aa85b587a699e14a94e0590cd64bf81,
+        type: 3}
       propertyPath: serializationData.Prefab
       value: 
       objectReference: {fileID: 4394365305682713924, guid: 0aa85b587a699e14a94e0590cd64bf81,

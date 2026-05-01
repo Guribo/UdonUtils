@@ -17,7 +17,7 @@ namespace TLP.UdonUtils.Runtime.Recording
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = InertiaTensor.ExecutionOrder + 1;
+        public new const int ExecutionOrder = TlpExecutionOrder.VehicleMotionStart + 1;
 
         [FormerlySerializedAs("transformRecorder")]
         public TransformRecorder TransformRecorder;

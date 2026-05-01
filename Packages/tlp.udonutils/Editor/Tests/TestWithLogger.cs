@@ -2,12 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using HarmonyLib;
 using JetBrains.Annotations;
+using NSubstitute;
 using NUnit.Framework;
+using TLP.UdonUtils.Runtime;
 using TLP.UdonUtils.Runtime.EditorOnly;
 using TLP.UdonUtils.Runtime.Events;
 using TLP.UdonUtils.Runtime.Logger;
+using TLP.UdonUtils.Runtime.Sources;
 using TLP.UdonUtils.Runtime.Sources.FrameCount;
 using TLP.UdonUtils.Runtime.Sources.Time;
 using TLP.UdonUtils.Runtime.Tests.Utils;
@@ -37,7 +42,40 @@ namespace TLP.UdonUtils.Editor.Tests
         /// </summary>
         protected TlpNetworkTime NetworkTime;
 
-        public void ClearLog() {
+        [SetUp]
+        public virtual void Setup() {
+            LogAssert.ignoreFailingMessages = false;
+
+            ClearLog();
+            Debug.ClearDeveloperConsole();
+
+            DestroyGameObjects(SceneManager.GetActiveScene().GetRootGameObjects());
+            PrepareUdonTestEnvironmentWithLocalPlayer();
+            CreateAndActivateLogger();
+        }
+
+        [TearDown]
+        public virtual void CleanUp() {
+            Debug.Log("=========== Test TearDown start ===========");
+            LogAssert.ignoreFailingMessages = true;
+            ResetTestEnvironment();
+            DestroyLoggerInstance();
+            DestroyGameObjects(SceneManager.GetActiveScene().GetRootGameObjects());
+        }
+        
+        [Test]
+        public void SanityTest() {
+            // Arrange
+            var mock = Substitute.For<TlpBaseBehaviour>();
+
+            // Act
+            mock.OnEvent("Foo");
+
+            // Assert
+            mock.Received().OnEvent("Foo");
+        }
+        
+        public static void ClearLog() {
             var assembly = Assembly.GetAssembly(typeof(UnityEditor.Editor));
             var type = assembly.GetType("UnityEditor.LogEntries");
             var method = type.GetMethod("Clear");
@@ -45,61 +83,20 @@ namespace TLP.UdonUtils.Editor.Tests
             method.Invoke(new object(), null);
         }
 
-        [SetUp]
-        public virtual void Setup() {
-            ClearLog();
-            Debug.ClearDeveloperConsole();
-            Debug.Log("=========== Test Setup start ===========");
-
-            DestroyGameObjects(SceneManager.GetActiveScene().GetRootGameObjects());
-
-            UdonTestUtils.UdonTestEnvironment.ResetApiBindings();
-            LogAssert.ignoreFailingMessages = false;
-            TlpLogger = new GameObject(TlpLogger.ExpectedGameObjectName()).AddComponent<TlpLogger>();
-            Debug.Log($"Created {TlpLogger.ExpectedGameObjectName()}: {TlpLogger == true}");
-            TlpLogger.Severity = ELogLevel.Warning;
-            TlpLogger.TimeSource = new GameObject(nameof(ConstantTime)).AddComponent<ConstantTime>();
-            TlpLogger.FrameCount = new GameObject(nameof(ConstantFrameCount)).AddComponent<ConstantFrameCount>();
-
-            UdonTestEnvironment = new UdonTestUtils.UdonTestEnvironment();
-            LocalPlayer = UdonTestEnvironment.CreatePlayer();
-            TlpLogger.OnEnable();
-        }
-
-        [Test]
-        public void SanityTest() {
-            Assert.IsTrue(true);
-        }
-
-        [TearDown]
-        public virtual void CleanUp() {
-            Debug.Log("=========== Test TearDown start ===========");
-            LogAssert.ignoreFailingMessages = true;
-            if (UdonTestEnvironment != null) {
-                UdonTestEnvironment.Deconstruct();
-                UdonTestEnvironment = null;
-                LocalPlayer = null;
-            }
-
-            if (TlpLogger) {
-                Object.DestroyImmediate(TlpLogger.gameObject);
-                TlpLogger = null;
-            }
-
-            DestroyGameObjects(SceneManager.GetActiveScene().GetRootGameObjects());
-        }
-
+        [PublicAPI]
         protected static IEnumerator ShowAllGameObjects() {
-            if (Application.isPlaying) {
-                foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects()) {
-                    foreach (var componentInChild in root.GetComponentsInChildren<Transform>(true)) {
-                        yield return null;
-                        EditorGUIUtility.PingObject(componentInChild);
-                    }
-                }
-
-                yield return new WaitForSeconds(10f);
+            if (!Application.isPlaying) {
+                yield break;
             }
+
+            foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects()) {
+                foreach (var componentInChild in root.GetComponentsInChildren<Transform>(true)) {
+                    yield return null;
+                    EditorGUIUtility.PingObject(componentInChild);
+                }
+            }
+
+            yield return new WaitForSeconds(10f);
         }
 
         protected static void DestroyGameObjects(IEnumerable<GameObject> objectsToCleanup) {
@@ -145,17 +142,12 @@ namespace TLP.UdonUtils.Editor.Tests
             return gameObject;
         }
 
-        public void AreApproximatelyEqual(Vector3 a, Vector3 b, float delta = 1e-5f) {
-            bool ok = false;
-            try {
-                Assert.AreApproximatelyEqual(a.x, b.x, delta);
-                Assert.AreApproximatelyEqual(a.y, b.y, delta);
-                Assert.AreApproximatelyEqual(a.z, b.z, delta);
-                ok = true;
-            }
-            finally {
-                if (!ok) Debug.LogError($"{a} != {b}");
-            }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void AreApproximatelyEqual(Vector3 a, Vector3 b, float delta = 1e-5f, string message = "")
+        {
+            Assert.IsFalse(Mathf.Abs(a.x - b.x) > delta ||
+                           Mathf.Abs(a.y - b.y) > delta ||
+                           Mathf.Abs(a.z - b.z) > delta, $" {a} != {b} " + message);
         }
 
         /// <summary>
@@ -175,6 +167,7 @@ namespace TLP.UdonUtils.Editor.Tests
             }
         }
 
+        [PublicAPI]
         protected void CreateTlpNetworkTime() {
             NetworkTime = new GameObject("TLP_NetworkTime").AddComponent<TlpNetworkTime>();
             GameTime = new GameObject("TLP_GameTime").AddComponent<ConstantTime>();
@@ -186,5 +179,95 @@ namespace TLP.UdonUtils.Editor.Tests
             NetworkTime.OnReferenceTimeUpdated = new GameObject("OnReferenceTimeUpdated").AddComponent<UdonEvent>();
             NetworkTime.Start();
         }
+        
+        #region Utilties.IsValid Patch
+        
+     
+        protected Harmony _harmony;
+        
+        /// <summary>
+        /// Patch Utilities.IsValid to only check for null, thus accepting non-Unity objects as valid.
+        /// Useful for testing with NSubstitute mocks.
+        /// </summary>
+        protected void SetupUtilitiesIsValidPatch() {
+            _harmony = new Harmony("tlp.tests");
+            _harmony.Patch(
+                    original: AccessTools.Method(typeof(Utilities), nameof(Utilities.IsValid)),
+                    prefix: new HarmonyMethod(typeof(TestWithLogger), nameof(IsValidPatch))
+            );
+        }
+        
+        protected void CleanupUtilitiesIsValidPatch() {
+            _harmony.UnpatchAll("tlp.tests");
+        }
+        // ReSharper disable once RedundantAssignment
+        private static bool IsValidPatch(object obj, ref bool __result)
+        {
+            if (obj == null) { __result = false; return false; }
+            __result = true;
+            return false; // skip original
+        }
+        #endregion
+
+        #region Hooks
+        /// <summary>
+        /// Hook to provide the initial <see cref="TimeSource"/> for the logger.
+        /// Defaults to a <see cref="ConstantTime"/> component on a new <see cref="GameObject"/>.
+        /// </summary>
+        /// <returns>A new <see cref="TimeSource"/> instance.</returns>
+        protected virtual TimeSource GetInitialLoggerTimeSource() {
+            return new GameObject(nameof(ConstantTime)).AddComponent<ConstantTime>();
+        }
+
+        /// <summary>
+        /// Hook to provide the initial <see cref="FrameCountSource"/> for the logger.
+        /// Defaults to a <see cref="ConstantFrameCount"/> component on a new <see cref="GameObject"/>.
+        /// </summary>
+        /// <returns>A new <see cref="FrameCountSource"/> instance.</returns>
+        protected virtual FrameCountSource GetInitialLoggerFrameCountSource() {
+            return new GameObject(nameof(ConstantFrameCount)).AddComponent<ConstantFrameCount>();
+        }
+        #endregion
+
+        #region Internal
+        private void CreateAndActivateLogger() {
+            var tlpLoggerObject = new GameObject(TlpLogger.ExpectedGameObjectName());
+            tlpLoggerObject.SetActive(false);
+            TlpLogger = tlpLoggerObject.AddComponent<TlpLogger>();
+            TlpLogger.Severity = ELogLevel.Warning;
+            TlpLogger.TimeSource = GetInitialLoggerTimeSource();
+            TlpLogger.FrameCount = GetInitialLoggerFrameCountSource();
+            tlpLoggerObject.SetActive(true);
+
+            if (!Application.isPlaying) {
+                TlpLogger.OnEnable();
+            }
+        }
+
+        private void PrepareUdonTestEnvironmentWithLocalPlayer() {
+            UdonTestUtils.UdonTestEnvironment.ResetApiBindings();
+            UdonTestEnvironment = new UdonTestUtils.UdonTestEnvironment();
+            LocalPlayer = UdonTestEnvironment.CreatePlayer();
+        }
+
+        private void DestroyLoggerInstance() {
+            if (!TlpLogger) {
+                return;
+            }
+
+            Object.DestroyImmediate(TlpLogger.gameObject);
+            TlpLogger = null;
+        }
+
+        private void ResetTestEnvironment() {
+            if (UdonTestEnvironment == null) {
+                return;
+            }
+
+            UdonTestEnvironment.Deconstruct();
+            UdonTestEnvironment = null;
+            LocalPlayer = null;
+        }
+        #endregion
     }
 }

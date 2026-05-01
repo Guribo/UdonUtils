@@ -23,8 +23,7 @@ namespace TLP.UdonUtils.Runtime.Physics
         #region Dependencies
         public Rigidbody ToTrack;
 
-        [SerializeField]
-        internal TimeSource TimeSource;
+        public TimeSource TimeSource;
         #endregion
 
         #region Settings

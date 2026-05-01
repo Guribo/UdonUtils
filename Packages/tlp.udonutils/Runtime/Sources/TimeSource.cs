@@ -1,6 +1,5 @@
 ﻿using JetBrains.Annotations;
-using TLP.UdonUtils.Runtime.Sync;
-using UdonSharp;
+using TLP.UdonUtils.Runtime.Sources.FrameCount;
 using UnityEngine;
 
 namespace TLP.UdonUtils.Runtime.Sources
@@ -16,7 +15,7 @@ namespace TLP.UdonUtils.Runtime.Sources
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TimeBacklog.ExecutionOrder + 1;
+        public new const int ExecutionOrder = UpdateFrameCount.ExecutionOrder + 1;
 
         /// <summary>
         /// Current time of this source.

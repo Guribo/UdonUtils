@@ -8,7 +8,8 @@ namespace TLP.UdonUtils.Runtime.Sync
     /// Variant that predicts movement based on <see cref="Update"/>
     /// </summary>
     [DefaultExecutionOrder(ExecutionOrder)]
-    [TlpDefaultExecutionOrder(typeof(TlpAccurateSyncBehaviourUpdate), ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(TlpAccurateSyncBehaviourUpdate),
+                              ExecutionOrder)]
     public abstract class TlpAccurateSyncBehaviourUpdate : TlpAccurateSyncBehaviour
     {
         public override int ExecutionOrderReadOnly => ExecutionOrder;
@@ -27,8 +28,13 @@ namespace TLP.UdonUtils.Runtime.Sync
             if (Networking.IsOwner(gameObject)) {
                 return;
             }
-
-            PredictMovement(GetElapsed(), GameTime.UnscaledDeltaTime());
+            float predictionReduction = GetTotalPredictionReduction();
+            double networkTime = NetworkTime.TimeAsDouble();
+            PredictMovement(networkTime,
+                            networkTime - predictionReduction,
+                            networkTime - WorkingSendTime - predictionReduction,
+                            predictionReduction,
+                            NetworkTime.UnscaledDeltaTime());
         }
         #endregion
     }

@@ -10,7 +10,7 @@ Theses are being added over time where it makes sense.
 
 ## Installation
 
-1. Install/Add VRChat World SDK 3.9.0 to your project
+1. Install/Add VRChat World SDK 3.10.3 or later to your project
 2. Install/Add TLP UdonUtils to your project: https://guribo.github.io/TLP/
 
 ## Uninstall
@@ -87,6 +87,59 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 3. PATCH version: backward compatible bug fixes were implemented
    - Implication: after updating remove potential workarounds you added
 
+### [14.0.0] - 2026-05-01
+
+#### 🚀 Features
+
+- *(UdonUtils)* Update TransformBacklog interpolation methods to use `double` for improved precision
+- *(UdonUtils)* Expose `LastAdded` as public, add `DiscardAllButLatest` method to TimeBacklog and TransformBacklog
+- *(UdonUtils)* Add `MaxBacklogAge` constant for configurable interpolation snapshot retention
+- *(UdonUtils)* Add ECS Test materials and configuration assets
+- *(UdonUtils)* Extend test framework with NSubstitute, Harmony patches, and additional DLL references
+- *(UdonUtils)* Add `RigidbodyRecorder` and enhance `RigidbodyHistory` with new snapshot and acceleration handling logic
+- *(UdonUtils)* Add `RigidbodyRecorder` asset for enhanced physics recording
+- *(UdonUtils)* Add unit tests for `RigidBodyPhysicsState` and enhance with encoded/decoded flag handling logic
+- *(UdonUtils)* Add `RigidbodyExtensions` with movement and rotation methods, integrate new tests, and improve serialization
+- *(player-camera-tracker)* Add experimental support for player (handheld-)camera tracking
+
+#### 🐛 Bug Fixes
+
+- *(UdonUtils)* Simplify ownership transfer logic by reducing redundant parent component checks
+- *(UdonUtils)* Refine execution order logic by excluding specific types and improving filtering of mock/test classes
+
+#### 🚜 Refactor
+
+- *(UdonUtils)* Change TimeSource field from internal to public in RigidbodyVelocityProvider
+- *(UdonUtils)* [**breaking**] Remove `TimeSnapshot` and `TransformSnapshot` classes and assets, update tests to use substitutes for easier mocking
+- *(UdonUtils)* Standardize method formatting, improve debug logging, and enhance snapshot prediction logic
+- *(UdonUtils)* Rename and simplify deserialization method, adjust snapshot handling logic for consistency
+- *(UdonUtils)* Remove `NetworkSnapshotBacklog` dependencies and update `RigidbodyHistory` with improved snapshot handling logic
+- *(UdonUtils)* [**breaking**] Remove `SnapshotBacklog`, `TransformBacklog` tests, and related assets to streamline codebase and reduce redundancy
+- *(UdonUtils)* Simplify prediction reduction logic and remove unused constants, usings, and code lines
+- *(UdonUtils)* Update access modifiers in `RigidbodyRecorder`, adjust `RigidBodyPhysicsState` serialization
+
+#### 🧪 Testing
+
+- Different sphere collision scenarios
+- *(RigidBodyCollision)* Add test for collision determinism with physics update offset
+- *(UdonUtils)* Refine logger initialization and add hooks for time and frame count sources
+- *(UdonUtils)* Refactor test setup and teardown for logger and environment initialization
+- Add ownership transfer test and related assets
+
+#### ⚙️ Miscellaneous Tasks
+
+- Update assets
+- *(UdonUtils)* Mark `PredictState` method as obsolete with guidance for merging
+- Update PlayerBlackList and PlayerFollower assets with serialized data adjustments
+- Update PlayerBlackList and PlayerFollower assets with serialized data adjustments
+- *(UdonUtils)* Add RigidBodyPhysicsState asset and RigidbodyHistory script for physics state tracking and history
+- *(UdonUtils)* Refactor and extend TimeBacklog and TransformBacklog with improved API regions and interpolation support
+- *(UdonUtils)* Add debug logging for TransformBacklog interpolation method under TLP_DEBUG
+- *(UdonUtils)* Add meta files for RigidBodyPhysicsState and RigidbodyHistory assets
+- *(UdonUtils)* Update Chair and WorldVersionCheck assets with serialized data adjustments
+- *(UdonUtils)* Update Chair and WorldVersionCheck assets with serialized field and data refinements
+- *(UdonUtils)* Bump package version to 13.0.0, update VRChat Worlds SDK dependency to 3.10.0
+- Bump version to 14.0.0
 ### [13.0.0] - 2026-04-12
 
 #### 🚀 Features

@@ -1,9 +1,8 @@
 using System;
 using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Events;
-using TLP.UdonUtils.Runtime.Extensions;
 using TLP.UdonUtils.Runtime.Physics;
-using TLP.UdonUtils.Runtime.Recording;
 using TLP.UdonUtils.Runtime.Sources;
 using TLP.UdonUtils.Runtime.Sources.Time;
 using UdonSharp;
@@ -24,16 +23,11 @@ namespace TLP.UdonUtils.Runtime.Sync
         #region ExecutionOrder
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
-        [PublicAPI]
-        public new const int ExecutionOrder = TransformRecordingPlayer.ExecutionOrder + 1;
+        [PublicAPI] public new const int ExecutionOrder = VehicleMotionEvent.ExecutionOrder + 1;
         #endregion
 
         #region Dependencies
-        [Tooltip("Container for received snapshot data for inter-/extrapolation")]
-        public TimeBacklog Backlog;
-
-        [Tooltip("Container for a received network snapshot")]
-        public TimeSnapshot Snapshot;
+        [Tooltip("Container for a received network snapshot")] public Snapshot Snapshot;
 
         [Tooltip("The network time as provided by e.g. TlpNetworkTime")]
         public TimeSource NetworkTime;
@@ -51,8 +45,7 @@ namespace TLP.UdonUtils.Runtime.Sync
         /// <summary>
         /// Compressed SendTime relative to the latest <see cref="TlpNetworkTime.ReferenceTime"/> snapshot.
         /// </summary>
-        [UdonSynced]
-        private float _syncedSendTime;
+        [UdonSynced] private float _syncedSendTime;
 
         /// <summary>
         /// snapshot of the <see cref="TlpNetworkTime"/> for delta-compression.
@@ -73,20 +66,17 @@ namespace TLP.UdonUtils.Runtime.Sync
         /// <summary>
         /// Time when the last update was sent in seconds of <see cref="NetworkTime"/>.
         /// </summary>
-        [NonSerialized]
-        public double WorkingSendTime = double.MinValue;
+        [NonSerialized] public double WorkingSendTime = double.MinValue;
 
         /// <summary>
         /// Time when the last update was received in seconds of <see cref="NetworkTime"/>.
         /// </summary>
-        [NonSerialized]
-        public double ReceiveTime = double.MinValue;
+        [NonSerialized] public double ReceiveTime = double.MinValue;
 
         /// <summary>
         /// In seconds, time between <see cref="ReceiveTime"/> and <see cref="WorkingSendTime"/>.
         /// </summary>
-        [NonSerialized]
-        public double Latency;
+        [NonSerialized] public double Latency;
         #endregion
         #endregion
 
@@ -96,50 +86,73 @@ namespace TLP.UdonUtils.Runtime.Sync
         public float PredictionReduction;
         #endregion
 
+
         #region Network Events
         /// <summary>
         /// Copy the working state to the network state
         /// </summary>
-        public override void OnPreSerialization() {
+        public override void OnPreSerialization()
+        {
             base.OnPreSerialization();
             CreateNetworkStateFromWorkingState();
         }
 
-        public override void OnDeserialization(DeserializationResult deserializationResult) {
+        public override void OnDeserialization(DeserializationResult deserializationResult)
+        {
             base.OnDeserialization(deserializationResult);
 
             if (!HasStartedOk) {
-                Error($"{nameof(OnDeserialization)}: Not initialized");
                 return;
             }
 
-            if (!ReceivedNetworkStateIsNewer()) {
+            if (SyncedSendTime < WorkingSendTime) {
+                Warn($"{nameof(OnDeserialization)}: Received {nameof(SyncedSendTime)} from the past, " +
+                     $"late by {WorkingSendTime - SyncedSendTime:F6}s");
                 return;
             }
 
-            CreateWorkingCopyOfNetworkState();
-            RecordSnapshot(Snapshot, WorkingSendTime);
-            Backlog.Add(Snapshot, 3 * PredictionReduction);
+            double networkTime = NetworkTime.TimeAsDouble();
+            if (SyncedSendTime >= networkTime) {
+                Warn($"{nameof(OnDeserialization)}: Received {nameof(SyncedSendTime)} from the future, " +
+                     $"early by {SyncedSendTime - networkTime:F6}s");
 
+                if (SyncedSendTime - networkTime > 1f) {
+                    Warn($"{nameof(OnDeserialization)}: Received {nameof(SyncedSendTime)} that is more than 1s in the future, ignoring update");
+                    return;
+                }
+            }
+
+            OnDeserializationAccepted(networkTime, networkTime - SyncedSendTime);
+        }
+
+        protected virtual void OnDeserializationAccepted(double newReceiveTime, double newLatency)
+        {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(GetAge)}: {NetworkTime.TimeAsDouble()} - {WorkingSendTime}");
-
+            DebugLog($"{nameof(OnDeserializationAccepted)}: Latency TLP={newLatency * 1000:F3}");
 #endif
             #endregion
 
-            Latency = ReceiveTime - WorkingSendTime;
-#if TLP_DEBUG
-            DebugLog($"Latency VRC = {deserializationResult.Latency():F6} vs own {Latency:F6}");
-#endif
+            float predictionReduction = GetTotalPredictionReduction();
+            double adjustedNetworkTime = newReceiveTime - predictionReduction;
+            double predictionSeconds = newReceiveTime - SyncedSendTime - predictionReduction;
+            CreateSnapshotOfDeserialization(adjustedNetworkTime);
+
+            ReceiveTime = newReceiveTime;
+            Latency = newLatency;
 
             // ensure we update as early as possible in the lifecycle of the UdonSharpBehaviour
-            PredictMovement(GetElapsed(), 0f);
+            PredictMovement(ReceiveTime,
+                            adjustedNetworkTime,
+                            predictionSeconds,
+                            predictionReduction,
+                            0f);
         }
         #endregion
 
         #region Overrides
-        protected override bool SetupAndValidate() {
+        protected override bool SetupAndValidate()
+        {
             if (!base.SetupAndValidate()) return false;
 
             if (!Utilities.IsValid(NetworkTime)) {
@@ -158,7 +171,8 @@ namespace TLP.UdonUtils.Runtime.Sync
         }
 
 
-        public override void OnEvent(string eventName) {
+        public override void OnEvent(string eventName)
+        {
             switch (eventName) {
                 case nameof(OnNetworkTimeShifted):
 #if TLP_DEBUG
@@ -185,6 +199,8 @@ namespace TLP.UdonUtils.Runtime.Sync
         /// <param name="newPosition"></param>
         /// <param name="newVelocity"></param>
         /// <param name="newRotation"></param>
+        [Obsolete("Try to merge with RigidBodyPhysicsState.Predict instead",
+                  false)]
         public static void PredictState(
                 Vector3 position,
                 Vector3 velocity,
@@ -197,7 +213,8 @@ namespace TLP.UdonUtils.Runtime.Sync
                 out Vector3 newPosition,
                 out Vector3 newVelocity,
                 out Quaternion newRotation
-        ) {
+        )
+        {
             if (circleAngularVelocityDegrees > circleThreshold) {
                 newPosition = ConstantCircularVelocity.PositionOnCircle(
                         position,
@@ -226,7 +243,8 @@ namespace TLP.UdonUtils.Runtime.Sync
 
             // conversion to degrees is done AFTER the axis is created, otherwise huge errors are introduced from euler angles
             float predictedTurnDelta = (float)(syncedTurnRateRadians * elapsed * Mathf.Rad2Deg);
-            var rawDeltaRotation = Quaternion.AngleAxis(predictedTurnDelta, syncedTurnAxis);
+            var rawDeltaRotation = Quaternion.AngleAxis(predictedTurnDelta,
+                                                        syncedTurnAxis);
 
             // apply deltaRotation in world space
             newRotation = rawDeltaRotation * rotation.normalized;
@@ -234,40 +252,38 @@ namespace TLP.UdonUtils.Runtime.Sync
         #endregion
 
         #region Hooks
-        protected virtual void RecordSnapshot(TimeSnapshot timeSnapshot, double mostRecentServerTime) {
-            #region TLP_DEBUG
-#if TLP_DEBUG
-            DebugLog($"{nameof(RecordSnapshot)}: {nameof(mostRecentServerTime)} = {mostRecentServerTime}s");
-#endif
-            #endregion
-
-            timeSnapshot.ServerTime = mostRecentServerTime;
-        }
-
         /// <summary>
         /// Hook that allows predicting movement based on elapsed time since the latest received network snapshot.
         /// </summary>
-        /// <param name="receivedSnapshotAge">number of seconds that have passed relative to
-        /// <see cref="TimeSource"/> time since the recording of the latest <see cref="SyncedSendTime"/></param>
+        /// <param name="networkTime"></param>
+        /// <param name="adjustedNetworkTime"></param>
+        /// <param name="predictionSeconds">number of seconds that have passed relative to
+        ///     <see cref="TimeSource"/> time since the recording of the latest <see cref="SyncedSendTime"/></param>
+        /// <param name="currentPredictionReduction">The prediction reduction in seconds already
+        /// applied to adjustedNetworkTime and predictionSeconds</param>
         /// <param name="deltaTime">time since previous update</param>
-        /// <param name="predictedVelocity">predicted velocity in world space</param>
         protected abstract void PredictMovement(
-                double receivedSnapshotAge,
+                double networkTime,
+                double adjustedNetworkTime,
+                double predictionSeconds,
+                float currentPredictionReduction,
                 float deltaTime
         );
 
-        protected virtual void CreateWorkingCopyOfNetworkState() {
+        protected virtual void CreateSnapshotOfDeserialization(double adjustedNetworkTime)
+        {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(CreateWorkingCopyOfNetworkState));
+            DebugLog(nameof(CreateSnapshotOfDeserialization));
 #endif
             #endregion
 
-            ReceiveTime = NetworkTime.TimeAsDouble();
             WorkingSendTime = SyncedSendTime;
+            Snapshot.Time = SyncedSendTime;
         }
 
-        protected virtual void CreateNetworkStateFromWorkingState() {
+        protected virtual void CreateNetworkStateFromWorkingState()
+        {
             #region TLP_DEBUG
 #if TLP_DEBUG
             DebugLog(nameof(CreateNetworkStateFromWorkingState));
@@ -280,46 +296,14 @@ namespace TLP.UdonUtils.Runtime.Sync
 
 
         #region Internal
-        protected internal double GetElapsed() {
-            #region TLP_DEBUG
-#if TLP_DEBUG
-            DebugLog(nameof(GetElapsed));
-#endif
-            #endregion
-
-            return GetAge() - PredictionReduction;
+        protected internal double GetPredictionSeconds(double networkTime, double sendTime, float predictionReduction)
+        {
+            return networkTime - sendTime - predictionReduction;
         }
 
-        private bool ReceivedNetworkStateIsNewer() {
-            #region TLP_DEBUG
-#if TLP_DEBUG
-            DebugLog(nameof(ReceivedNetworkStateIsNewer));
-#endif
-            #endregion
 
-            if (SyncedSendTime < WorkingSendTime) {
-                Warn(
-                        $"{nameof(ReceivedNetworkStateIsNewer)}: Received late {nameof(SyncedSendTime)}={SyncedSendTime:F6}s; previous {nameof(WorkingSendTime)}={WorkingSendTime:F6}s");
-                return false;
-            }
-
-            if (SyncedSendTime >= NetworkTime.TimeAsDouble()) {
-                Warn(
-                        $"{nameof(ReceivedNetworkStateIsNewer)}: Received {nameof(SyncedSendTime)}={SyncedSendTime:F6}s from the future (current time={NetworkTime.TimeAsDouble():F6}s)");
-                return false;
-            }
-
-            #region TLP_DEBUG
-#if TLP_DEBUG
-            DebugLog(
-                    $"{nameof(ReceivedNetworkStateIsNewer)}: Valid {nameof(SyncedSendTime)} received: {SyncedSendTime:F6} > {WorkingSendTime:F6}");
-#endif
-            #endregion
-
-            return true;
-        }
-
-        internal double GetAge() {
+        internal double GetAge()
+        {
             #region TLP_DEBUG
 #if TLP_DEBUG
             DebugLog($"{nameof(GetAge)}: {NetworkTime.TimeAsDouble()} - {WorkingSendTime}");
@@ -330,7 +314,8 @@ namespace TLP.UdonUtils.Runtime.Sync
             return NetworkTime.TimeAsDouble() - WorkingSendTime;
         }
 
-        private void OnNetworkTimeShifted() {
+        private void OnNetworkTimeShifted()
+        {
             #region TLP_DEBUG
 #if TLP_DEBUG
             DebugLog(nameof(OnNetworkTimeShifted));
@@ -348,7 +333,8 @@ namespace TLP.UdonUtils.Runtime.Sync
         }
 
 
-        private bool TryListeningToOptionalTlpNetworktimeUpdates() {
+        private bool TryListeningToOptionalTlpNetworktimeUpdates()
+        {
             if (NetworkTime.GetUdonTypeID() != GetUdonTypeID<TlpNetworkTime>()) {
                 return true;
             }
@@ -359,8 +345,8 @@ namespace TLP.UdonUtils.Runtime.Sync
             }
 
             _referenceTime = tlpTimeSource.ReferenceTime;
-            if (!Utilities.IsValid(tlpTimeSource.OnReferenceTimeUpdated)
-                || tlpTimeSource.OnReferenceTimeUpdated.AddListenerVerified(
+            if (!Utilities.IsValid(tlpTimeSource.OnReferenceTimeUpdated) ||
+                tlpTimeSource.OnReferenceTimeUpdated.AddListenerVerified(
                         this,
                         nameof(OnNetworkTimeShifted))) {
                 return true;
@@ -370,25 +356,27 @@ namespace TLP.UdonUtils.Runtime.Sync
             return false;
         }
 
-        protected virtual bool CheckDependencies() {
-            if (!IsSet(GameTime, nameof(GameTime))) {
+        protected virtual bool CheckDependencies()
+        {
+            if (!IsSet(GameTime,
+                       nameof(GameTime))) {
                 return false;
             }
 
-            if (!IsSet(NetworkTime, nameof(NetworkTime))) {
+            if (!IsSet(NetworkTime,
+                       nameof(NetworkTime))) {
                 return false;
             }
 
-            if (!IsSet(Backlog, nameof(Backlog))) {
-                return false;
-            }
-
-            if (!IsSet(Snapshot, nameof(Snapshot))) {
+            if (!IsSet(Snapshot,
+                       nameof(Snapshot))) {
                 return false;
             }
 
             return true;
         }
+
+        protected virtual float GetTotalPredictionReduction() => PredictionReduction;
         #endregion
     }
 }
