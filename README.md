@@ -99,6 +99,11 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 3. PATCH version: backward compatible bug fixes were implemented
    - Implication: after updating remove potential workarounds you added
 
+### [14.0.3] - 2026-05-01
+
+#### 🐛 Bug Fixes
+
+- *(ci)* Include missing assembly definition file in release packaging for UdonVoiceUtils
 ### [14.0.2] - 2026-05-01
 
 #### 🐛 Bug Fixes
