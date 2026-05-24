@@ -29,14 +29,14 @@ namespace TLP.UdonUtils.Runtime.Player
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
-    [TlpDefaultExecutionOrder(typeof(TrackingDataFollower), ExecutionOrder)]
+    [TlpDefaultExecutionOrder(typeof(PlayerCameraTrackerUi), ExecutionOrder)]
     public class PlayerCameraTrackerUi : TlpBaseBehaviour
     {
         #region ExecutionOrder
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TrackingDataFollowerUI.ExecutionOrder + 1;
+        public new const int ExecutionOrder = DistanceScalerUI.ExecutionOrder + 1;
         #endregion
 
 
