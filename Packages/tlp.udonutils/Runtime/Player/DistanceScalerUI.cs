@@ -13,7 +13,7 @@ namespace TLP.UdonUtils.Runtime.Player
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = LookAtPlayerUI.ExecutionOrder + 1;
+        public new const int ExecutionOrder = PlayerCameraTrackerUi.ExecutionOrder + 1;
 
         public VRCPlayerApi player;
         public bool useLocalPlayerByDefault = true;

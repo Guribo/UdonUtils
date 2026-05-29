@@ -99,6 +99,15 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 3. PATCH version: backward compatible bug fixes were implemented
    - Implication: after updating remove potential workarounds you added
 
+### [14.0.4] - 2026-05-29
+
+#### 🚜 Refactor
+
+- *(UdonUtils)* Update execution order dependencies in `PlayerCameraTrackerUi` and `DistanceScalerUI`
+
+#### ⚙️ Miscellaneous Tasks
+
+- *(UdonUtils)* Bump package version to 14.0.4
 ### [14.0.3] - 2026-05-01
 
 #### 🐛 Bug Fixes
