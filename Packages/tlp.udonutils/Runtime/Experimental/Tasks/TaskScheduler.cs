@@ -216,8 +216,10 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             _timeCompleted = newTimeCompleted;
             _averageIterations = Mathf.Lerp(_averageIterations, iteration, 0.1f);
 #if TLP_DEBUG
-            Info(
-                    $"{nameof(PostLateUpdate)}: Completed {iteration} iterations in {1000 * (newTimeCompleted - startTime):F6}ms, skipped task steps={totalSkips}, avg. iterations={_averageIterations:F1}, real dt={1000 * _realDeltaTime:F3}ms");
+            if (Time.frameCount % 100 == 0) {
+                Info(
+                        $"{nameof(PostLateUpdate)}: Completed {iteration} iterations in {1000 * (newTimeCompleted - startTime):F6}ms, skipped task steps={totalSkips}, avg. iterations={_averageIterations:F1}, real dt={1000 * _realDeltaTime:F3}ms");
+            }
 #endif
         }
         #endregion

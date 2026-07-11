@@ -6,7 +6,7 @@ Contains the base scripts/tools for TLP packages as well as prefabs and potentia
 
 Please note that there is no explicit documentation available.
 The code contains tooltips and descriptions of classes where it makes sense.
-Theses are being added over time where it makes sense.
+These are being added over time where it makes sense.
 
 ## Installation
 
@@ -34,7 +34,7 @@ Theses are being added over time where it makes sense.
       "dependencies": {}
     },
    ```
-3. Remove in a similar fassion from the `Packages/vpm-manifest.json` if present in there
+3. Remove in a similar fashion from the `Packages/vpm-manifest.json` if present in there
 4. In the Unity project go to **Edit > Project Settings > Player > Script Compilation** and remove `TLP_UDONUTILS` from the list
 5. You may also remove anything else starting with `TLP_`
    1. Only applies if you used other TLP packages or enabled debug/test mode
@@ -43,8 +43,7 @@ Theses are being added over time where it makes sense.
 
 1. Add `TLP_Essentials` prefab to your scene to get the core components
    1. TLPLogger - *for logging anything TLP related (mandatory)*
-   2. WorldVersionCheck - *Warns users if a player with a new world version joins*
-   3. TLPNetworkTime - *Much more accurate VRC network time provider (sub-millisecond accuracy)*
+   2. TLP_NetworkTime - *Much more accurate VRC network time provider (sub-millisecond accuracy)*
 
 ## Enable Debug Mode
 
@@ -53,11 +52,11 @@ Theses are being added over time where it makes sense.
 
 Debug mode is disabled by default. When enabled it will log additional information to the console.
 This logging is quite excessive and should only be enabled for debugging purposes.
-If you see no debug logs in the console/log files, ensure that the 
+If you see no debug logs in the console/log files, ensure that the TLP_DEBUG symbol is added and logging severity is set to Debug.
 
 1. Go to **Edit > Project Settings > Player > Script Compilation** and add `TLP_DEBUG` to the list
 2. Find the `TLP_Logger` prefab in your scene 
-3. Set to logging severity `Debug`, be default it is set to `Info`.
+3. Set to logging severity `Debug`, by default it is set to `Info`.
 
 ## Disable Debug Mode
 
@@ -72,11 +71,11 @@ by adding `TLP_UNIT_TESTING` to the list of script compilation symbols.
 Test mode is intended to be used for unit testing and should not be enabled in production builds.
 It will enable certain workarounds for parts of the VRChat SDK that can not easily be mocked.
 
-> Note: Releases of UdonUtils include basic editor tests for setup verification, such as the SanityTest. Full development unit tests are not included as they are not relevant for most users.
+> Note: Releases of UdonUtils include basic editor tests for setup verification, such as the SanityTest — an empty test that should always pass. Full development unit tests are not included as they are not relevant for most users.
 
 ## Running Unit Tests
 
-The package includes a basic `SanityTest` in the editor tests that verifies NSubstitute mocking functionality. This test is optional and only runs if NSubstitute is available.
+The package includes a basic `SanityTest` in the editor tests — an empty test that should always pass. This test is optional and only runs if NSubstitute is available.
 
 To enable and run the SanityTest:
 
@@ -99,6 +98,19 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 3. PATCH version: backward compatible bug fixes were implemented
    - Implication: after updating remove potential workarounds you added
 
+### [14.0.5] - 2026-07-11
+
+#### 🐛 Bug Fixes
+
+- *(ExecutionOrderCheck)* Correct typos in README and add debug log conditionals
+
+#### 🚜 Refactor
+
+- *(TaskScheduler)* Throttle debug logs for performance monitoring and update ECS Test assets with new serialized references
+
+#### ⚙️ Miscellaneous Tasks
+
+- Update program assets, bump version
 ### [14.0.4] - 2026-05-29
 
 #### 🚜 Refactor
