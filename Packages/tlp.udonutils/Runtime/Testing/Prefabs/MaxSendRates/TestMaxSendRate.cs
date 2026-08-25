@@ -3,6 +3,7 @@ using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Extensions;
 using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
 using VRC.Udon.Common.Interfaces;
 
@@ -45,17 +46,17 @@ namespace TLP.UdonUtils.Runtime.Testing
         #endregion
 
         #region TestCase
-        protected override void InitializeTest() {
+        protected override void _InitializeTest() {
             if (TestMaxSendRateSender == null || TestMaxSendRateSender.Length < 1) {
-                Error("Test requires at least 1 sender");
-                TestController.TestInitialized(false);
+                _Error("Test requires at least 1 sender");
+                TestController._TestInitialized(false);
                 return;
             }
 
             foreach (var testMaxSendRateSender in TestMaxSendRateSender) {
                 if (!testMaxSendRateSender) {
-                    Error($"Invalid sender in {nameof(TestMaxSendRateSender)}");
-                    TestController.TestInitialized(false);
+                    _Error($"Invalid sender in {nameof(TestMaxSendRateSender)}");
+                    TestController._TestInitialized(false);
                     return;
                 }
 
@@ -64,15 +65,15 @@ namespace TLP.UdonUtils.Runtime.Testing
                     continue;
                 }
 
-                Error(
-                        $"Sender {testMaxSendRateSender.GetComponentPathInScene()} must be a child of {gameObject.transform.GetPathInScene()}");
-                TestController.TestInitialized(false);
+                _Error(
+                        $"Sender {testMaxSendRateSender._GetComponentPathInScene()} must be a child of {gameObject.transform._GetPathInScene()}");
+                TestController._TestInitialized(false);
                 return;
             }
 
             if (VRCPlayerApi.GetPlayerCount() != 2) {
-                Error("Test requires 2 players");
-                TestController.TestInitialized(false);
+                _Error("Test requires 2 players");
+                TestController._TestInitialized(false);
                 return;
             }
 
@@ -85,27 +86,27 @@ namespace TLP.UdonUtils.Runtime.Testing
                 Networking.SetOwner(_otherPlayer, testMaxSendRateSender.gameObject);
             }
 
-            TestController.TestInitialized(true);
+            TestController._TestInitialized(true);
         }
 
-        protected override void RunTest() {
+        protected override void _RunTest() {
             _totalValidReceived = 0;
             _totalOutOfOrderReceived = 0;
-            SendCustomEventDelayedSeconds(nameof(Delayed_RequestStartSending), 3);
+            SendCustomEventDelayedSeconds(nameof(_Delayed_RequestStartSending), 3);
         }
 
-        protected override void CleanUpTest() {
+        protected override void _CleanUpTest() {
             Networking.SetOwner(Networking.LocalPlayer, gameObject);
             foreach (var testMaxSendRateSender in TestMaxSendRateSender) {
                 Networking.SetOwner(Networking.LocalPlayer, testMaxSendRateSender.gameObject);
             }
 
-            TestController.TestCleanedUp(true);
+            TestController._TestCleanedUp(true);
         }
         #endregion
 
         #region Delayed Events
-        public void Delayed_RequestStartSending() {
+        public void _Delayed_RequestStartSending() {
             if (Status != TestCaseStatus.Running) return;
 
             if (!Utilities.IsValid(TestController)) {
@@ -115,21 +116,21 @@ namespace TLP.UdonUtils.Runtime.Testing
 
             if (!Utilities.IsValid(gameObject)) {
                 Debug.LogError("'GameObject' is no longer valid");
-                TestController.TestCompleted(false);
+                TestController._TestCompleted(false);
                 return;
             }
 
             if (Networking.IsOwner(gameObject)) {
-                Error("Local player should not be owner anymore");
-                TestController.TestCompleted(false);
+                _Error("Local player should not be owner anymore");
+                TestController._TestCompleted(false);
                 return;
             }
 
-            SendCustomNetworkEvent(NetworkEventTarget.Owner, nameof(RPC_StartSending));
-            SendCustomEventDelayedSeconds(nameof(Delayed_ExpectTestFinished), SendDuration + 5f);
+            SendCustomNetworkEvent(NetworkEventTarget.Owner, nameof(_RPC_StartSending));
+            SendCustomEventDelayedSeconds(nameof(_Delayed_ExpectTestFinished), SendDuration + 5f);
         }
 
-        public void Delayed_ExpectTestFinished() {
+        public void _Delayed_ExpectTestFinished() {
             if (Status != TestCaseStatus.Running) return;
             if (!Utilities.IsValid(TestController)) {
                 Debug.LogError($"'{nameof(TestController)}' is no longer valid");
@@ -138,31 +139,32 @@ namespace TLP.UdonUtils.Runtime.Testing
 
             if (!Utilities.IsValid(gameObject)) {
                 Debug.LogError("'GameObject' is no longer valid");
-                TestController.TestInitialized(false);
+                TestController._TestInitialized(false);
                 return;
             }
 
-            Info(
+            _Info(
                     $"Received {_totalValidReceived}/{Mathf.RoundToInt(TargetSendRate * SendDuration)} updates, {_totalOutOfOrderReceived} out of expected order");
 
             if (Mathf.Abs(_totalValidReceived - Mathf.RoundToInt(TargetSendRate * SendDuration)) <
                 AllowedDeviation * TargetSendRate * SendDuration) {
-                TestController.TestCompleted(true);
+                TestController._TestCompleted(true);
                 return;
             }
 
-            Error(
+            _Error(
                     $"Expected {Mathf.RoundToInt(TargetSendRate * SendDuration)} updates, " +
                     $"got {_totalValidReceived} valid updates, " +
                     $"{_totalOutOfOrderReceived} updates were out of expected order " +
                     $"({100f - 100f * _totalValidReceived / (TargetSendRate * SendDuration):F3}% deviation, " +
                     $"allowed was {AllowedDeviation * 100:F3}%)");
-            TestController.TestCompleted(false);
+            TestController._TestCompleted(false);
         }
         #endregion
 
         #region RPCs
-        public void RPC_StartSending() {
+        [NetworkCallable(1)]
+        public void _RPC_StartSending() {
             _sendDeltaTime = 1f / TargetSendRate;
             _nextSendTime = Time.time + _sendDeltaTime;
             _lastSendTime = Time.time + SendDuration;
@@ -170,24 +172,24 @@ namespace TLP.UdonUtils.Runtime.Testing
         #endregion
 
         #region U# Lifecycle
-        public void Update() {
+        internal void Update() {
             if (Time.time > _lastSendTime || Time.time < _nextSendTime) return;
 
             TestMaxSendRateSender[_senderIndex].SendTime = _totalValidReceived;
             TestMaxSendRateSender[_senderIndex].RequestSerialization();
-            _senderIndex.MoveIndexRightLooping(TestMaxSendRateSender.Length);
+            _senderIndex._MoveIndexRightLooping(TestMaxSendRateSender.Length);
             _nextSendTime += _sendDeltaTime;
         }
         #endregion
 
 
-        public void ReceivedData(TestMaxSendRateSender sender) {
+        public void _ReceivedData(TestMaxSendRateSender sender) {
             if (Status != TestCaseStatus.Running) return;
             if (Networking.IsOwner(gameObject)) return;
             double sendTime = sender.SendTime;
             if (sendTime < _lastReceived) {
-                Warn(
-                        $"Received outdated packet from {sender.GetComponentPathInScene()}: {sendTime:F6} < {_lastReceived:F6}");
+                _Warn(
+                        $"Received outdated packet from {sender._GetComponentPathInScene()}: {sendTime:F6} < {_lastReceived:F6}");
                 _totalOutOfOrderReceived++;
                 if (!AllowUnsorted) return;
             }

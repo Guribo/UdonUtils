@@ -13,7 +13,7 @@ namespace TLP.UdonUtils.Runtime.Physics
         /// <param name="tangentialVelocity">velocity on the circle</param>
         /// <param name="rotationRate">turnrate on the circle in degrees/s, must not be 0</param>
         /// <returns>absolute radius (>= 0), also returns 0 if rotationRate is 0</returns>
-        public static float Radius(Vector3 tangentialVelocity, float rotationRate) {
+        public static float _Radius(Vector3 tangentialVelocity, float rotationRate) {
             if (rotationRate == 0) return 0;
             // Convert rotation rate from degrees per second to radians per second
             float omega = rotationRate * Mathf.Deg2Rad;
@@ -30,22 +30,22 @@ namespace TLP.UdonUtils.Runtime.Physics
         /// <param name="circleAxis">expected to be normalized and perpendicular to tangentialVelocity</param>
         /// <param name="radius">expected to be >= 0</param>
         /// <returns>The position of the center of the circle</returns>
-        public static Vector3 Center(Vector3 position, Vector3 tangentialVelocity, Vector3 circleAxis, float radius) {
+        public static Vector3 _Center(Vector3 position, Vector3 tangentialVelocity, Vector3 circleAxis, float radius) {
 #if TLP_DEBUG
-            if (radius < 0) Debug.LogError($"{nameof(Center)}: {nameof(radius)} must be >= 0");
+            if (radius < 0) Debug.LogError($"{nameof(_Center)}: {nameof(radius)} must be >= 0");
             if (Math.Abs(circleAxis.sqrMagnitude - 1) > 1e-6f)
-                Debug.LogError($"{nameof(Center)}: {nameof(circleAxis)} must be normalized");
+                Debug.LogError($"{nameof(_Center)}: {nameof(circleAxis)} must be normalized");
             if (Math.Abs(tangentialVelocity.sqrMagnitude) < 1e-6f)
-                Debug.LogError($"{nameof(Center)}: {nameof(tangentialVelocity)} must not be zero");
+                Debug.LogError($"{nameof(_Center)}: {nameof(tangentialVelocity)} must not be zero");
             if (Math.Abs(Vector3.Dot(tangentialVelocity.normalized, circleAxis)) > 1e-3f)
                 Debug.LogError(
-                        $"{nameof(Center)}: {nameof(circleAxis)} must be perpendicular to {nameof(tangentialVelocity)}");
+                        $"{nameof(_Center)}: {nameof(circleAxis)} must be perpendicular to {nameof(tangentialVelocity)}");
 #endif
             var directionToCenter = Vector3.Cross(circleAxis ,tangentialVelocity.normalized).normalized;
             return position + directionToCenter * radius;
         }
 
-        public static Vector3 PositionOnCircle(
+        public static Vector3 _PositionOnCircle(
                 Vector3 initialPosition,
                 Vector3 tangentialVelocity,
                 Vector3 velocityChangeDirection,
@@ -56,15 +56,15 @@ namespace TLP.UdonUtils.Runtime.Physics
         ) {
             var rotationAxis = Vector3.Cross( tangentialVelocity.normalized, velocityChangeDirection.normalized)
                     .normalized;
-            float radius = Radius(tangentialVelocity, rotationRateDegrees);
-            var center = Center(initialPosition, tangentialVelocity, rotationAxis, radius);
+            float radius = _Radius(tangentialVelocity, rotationRateDegrees);
+            var center = _Center(initialPosition, tangentialVelocity, rotationAxis, radius);
             var centerToPosition = initialPosition - center;
             rotationDelta = Quaternion.AngleAxis(rotationRateDegrees * deltaTime, rotationAxis);
             velocity = rotationDelta * tangentialVelocity;
             return center + rotationDelta * centerToPosition;
         }
 
-        public static bool IsCircularMovement(
+        public static bool _IsCircularMovement(
                 Vector3 velocity0,
                 Vector3 velocity1,
                 float deltaTime,

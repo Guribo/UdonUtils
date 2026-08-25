@@ -5,6 +5,7 @@ using TLP.UdonUtils.Runtime.Logger;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
+using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
 
 #if UNITY_EDITOR
@@ -63,16 +64,16 @@ namespace TLP.UdonUtils.Runtime.Events
         public readonly DataList RestoredPlayers = new DataList();
 
         public override void OnPlayerRestored(VRCPlayerApi player) {
-            string uniquePlayerName = player.DisplayNameUniqueSafe();
+            string uniquePlayerName = player._DisplayNameUniqueSafe();
 
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(OnPlayerRestored)}: {uniquePlayerName}");
+            _DebugLog($"{nameof(OnPlayerRestored)}: {uniquePlayerName}");
 #endif
             #endregion
 
             if (!Utilities.IsValid(player)) {
-                Error($"{nameof(OnPlayerRestored)}: invalid player received");
+                _Error($"{nameof(OnPlayerRestored)}: invalid player received");
                 return;
             }
 
@@ -90,26 +91,26 @@ namespace TLP.UdonUtils.Runtime.Events
 
             // notify all listeners with the restored player temporarily available
             RestoredPlayer = player;
-            if (!Raise(this)) {
-                Error($"{nameof(OnPlayerRestored)}: Failed to raise event");
+            if (!_Raise(this)) {
+                _Error($"{nameof(OnPlayerRestored)}: Failed to raise event");
             }
 
             RestoredPlayer = null;
         }
 
-        public static bool IsPlayerDataRestored(VRCPlayerApi player) {
+        public static bool _IsPlayerDataRestored(VRCPlayerApi player) {
             var localPlayer = Networking.LocalPlayer;
             if (!Utilities.IsValid(localPlayer)) {
-                TlpLogger.StaticError($"{nameof(IsPlayerDataRestored)}: {nameof(localPlayer)} invalid", null);
+                TlpLogger.StaticError($"{nameof(_IsPlayerDataRestored)}: {nameof(localPlayer)} invalid", null);
                 return false;
             }
 
-            string playerTag = localPlayer.GetPlayerTag($"{PlayerTagPrefix}{player.DisplayNameUnique()}");
+            string playerTag = localPlayer.GetPlayerTag($"{PlayerTagPrefix}{player._DisplayNameUnique()}");
 
             #region TLP_DEBUG
 #if TLP_DEBUG
             TlpLogger.StaticDebugLog(
-                    $"{nameof(IsPlayerDataRestored)}: {player.DisplayNameUniqueSafe()} = {!string.IsNullOrEmpty(playerTag)}",
+                    $"{nameof(_IsPlayerDataRestored)}: {player._DisplayNameUniqueSafe()} = {!string.IsNullOrEmpty(playerTag)}",
                     null);
 #endif
             #endregion
@@ -124,7 +125,7 @@ namespace TLP.UdonUtils.Runtime.Events
         public override void OnPlayerLeft(VRCPlayerApi player) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(OnPlayerLeft)}: {player.DisplayNameUniqueSafe()}");
+            _DebugLog($"{nameof(OnPlayerLeft)}: {player._DisplayNameUniqueSafe()}");
 #endif
             #endregion
 
@@ -133,8 +134,8 @@ namespace TLP.UdonUtils.Runtime.Events
             }
 
             if (!Utilities.IsValid(player)) {
-                Error($"{nameof(OnPlayerLeft)}: invalid player received");
-                SendCustomEventDelayedFrames(nameof(Delayed_UpdateRestoredPlayers), 1);
+                _Error($"{nameof(OnPlayerLeft)}: invalid player received");
+                SendCustomEventDelayedFrames(nameof(_Delayed_UpdateRestoredPlayers), 1);
                 return;
             }
 
@@ -144,17 +145,18 @@ namespace TLP.UdonUtils.Runtime.Events
         }
 
         #region Overrides
-        public override void OnEnable() {
+        protected override void OnEnable() {
             base.OnEnable();
-            Delayed_UpdateRestoredPlayers();
+
+            _Delayed_UpdateRestoredPlayers();
         }
         #endregion
 
         #region Delayed
-        public void Delayed_UpdateRestoredPlayers() {
+        public void _Delayed_UpdateRestoredPlayers() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(Delayed_UpdateRestoredPlayers));
+            _DebugLog(nameof(_Delayed_UpdateRestoredPlayers));
 #endif
             #endregion
 
@@ -162,33 +164,33 @@ namespace TLP.UdonUtils.Runtime.Events
                 return;
             }
 
-            var existingPlayers = CreateExistingPlayerLookupTable(out var existingPlayerNames);
-            RemovePlayersWhoFailedLeaving(existingPlayerNames, LocalPlayer);
-            AddRestoredButMissingPlayers(existingPlayers);
+            var existingPlayers = _CreateExistingPlayerLookupTable(out var existingPlayerNames);
+            _RemovePlayersWhoFailedLeaving(existingPlayerNames, LocalPlayer);
+            _AddRestoredButMissingPlayers(existingPlayers);
         }
         #endregion
 
 
         #region internal
-        private void AddRestoredButMissingPlayers(VRCPlayerApi[] existingPlayers) {
+        private void _AddRestoredButMissingPlayers(VRCPlayerApi[] existingPlayers) {
             foreach (var existingPlayer in existingPlayers) {
                 if (!Utilities.IsValid(existingPlayer)) {
                     continue;
                 }
 
-                string displayNameUnique = existingPlayer.DisplayNameUnique();
-                if (!IsPlayerDataRestored(existingPlayer) || RestoredPlayers.Contains(displayNameUnique)) {
+                string displayNameUnique = existingPlayer._DisplayNameUnique();
+                if (!_IsPlayerDataRestored(existingPlayer) || RestoredPlayers.Contains(displayNameUnique)) {
                     continue;
                 }
 
                 // player has already been restored but this gameObject doesn't know that yet: add to list
                 RestoredPlayers.Add(displayNameUnique);
-                Warn(
-                        $"{nameof(AddRestoredButMissingPlayers)}: added {displayNameUnique} to {nameof(RestoredPlayers)}");
+                _Warn(
+                        $"{nameof(_AddRestoredButMissingPlayers)}: added {displayNameUnique} to {nameof(RestoredPlayers)}");
             }
         }
 
-        private void RemovePlayersWhoFailedLeaving(
+        private void _RemovePlayersWhoFailedLeaving(
                 DataDictionary existingPlayerNames,
                 VRCPlayerApi localPlayer
         ) {
@@ -198,16 +200,16 @@ namespace TLP.UdonUtils.Runtime.Events
                     // remove player, who left the world but for some reason still in the RestoredPlayers
                     localPlayer.SetPlayerTag(PlayerTagPrefix + restoredPlayerName);
                     RestoredPlayers.RemoveAll(restoredPlayerName);
-                    Warn(
-                            $"{nameof(RemovePlayersWhoFailedLeaving)}: removed {restoredPlayerName} from {nameof(RestoredPlayers)}");
+                    _Warn(
+                            $"{nameof(_RemovePlayersWhoFailedLeaving)}: removed {restoredPlayerName} from {nameof(RestoredPlayers)}");
                 } else {
                     i++;
                 }
             }
         }
 
-        private static VRCPlayerApi[] CreateExistingPlayerLookupTable(out DataDictionary existingPlayerNames) {
-            var existingPlayers = VrcPlayerApiUtils.GetAllPlayers();
+        private static VRCPlayerApi[] _CreateExistingPlayerLookupTable(out DataDictionary existingPlayerNames) {
+            var existingPlayers = VrcPlayerApiUtils._GetAllPlayers();
             existingPlayerNames = new DataDictionary();
             foreach (var existingPlayer in existingPlayers) {
                 if (Utilities.IsValid(existingPlayer) && !existingPlayerNames.ContainsKey(existingPlayer.displayName)) {

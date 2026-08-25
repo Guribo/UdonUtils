@@ -5,6 +5,7 @@ using TLP.UdonUtils.Runtime.Rendering;
 using UdonSharp;
 using UnityEditor;
 using UnityEngine;
+using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
 
 #if UNITY_EDITOR
@@ -17,7 +18,7 @@ namespace TLP.UdonUtils.Editor.Core
     [CustomEditor(typeof(VisibilityToggle))]
     public class VisibilityToggleEditor : TlpBehaviourEditor
     {
-        protected override string GetDescription() {
+        protected override string _GetDescription() {
             return
                     "Disables scripts/Behaviours/GameObjects when the associated renderer is invisible, enables them when visible.\n" +
                     "Disabling occurs in reverse order of their appearance in the inspector.\n" +
@@ -70,14 +71,21 @@ namespace TLP.UdonUtils.Runtime.Optimization
         /// </summary>
         public UdonSharpBehaviour[] UdonSharpBehaviour;
 
+        /// <summary>
+        /// True when the renderer on this gameobject is currently visible.
+        /// </summary>
+        public bool IsVisible { get; private set; }
+
         private void OnBecameVisible() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnBecameVisible));
+            _DebugLog(nameof(OnBecameVisible));
 #endif
             #endregion
 
-            int count = GameObjects.LengthSafe();
+            IsVisible = true;
+
+            int count = GameObjects._LengthSafe();
             for (int i = 0; i < count; ++i) {
                 var go = GameObjects[i];
                 if (!Utilities.IsValid(go)) {
@@ -86,14 +94,14 @@ namespace TLP.UdonUtils.Runtime.Optimization
 
                 #region TLP_DEBUG
 #if TLP_DEBUG
-                DebugLog($"Enabling GameObject {go.transform.GetPathInScene()}");
+                _DebugLog($"Enabling GameObject {go.transform._GetPathInScene()}");
 #endif
                 #endregion
 
                 go.SetActive(true);
             }
 
-            count = Behaviours.LengthSafe();
+            count = Behaviours._LengthSafe();
             for (int i = 0; i < count; ++i) {
                 var behaviour = Behaviours[i];
                 if (!Utilities.IsValid(behaviour)) {
@@ -102,14 +110,14 @@ namespace TLP.UdonUtils.Runtime.Optimization
 
                 #region TLP_DEBUG
 #if TLP_DEBUG
-                DebugLog($"Enabling behaviour {behaviour.GetComponentPathInScene()}");
+                _DebugLog($"Enabling behaviour {behaviour._GetComponentPathInScene()}");
 #endif
                 #endregion
 
                 behaviour.enabled = true;
             }
 
-            count = UdonSharpBehaviour.LengthSafe();
+            count = UdonSharpBehaviour._LengthSafe();
             for (int i = 0; i < count; ++i) {
                 var behaviour = UdonSharpBehaviour[i];
                 if (!Utilities.IsValid(behaviour)) {
@@ -118,7 +126,7 @@ namespace TLP.UdonUtils.Runtime.Optimization
 
                 #region TLP_DEBUG
 #if TLP_DEBUG
-                DebugLog($"Enabling U# behaviour {behaviour.GetScriptPathInScene()}");
+                _DebugLog($"Enabling U# behaviour {behaviour._GetScriptPathInScene()}");
 #endif
                 #endregion
 
@@ -129,12 +137,14 @@ namespace TLP.UdonUtils.Runtime.Optimization
         private void OnBecameInvisible() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnBecameInvisible));
+            _DebugLog(nameof(OnBecameInvisible));
 #endif
             #endregion
 
-            int count = UdonSharpBehaviour.LengthSafe();
-            for (int i = count -1; i > -1; --i) {
+            IsVisible = false;
+
+            int count = UdonSharpBehaviour._LengthSafe();
+            for (int i = count - 1; i > -1; --i) {
                 var behaviour = UdonSharpBehaviour[i];
                 if (!Utilities.IsValid(behaviour)) {
                     continue;
@@ -142,15 +152,15 @@ namespace TLP.UdonUtils.Runtime.Optimization
 
                 #region TLP_DEBUG
 #if TLP_DEBUG
-                DebugLog($"Disabling U# behaviour {behaviour.GetScriptPathInScene()}");
+                _DebugLog($"Disabling U# behaviour {behaviour._GetScriptPathInScene()}");
 #endif
                 #endregion
 
                 behaviour.enabled = false;
             }
 
-            count = Behaviours.LengthSafe();
-            for (int i = count -1; i > -1; --i) {
+            count = Behaviours._LengthSafe();
+            for (int i = count - 1; i > -1; --i) {
                 var behaviour = Behaviours[i];
                 if (!Utilities.IsValid(behaviour)) {
                     continue;
@@ -158,15 +168,15 @@ namespace TLP.UdonUtils.Runtime.Optimization
 
                 #region TLP_DEBUG
 #if TLP_DEBUG
-                DebugLog($"Disabling behaviour {behaviour.GetComponentPathInScene()}");
+                _DebugLog($"Disabling behaviour {behaviour._GetComponentPathInScene()}");
 #endif
                 #endregion
 
                 behaviour.enabled = false;
             }
 
-            count = GameObjects.LengthSafe();
-            for (int i = count -1; i > -1; --i) {
+            count = GameObjects._LengthSafe();
+            for (int i = count - 1; i > -1; --i) {
                 var go = GameObjects[i];
                 if (!Utilities.IsValid(go)) {
                     continue;
@@ -174,12 +184,38 @@ namespace TLP.UdonUtils.Runtime.Optimization
 
                 #region TLP_DEBUG
 #if TLP_DEBUG
-                DebugLog($"Disabling GameObject {go.transform.GetPathInScene()}");
+                _DebugLog($"Disabling GameObject {go.transform._GetPathInScene()}");
 #endif
                 #endregion
 
                 go.SetActive(false);
             }
+        }
+
+        /// <summary>
+        /// Adds the behaviour if it is valid. Does NOT check for duplicates.
+        /// Does NOT change the scripts enabled state. Use <see cref="IsVisible"/> to control the enabled state.
+        /// </summary>
+        /// <param name="udonSharpBehaviour"></param>
+        public void _AddUdonSharpBehaviour(UdonSharpBehaviour udonSharpBehaviour) {
+            if (!Utilities.IsValid(udonSharpBehaviour)) {
+                return;
+            }
+
+            UdonSharpBehaviour = UdonSharpBehaviour._Append(udonSharpBehaviour);
+        }
+
+        /// <summary>
+        /// Tries to removed the first entry of the behaviour if it is valid/exists. Does NOT remove duplicates.
+        /// Does NOT change the scripts enabled state. Use <see cref="IsVisible"/> to control the enabled state.
+        /// </summary>
+        /// <param name="udonSharpBehaviour"></param>
+        public void _RemoveUdonSharpBehaviour(UdonSharpBehaviour udonSharpBehaviour) {
+            if (!Utilities.IsValid(udonSharpBehaviour)) {
+                return;
+            }
+
+            UdonSharpBehaviour = UdonSharpBehaviour._Delete(udonSharpBehaviour);
         }
     }
 }

@@ -16,7 +16,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &8679563121382036383
 Transform:
@@ -54,7 +54,7 @@ MonoBehaviour:
     PrefabModificationsReferencedUnityObjects: []
     PrefabModifications: []
     SerializationNodes:
-    - Name: RestoredPlayerNames
+    - Name: RestoredPlayers
       Entry: 7
       Data: 0|VRC.SDK3.Data.DataList, VRCSDK3
     - Name: 
@@ -73,9 +73,13 @@ MonoBehaviour:
   EventInstigator: {fileID: 0}
   Pool: {fileID: 0}
   PoolableInUse: 0
+  DefaultScheduler: {fileID: 0}
+  LimitToOncePerFrame: 0
   Listeners: []
   RaiseOnEnable: 0
   RaiseOnStart: 0
+  NotifyAsync: 0
+  UseAsyncEventQueue: 0
   ListenerMethod: PlayerDataRestored
 --- !u!114 &4521105429811357472
 MonoBehaviour:

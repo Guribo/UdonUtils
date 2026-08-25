@@ -26,8 +26,8 @@ namespace TLP.UdonUtils.Runtime.Player
 
         private Vector3 _smoothingVelocity;
 
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
@@ -41,7 +41,7 @@ namespace TLP.UdonUtils.Runtime.Player
             }
 
             if (!Utilities.IsValid(Player)) {
-                Warn("Player is not valid");
+                _Warn("Player is not valid");
                 return;
             }
 

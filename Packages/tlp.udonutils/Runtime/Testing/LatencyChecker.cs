@@ -53,15 +53,15 @@ namespace TLP.UdonUtils.Runtime.Testing
 
         #region RPCs
         [NetworkCallable(100)]
-        public void RPC_Ping(double requestTime) {
-            double localTime = _networkTime.TimeAsDouble();
+        public void _RPC_Ping(double requestTime) {
+            double localTime = _networkTime._TimeAsDouble();
             double delta2 = localTime - requestTime;
-            UpdateMovingAverageDelta(delta2);
+            _UpdateMovingAverageDelta(delta2);
             Text.text =
                     $"local: {localTime:F6}s\nrequested: {requestTime:F6}\nreceived: {localTime:F6}s\ndelta requested:{delta2:F6}s\ndelta: {delta2:F6}s\nsmoothed delta: {_movingAverageDelta:F6}";
         }
 
-        private void UpdateMovingAverageDelta(double delta2) {
+        private void _UpdateMovingAverageDelta(double delta2) {
             if (_movingAverageDelta == 0) _movingAverageDelta = (float)delta2;
             if (Mathf.Abs(_movingAverageDelta - (float)delta2) > 0.25f) {
                 _movingAverageDelta = (float)delta2;
@@ -72,52 +72,52 @@ namespace TLP.UdonUtils.Runtime.Testing
         }
         #endregion
 
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
-            _networkTime = TlpNetworkTime.GetInstance();
+            _networkTime = TlpNetworkTime._GetInstance();
             if (!Utilities.IsValid(_networkTime)) {
-                ErrorAndDisableGameObject($"{nameof(_networkTime)} is not set");
+                _ErrorAndDisableGameObject($"{nameof(_networkTime)} is not set");
                 return false;
             }
 
-            SendCustomEventDelayedSeconds(nameof(Delayed_Refresh), SendInterval);
+            SendCustomEventDelayedSeconds(nameof(_Delayed_Refresh), SendInterval);
 
             return true;
         }
 
-        public void Delayed_Refresh() {
+        public void _Delayed_Refresh() {
             if (Networking.IsOwner(gameObject)) {
                 if (UseManualSync) {
-                    _requestTime = _networkTime.TimeAsDouble();
+                    _requestTime = _networkTime._TimeAsDouble();
                     RequestSerialization();
                 } else {
-                    if (NetworkCalling.GetQueuedEvents((IUdonEventReceiver)this, nameof(RPC_Ping)) == 0) {
+                    if (NetworkCalling.GetQueuedEvents((IUdonEventReceiver)this, nameof(_RPC_Ping)) == 0) {
                         SendCustomNetworkEvent(
                                 NetworkEventTarget.Others,
-                                nameof(RPC_Ping),
-                                _networkTime.TimeAsDouble());
+                                nameof(_RPC_Ping),
+                                _networkTime._TimeAsDouble());
                     }
                 }
             }
 
-            SendCustomEventDelayedSeconds(nameof(Delayed_Refresh), SendInterval);
+            SendCustomEventDelayedSeconds(nameof(_Delayed_Refresh), SendInterval);
         }
 
         public override void OnPreSerialization() {
             base.OnPreSerialization();
-            _time = _networkTime.TimeAsDouble();
+            _time = _networkTime._TimeAsDouble();
         }
 
         public override void OnDeserialization(DeserializationResult deserializationResult) {
             base.OnDeserialization(deserializationResult);
-            double delta = _networkTime.TimeAsDouble() - _time;
-            double delta2 = _networkTime.TimeAsDouble() - _requestTime;
-            UpdateMovingAverageDelta(delta);
+            double delta = _networkTime._TimeAsDouble() - _time;
+            double delta2 = _networkTime._TimeAsDouble() - _requestTime;
+            _UpdateMovingAverageDelta(delta);
             Text.text =
-                    $"local: {_networkTime.TimeAsDouble():F6}s\nrequested: {_requestTime:F6}\nreceived: {_time:F6}s\ndelta requested:{delta2:F6}s\ndelta: {delta:F6}s\nsmoothed delta: {_movingAverageDelta:F6}";
+                    $"local: {_networkTime._TimeAsDouble():F6}s\nrequested: {_requestTime:F6}\nreceived: {_time:F6}s\ndelta requested:{delta2:F6}s\ndelta: {delta:F6}s\nsmoothed delta: {_movingAverageDelta:F6}";
         }
     }
 }

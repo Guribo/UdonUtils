@@ -33,20 +33,20 @@ namespace TLP.UdonUtils.Runtime.StateMachine
 
         #region Callbacks
         /// <summary>
-        /// Called after <see cref="StateMachineState.OnBeginEnterState"/>.
+        /// Called after <see cref="StateMachineState._OnBeginEnterState"/>.
         /// Called after all behaviours of the state have been enabled.
-        /// Called before <see cref="StateMachineState.OnStateEntered"/>.
+        /// Called before <see cref="StateMachineState._OnStateEntered"/>.
         /// </summary>
-        public abstract void OnStateEntered();
+        public abstract void _OnStateEntered();
 
         /// <summary>
-        /// Called after <see cref="StateMachineState.OnBeginExitState"/>.
+        /// Called after <see cref="StateMachineState._OnBeginExitState"/>.
         /// Called before all behaviours of the state have been disabled.
-        /// Called before <see cref="StateMachineState.OnStateExited"/>.
-        /// Called in reverse order compared to <see cref="OnStateEntered"/> if there
+        /// Called before <see cref="StateMachineState._OnStateExited"/>.
+        /// Called in reverse order compared to <see cref="_OnStateEntered"/> if there
         /// is multiple behaviours on one state.
         /// </summary>
-        public abstract void OnStateExited();
+        public abstract void _OnStateExited();
         #endregion
     }
 }

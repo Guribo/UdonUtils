@@ -18,23 +18,24 @@ namespace TLP.UdonUtils.Runtime.Sync
         public new const int ExecutionOrder = TlpAccurateSyncBehaviourFixedUpdate.ExecutionOrder + 1;
 
         #region U# Lifecycle
-        public void Update() {
+        internal void Update() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(Update));
+            _DebugLog(nameof(Update));
 #endif
             #endregion
 
             if (Networking.IsOwner(gameObject)) {
                 return;
             }
-            float predictionReduction = GetTotalPredictionReduction();
-            double networkTime = NetworkTime.TimeAsDouble();
-            PredictMovement(networkTime,
+
+            float predictionReduction = _GetTotalPredictionReduction();
+            double networkTime = NetworkTime._TimeAsDouble();
+            _PredictMovement(networkTime,
                             networkTime - predictionReduction,
                             networkTime - WorkingSendTime - predictionReduction,
                             predictionReduction,
-                            NetworkTime.UnscaledDeltaTime());
+                            NetworkTime._UnscaledDeltaTime());
         }
         #endregion
     }

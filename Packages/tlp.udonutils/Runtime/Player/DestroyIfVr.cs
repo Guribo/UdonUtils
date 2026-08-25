@@ -1,6 +1,5 @@
 using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Common;
-using TLP.UdonUtils.Runtime.Logger;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -17,8 +16,8 @@ namespace TLP.UdonUtils.Runtime.Player
         [PublicAPI]
         public new const int ExecutionOrder = DestroyIfDesktop.ExecutionOrder + 1;
 
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
@@ -26,7 +25,7 @@ namespace TLP.UdonUtils.Runtime.Player
                 return true;
             }
 
-            DebugLog($"Destroying {transform.GetPathInScene()}");
+            _DebugLog($"Destroying {transform._GetPathInScene()}");
             Destroy(gameObject);
             return true;
         }

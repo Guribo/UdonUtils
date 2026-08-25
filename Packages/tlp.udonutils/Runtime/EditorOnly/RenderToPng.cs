@@ -1,12 +1,13 @@
 #if UNITY_EDITOR
 using System.IO;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace TLP.UdonUtils.Runtime.EditorOnly
 {
     public class RenderToPng : MonoBehaviour
     {
-        public void RenderTextureToFile(RenderTexture rt) {
+        public void _RenderTextureToFile(RenderTexture rt) {
             var tex = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false)
             {
                     hideFlags = HideFlags.DontSave
@@ -27,11 +28,11 @@ namespace TLP.UdonUtils.Runtime.EditorOnly
             }
         }
 
-        public RenderTexture rt;
+        [FormerlySerializedAs("rt")] public RenderTexture RT;
 
         [ContextMenu("SaveAsFile")]
-        public void ConvertToPng() {
-            RenderTextureToFile(rt);
+        public void _ConvertToPng() {
+            _RenderTextureToFile(RT);
         }
     }
 }

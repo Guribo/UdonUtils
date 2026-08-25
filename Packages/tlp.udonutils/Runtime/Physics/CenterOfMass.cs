@@ -30,48 +30,48 @@ namespace TLP.UdonUtils.Runtime.Physics
         [FormerlySerializedAs("centerOfMass")]
         public Transform CenterOfMassPosition;
 
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
             if (!Utilities.IsValid(Body)) {
-                Error($"{nameof(Body)} not set");
+                _Error($"{nameof(Body)} not set");
                 return false;
             }
 
             if (!Utilities.IsValid(CenterOfMassPosition)) {
-                Error($"{nameof(CenterOfMassPosition)} not set");
+                _Error($"{nameof(CenterOfMassPosition)} not set");
                 return false;
             }
 
             if (InitOnStart) {
-                UpdateCenterOfMass(CenterOfMassPosition.position);
+                _UpdateCenterOfMass(CenterOfMassPosition.position);
             }
 
-            LogCenterOfMass();
+            _LogCenterOfMass();
             return true;
         }
 
-        public bool Set(Vector3 worldPosition) {
+        public bool _Set(Vector3 worldPosition) {
             if (!HasStartedOk) {
-                Error("Not initialized");
+                _Error("Not initialized");
                 return false;
             }
 
-            UpdateCenterOfMass(worldPosition);
+            _UpdateCenterOfMass(worldPosition);
             return true;
         }
 
 
         #region Internal
-        private void UpdateCenterOfMass(Vector3 worldPosition) {
+        private void _UpdateCenterOfMass(Vector3 worldPosition) {
             Body.centerOfMass = Body.transform.InverseTransformPoint(worldPosition);
         }
 
-        private void LogCenterOfMass() {
-            DebugLog($"[{GetType()}.LogTensor] {Body.gameObject.name}.centerOfMassPosition = {Body.centerOfMass}");
-            DebugLog($"[{GetType()}.LogTensor] {Body.gameObject.name}.worldCenterOfMass = {Body.worldCenterOfMass}");
+        private void _LogCenterOfMass() {
+            _DebugLog($"[{GetType()}.LogTensor] {Body.gameObject.name}.centerOfMassPosition = {Body.centerOfMass}");
+            _DebugLog($"[{GetType()}.LogTensor] {Body.gameObject.name}.worldCenterOfMass = {Body.worldCenterOfMass}");
         }
         #endregion
     }

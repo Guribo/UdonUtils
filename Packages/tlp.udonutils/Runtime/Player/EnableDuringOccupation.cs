@@ -74,13 +74,13 @@ namespace TLP.UdonUtils.Runtime.Player
         #endregion
 
         #region Overrides
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
-            if (ObjectsToEnable.LengthSafe() <= 0) {
-                Error($"{nameof(ObjectsToEnable)} is empty");
+            if (ObjectsToEnable._LengthSafe() <= 0) {
+                _Error($"{nameof(ObjectsToEnable)} is empty");
                 return false;
             }
 
@@ -101,19 +101,19 @@ namespace TLP.UdonUtils.Runtime.Player
 
             switch (Occupation) {
                 case OccupationState.LocalPlayerOnly:
-                    if (player.IsLocalSafe()) {
-                        Activate();
+                    if (player._IsLocalSafe()) {
+                        _Activate();
                     }
 
                     break;
                 case OccupationState.RemotePlayersOnly:
-                    if (!player.IsLocalSafe()) {
-                        Activate();
+                    if (!player._IsLocalSafe()) {
+                        _Activate();
                     }
 
                     break;
                 default:
-                    Activate();
+                    _Activate();
                     break;
             }
         }
@@ -123,35 +123,35 @@ namespace TLP.UdonUtils.Runtime.Player
 
             switch (Occupation) {
                 case OccupationState.LocalPlayerOnly:
-                    if (player.IsLocalSafe()) {
-                        Deactivate();
+                    if (player._IsLocalSafe()) {
+                        _Deactivate();
                     }
 
                     break;
                 case OccupationState.RemotePlayersOnly:
-                    if (!player.IsLocalSafe()) {
-                        Deactivate();
+                    if (!player._IsLocalSafe()) {
+                        _Deactivate();
                     }
 
                     break;
                 default:
-                    Deactivate();
+                    _Deactivate();
                     break;
             }
         }
         #endregion
 
         #region Internal
-        private void Activate() {
+        private void _Activate() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(Activate));
+            _DebugLog(nameof(_Activate));
 #endif
             #endregion
 
             _playerCount = Mathf.Min(VRCPlayerApi.GetPlayerCount(), _playerCount + 1);
 
-            if (_playerCount > 1 || ObjectsToEnable.LengthSafe() <= 0) {
+            if (_playerCount > 1 || ObjectsToEnable._LengthSafe() <= 0) {
                 return;
             }
 
@@ -160,16 +160,16 @@ namespace TLP.UdonUtils.Runtime.Player
             }
         }
 
-        private void Deactivate() {
+        private void _Deactivate() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(Deactivate));
+            _DebugLog(nameof(_Deactivate));
 #endif
             #endregion
 
             _playerCount = Mathf.Max(0, _playerCount - 1);
 
-            if (_playerCount > 0 || ObjectsToEnable.LengthSafe() <= 0) {
+            if (_playerCount > 0 || ObjectsToEnable._LengthSafe() <= 0) {
                 return;
             }
 

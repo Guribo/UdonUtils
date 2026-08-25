@@ -70,7 +70,7 @@ namespace TLP.UdonUtils.Runtime.Physics
         /// Copies all physics state values from another instance.
         /// </summary>
         /// <param name="other">The source physics state to copy from.</param>
-        public override bool CopyFrom(Snapshot other)
+        public override bool _CopyFrom(Snapshot other)
         {
             var rigidBodyPhysicsState = (RigidBodyPhysicsState)other;
             if (!Utilities.IsValid(rigidBodyPhysicsState)) {
@@ -98,7 +98,7 @@ namespace TLP.UdonUtils.Runtime.Physics
         /// <param name="target">The behaviour that receives the network event.</param>
         /// <param name="playerTarget">Specifies which clients should receive the network event.</param>
         /// <param name="eventName">The name of the network event to invoke on the target behaviour.</param>
-        public void SendViaNetworkEvent(
+        public void _SendViaNetworkEvent(
                 TlpBaseBehaviour target,
                 NetworkEventTarget playerTarget,
                 string eventName
@@ -114,10 +114,10 @@ namespace TLP.UdonUtils.Runtime.Physics
                     AngularVelocityRadians,
                     CircleAngularVelocityDegrees,
                     Time,
-                    EncodeSyncedFlags());
+                    _EncodeSyncedFlags());
         }
 
-        public byte EncodeSyncedFlags()
+        public byte _EncodeSyncedFlags()
         {
             byte flags = 0;
             if (TeleportingFlipFlop) {
@@ -131,7 +131,7 @@ namespace TLP.UdonUtils.Runtime.Physics
             return flags;
         }
 
-        public void DecodeSyncedFlags(byte flags)
+        public void _DecodeSyncedFlags(byte flags)
         {
             TeleportingFlipFlop = (flags & BitMaskIsTeleportingFlipFlop) != 0;
             IsAfterCollision = (flags & BitMaskIsAfterCollision) != 0;
@@ -145,14 +145,14 @@ namespace TLP.UdonUtils.Runtime.Physics
         /// <param name="networkTime">The target network time to predict the state for.</param>
         /// <param name="circleThreshold">The minimum circular angular velocity, in degrees per second, required to use circular prediction.</param>
         /// <param name="predictedState">The state instance that receives the predicted position, rotation, and motion values.</param>
-        public void PredictState(
+        public void _PredictState(
                 double networkTime,
                 float circleThreshold,
                 RigidBodyPhysicsState predictedState)
         {
             double elapsed = networkTime - Time;
             if (CircleAngularVelocityDegrees > circleThreshold) {
-                predictedState.Position = ConstantCircularVelocity.PositionOnCircle(
+                predictedState.Position = ConstantCircularVelocity._PositionOnCircle(
                         Position,
                         LinearVelocity,
                         LinearAcceleration,
@@ -162,12 +162,12 @@ namespace TLP.UdonUtils.Runtime.Physics
                         out var rotationDelta);
                 predictedState.LinearVelocity = predictedVelocity;
             } else {
-                predictedState.Position = ConstantLinearAcceleration.Position(
+                predictedState.Position = ConstantLinearAcceleration._Position(
                         Position,
                         LinearVelocity,
                         LinearAcceleration,
                         (float)elapsed);
-                predictedState.LinearVelocity = ConstantLinearAcceleration.Velocity(
+                predictedState.LinearVelocity = ConstantLinearAcceleration._Velocity(
                         LinearVelocity,
                         LinearAcceleration,
                         (float)elapsed);
@@ -199,7 +199,7 @@ namespace TLP.UdonUtils.Runtime.Physics
         /// <param name="stateA">The start state used when <paramref name="t"/> is 0.</param>
         /// <param name="stateB">The end state used when <paramref name="t"/> is 1.</param>
         /// <param name="t">The interpolation factor between the two states, typically in the range from 0 to 1.</param>
-        public void Lerp(
+        public void _Lerp(
                 RigidBodyPhysicsState stateA,
                 RigidBodyPhysicsState stateB,
                 float t)

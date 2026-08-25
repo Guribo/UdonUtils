@@ -10,8 +10,7 @@ These are being added over time where it makes sense.
 
 ## Installation
 
-1. Install/Add VRChat World SDK 3.10.3 or later to your project
-2. Install/Add TLP UdonUtils to your project: https://guribo.github.io/TLP/
+1. Install/Add TLP UdonUtils to your project via VCC or ALCOM: https://guribo.github.io/TLP/
 
 ## Uninstall
 
@@ -98,6 +97,41 @@ The used pattern MAJOR.MINOR.PATCH indicates:
 3. PATCH version: backward compatible bug fixes were implemented
    - Implication: after updating remove potential workarounds you added
 
+## Migrating from 14.x
+
+Methods in `TlpBaseBehaviour`, `UdonEvent`, `Pool`, `Task`, and `TlpNetworkTime` have been renamed with a `_` prefix (e.g. `EnsureLocalOwnership` → `_EnsureLocalOwnership`).
+
+This is a **breaking change** (major version bump to 15.0.0). All callers and subclass overrides must be updated.
+
+**Why:** UdonSharp allows any public, zero-argument method to be invoked remotely via `SendCustomNetworkEvent`. Without the `_` prefix, legacy methods were exploitable by malicious clients. The underscore prefix blocks network dispatch while preserving the existing API contract.
+
+### [15.0.0] - 2026-08-25
+
+#### 🚀 Features
+
+- Extract VrcCameraSettingsUtils from PlayerCameraTrackerUi
+- *(array)* Add method to delete an element from an array
+- *(visibility)* Add IsVisible property and methods for managing UdonSharpBehaviour
+- Add AssemblyDependencyResolver with GUID-to-name resolution
+- *(development)* Make executionorder respect assembly groups instead of checking globally
+- *(menu)* Implement VrcMenuDetector for menu state detection and event raising
+- *(CameraUtils)* Add TryGetScreenCameraPosition
+- *(VrcMenuDetector)* Add to TLP_Essentials prefab, change event type to InputEvent
+- *(VrcMenuDetector)* Add networking support, make essential prefabs static
+- [**breaking**] Protect against legacy SendCustomNetworkEvent attacks
+
+#### 🐛 Bug Fixes
+
+- *(VrcMenuDetector)* Correct synced events not firing on remote clients
+
+#### 🚜 Refactor
+
+- *(InertiaTensor)* Add custom editor and improve inertia tensor handling
+
+#### ⚙️ Miscellaneous Tasks
+
+- Update program assets, bump version
+- Mark IsActiveAndEnabled as obsolete
 ### [14.0.5] - 2026-07-11
 
 #### 🐛 Bug Fixes

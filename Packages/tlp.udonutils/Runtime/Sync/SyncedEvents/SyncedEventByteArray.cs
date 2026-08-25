@@ -24,12 +24,12 @@ namespace TLP.UdonUtils.Runtime.Sync.SyncedEvents
         public byte[] WorkingValues = new byte[0];
 
         public override void OnPreSerialization() {
-            WorkingValues.CreateCopy(ref SyncedValues);
+            WorkingValues._CreateCopy(ref SyncedValues);
             base.OnPreSerialization();
         }
 
         public override void OnDeserialization(DeserializationResult deserializationResult) {
-            SyncedValues.CreateCopy(ref WorkingValues);
+            SyncedValues._CreateCopy(ref WorkingValues);
             base.OnDeserialization(deserializationResult);
         }
     }

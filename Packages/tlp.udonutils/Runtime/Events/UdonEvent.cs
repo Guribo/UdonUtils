@@ -6,6 +6,7 @@ using TLP.UdonUtils.Runtime.Extensions;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
+using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
 using VRC.Udon.Common.Enums;
 
@@ -64,41 +65,41 @@ namespace TLP.UdonUtils.Runtime.Events
         #endregion
 
         #region Overrides
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
-            return !RaiseOnStart || Raise(this);
+            return !RaiseOnStart || _Raise(this);
         }
 
-        public override void OnEvent(string eventName) {
+        public override void _OnEvent(string eventName) {
             switch (eventName) {
                 case TaskScheduler.FinishedTaskCallbackName:
                     #region TLP_DEBUG
 #if TLP_DEBUG
-                    DebugLog_OnEvent(eventName);
+                    _DebugLog_OnEvent(eventName);
 #endif
                     #endregion
                     // to prevent a not implemented error
                     break;
                 default:
-                    base.OnEvent(eventName);
+                    base._OnEvent(eventName);
                     break;
             }
         }
         #endregion
 
         #region Unity Lifecycle
-        public virtual void OnEnable() {
+        protected virtual void OnEnable() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnEnable));
+            _DebugLog(nameof(OnEnable));
 #endif
             #endregion
 
             if (RaiseOnEnable) {
-                Raise(this);
+                _Raise(this);
             }
         }
         #endregion
@@ -110,10 +111,10 @@ namespace TLP.UdonUtils.Runtime.Events
         /// <param name="listener">must be valid</param>
         /// <returns>true if the listener is valid and was listening</returns>
         [PublicAPI]
-        public bool RemoveListener(TlpBaseBehaviour listener, bool all = false) {
+        public bool _RemoveListener(TlpBaseBehaviour listener, bool all = false) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(RemoveListener));
+            _DebugLog(nameof(_RemoveListener));
 #endif
             #endregion
 
@@ -121,7 +122,7 @@ namespace TLP.UdonUtils.Runtime.Events
                 return false;
             }
 
-            ListenerCount = Consolidate(Listeners, ListenerCount);
+            ListenerCount = _Consolidate(Listeners, ListenerCount);
             int found = 0;
             for (int i = 0; i < ListenerCount; i++) {
                 if (!ReferenceEquals(Listeners[i], listener)) {
@@ -130,16 +131,15 @@ namespace TLP.UdonUtils.Runtime.Events
 
                 Listeners[i] = null;
 
-
                 if (!all) {
-                    ListenerCount = Consolidate(Listeners, ListenerCount);
+                    ListenerCount = _Consolidate(Listeners, ListenerCount);
                     return true;
                 }
 
                 ++found;
             }
 
-            ListenerCount = Consolidate(Listeners, ListenerCount);
+            ListenerCount = _Consolidate(Listeners, ListenerCount);
             return found > 0;
         }
 
@@ -150,27 +150,25 @@ namespace TLP.UdonUtils.Runtime.Events
         /// </summary>
         [PublicAPI]
         [RecursiveMethod]
-        public virtual bool Raise(TlpBaseBehaviour instigator) {
+        public virtual bool _Raise(TlpBaseBehaviour instigator) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(Raise)} '{ListenerMethod}' for instigator={instigator.GetScriptPathInScene()}");
+            _DebugLog($"{nameof(_Raise)} '{ListenerMethod}' for instigator={instigator._GetScriptPathInScene()}");
 #endif
             #endregion
 
             if (!Utilities.IsValid(instigator)) {
-                Error("instigator must be valid");
+                _Error("instigator must be valid");
                 return false;
             }
 
             if (string.IsNullOrWhiteSpace(ListenerMethod)) {
-                Warn($"{nameof(ListenerMethod)} is empty, event {name} will not be raised");
+                _Warn($"{nameof(ListenerMethod)} is empty, event {name} will not be raised");
                 return false;
             }
 
-
             _instigator = instigator;
             IsPendingInvocation = false;
-
 
             if (NotifyAsync) {
                 bool canAddWithoutQueueing = State != TaskState.Running && InstigatorQueue.Count == 0;
@@ -182,18 +180,18 @@ namespace TLP.UdonUtils.Runtime.Events
                 } else {
                     #region TLP_DEBUG
 #if TLP_DEBUG
-                    Warn(
-                            $"{nameof(Raise)}: not adding {nameof(instigator)}={instigator.GetScriptPathInScene()} as " +
+                    _Warn(
+                            $"{nameof(_Raise)}: not adding {nameof(instigator)}={instigator._GetScriptPathInScene()} as " +
                             $"queue is already full");
 #endif
                     #endregion
                 }
 
-                if (TryScheduleTask(this)) {
+                if (_TryScheduleTask(this)) {
                     return true;
                 }
 
-                Error($"{nameof(Raise)}: failed to schedule");
+                _Error($"{nameof(_Raise)}: failed to schedule");
                 return false;
             }
 
@@ -204,9 +202,9 @@ namespace TLP.UdonUtils.Runtime.Events
 
                 listener.EventInstigator = instigator;
                 if (listener.HasStartedOk) {
-                    listener.OnEvent(ListenerMethod);
+                    listener._OnEvent(ListenerMethod);
                 } else {
-                    Warn($"Listener {listener.GetScriptPathInScene()} is not ready, skipping");
+                    _Warn($"Listener {listener._GetScriptPathInScene()} is not ready, skipping");
                 }
             }
 
@@ -217,38 +215,38 @@ namespace TLP.UdonUtils.Runtime.Events
         /// Use this when calling from e.g. an Unity UI event like Button or Scroll-rect
         /// </summary>
         [PublicAPI]
-        public void RaiseExtern() {
+        public void _RaiseExtern() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(RaiseExtern));
+            _DebugLog(nameof(_RaiseExtern));
 #endif
             #endregion
 
-            Raise(this);
+            _Raise(this);
         }
 
         /// <summary>
-        /// DON'T use directly, use <see cref="RaiseOnIdle"/> instead
+        /// DON'T use directly, use <see cref="_RaiseOnIdle"/> instead
         /// </summary>
-        public void InternalOnIdle() {
+        public void _InternalOnIdle() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(InternalOnIdle));
+            _DebugLog(nameof(_InternalOnIdle));
 #endif
             #endregion
 
             if (!IsPendingInvocation) {
                 #region TLP_DEBUG
 #if TLP_DEBUG
-                DebugLog("already executed, skipping");
+                _DebugLog("already executed, skipping");
 #endif
                 #endregion
 
                 return;
             }
 
-            if (!Raise(_instigator)) {
-                Error($"{nameof(InternalOnIdle)}: failed to raise '{ListenerMethod}'");
+            if (!_Raise(_instigator)) {
+                _Error($"{nameof(_InternalOnIdle)}: failed to raise '{ListenerMethod}'");
             }
         }
 
@@ -256,10 +254,10 @@ namespace TLP.UdonUtils.Runtime.Events
         /// Clears the listeners list by resetting the count making it effectively contain no entries
         /// </summary>
         [PublicAPI]
-        public void RemoveAllListeners() {
+        public void _RemoveAllListeners() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(RemoveAllListeners));
+            _DebugLog(nameof(_RemoveAllListeners));
 #endif
             #endregion
 
@@ -275,20 +273,20 @@ namespace TLP.UdonUtils.Runtime.Events
         /// <param name="canChangeListenerMethod">if true will update the listener method name to the provided
         /// callback name (will log a warning in the logs)</param>
         [PublicAPI]
-        public bool AddListenerVerified(
+        public bool _AddListenerVerified(
                 TlpBaseBehaviour listener,
                 string callbackName,
                 bool canChangeListenerMethod = false
         ) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(AddListenerVerified)} '{callbackName}'");
+            _DebugLog($"{nameof(_AddListenerVerified)} '{callbackName}'");
 
 #endif
             #endregion
 
             if (!HasStartedOk) {
-                Error($"{nameof(AddListenerVerified)}: Not initialized");
+                _Error($"{nameof(_AddListenerVerified)}: Not initialized");
                 return false;
             }
 
@@ -296,18 +294,18 @@ namespace TLP.UdonUtils.Runtime.Events
                 && ListenerMethod != callbackName
                 && !string.IsNullOrEmpty(callbackName)
                 && !string.IsNullOrWhiteSpace(callbackName)) {
-                Warn(
-                        $"Changing {this.GetScriptPathInScene()}.{nameof(ListenerMethod)} from '{ListenerMethod}' to '{callbackName}'");
+                _Warn(
+                        $"Changing {this._GetScriptPathInScene()}.{nameof(ListenerMethod)} from '{ListenerMethod}' to '{callbackName}'");
                 ListenerMethod = callbackName;
-                return AddListener(listener);
+                return _AddListener(listener);
             }
 
             if (callbackName == ListenerMethod) {
-                return AddListener(listener);
+                return _AddListener(listener);
             }
 
-            Error(
-                    $"{nameof(AddListenerVerified)}: callback name mismatch, expected '{ListenerMethod}' but received '{callbackName}'"
+            _Error(
+                    $"{nameof(_AddListenerVerified)}: callback name mismatch, expected '{ListenerMethod}' but received '{callbackName}'"
             );
             return false;
         }
@@ -322,25 +320,25 @@ namespace TLP.UdonUtils.Runtime.Events
         /// <param name="idleFrames">0 and 1 are equivalent and will perform execution on the next update</param>
         /// <exception cref="NotImplementedException"></exception>
         [PublicAPI]
-        public virtual bool RaiseOnIdle(
+        public virtual bool _RaiseOnIdle(
                 TlpBaseBehaviour instigator,
                 int idleFrames = 1,
                 EventTiming eventTiming = EventTiming.Update
         ) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(RaiseOnIdle)} after {idleFrames} frames");
+            _DebugLog($"{nameof(_RaiseOnIdle)} after {idleFrames} frames");
 #endif
             #endregion
 
 
             if (idleFrames < 1) {
-                Error($"{nameof(idleFrames)} must be at least 1 but was {idleFrames}");
+                _Error($"{nameof(idleFrames)} must be at least 1 but was {idleFrames}");
                 return false;
             }
 
             if (!Utilities.IsValid(instigator)) {
-                Error("instigator must be valid");
+                _Error("instigator must be valid");
                 return false;
             }
 
@@ -350,7 +348,7 @@ namespace TLP.UdonUtils.Runtime.Events
                 newPendingInvocation >= _nextInvocationFrame) {
                 #region TLP_DEBUG
 #if TLP_DEBUG
-                DebugLog($"Already pending raise of '{ListenerMethod}'");
+                _DebugLog($"Already pending raise of '{ListenerMethod}'");
 
 #endif
                 #endregion
@@ -360,7 +358,7 @@ namespace TLP.UdonUtils.Runtime.Events
 
             _nextInvocationFrame = newPendingInvocation;
             IsPendingInvocation = true;
-            SendCustomEventDelayedFrames(nameof(InternalOnIdle), idleFrames, eventTiming);
+            SendCustomEventDelayedFrames(nameof(_InternalOnIdle), idleFrames, eventTiming);
             return true;
         }
 
@@ -369,10 +367,10 @@ namespace TLP.UdonUtils.Runtime.Events
         #endregion
 
         #region Task Implementation
-        protected override bool InitTask() {
+        protected override bool _InitTask() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(InitTask));
+            _DebugLog(nameof(_InitTask));
 #endif
             #endregion
 
@@ -381,10 +379,10 @@ namespace TLP.UdonUtils.Runtime.Events
             return true;
         }
 
-        protected override TaskResult DoTask(float stepDeltaTime) {
+        protected override TaskResult _DoTask(float stepDeltaTime) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-        DebugLog($"{nameof(DoTask)}: {nameof(stepDeltaTime)}={stepDeltaTime}");
+            _DebugLog($"{nameof(_DoTask)}: {nameof(stepDeltaTime)}={stepDeltaTime}");
 #endif
 #endregion
 
@@ -399,14 +397,14 @@ namespace TLP.UdonUtils.Runtime.Events
                 var first = InstigatorQueue[0];
                 InstigatorQueue.RemoveAt(0);
                 if (first.IsNull) {
-                    Warn($"{nameof(DoTask)}: discarding invalid first {nameof(InstigatorQueue)} entry");
+                    _Warn($"{nameof(_DoTask)}: discarding invalid first {nameof(InstigatorQueue)} entry");
                     return TaskResult.Unknown; // skip null entry
                 }
 
                 _currentAsyncInstigator = (TlpBaseBehaviour)first.Reference;
                 if (!Utilities.IsValid(_currentAsyncInstigator)) {
-                    Warn(
-                            $"{nameof(DoTask)}: first {nameof(InstigatorQueue)} entry is not a {nameof(TlpBaseBehaviour)}");
+                    _Warn(
+                            $"{nameof(_DoTask)}: first {nameof(InstigatorQueue)} entry is not a {nameof(TlpBaseBehaviour)}");
                     return TaskResult.Unknown; // skip invalid entry
                 }
             }
@@ -418,16 +416,16 @@ namespace TLP.UdonUtils.Runtime.Events
 
             var listener = Listeners[_listenerIndex];
             if (!Utilities.IsValid(listener)) {
-                Warn($"{nameof(DoTask)}: Listener at position {_listenerIndex} is not valid");
+                _Warn($"{nameof(_DoTask)}: Listener at position {_listenerIndex} is not valid");
                 ++_listenerIndex;
                 return TaskResult.Unknown;
             }
 
             listener.EventInstigator = _currentAsyncInstigator;
             if (listener.HasStartedOk) {
-                listener.OnEvent(ListenerMethod);
+                listener._OnEvent(ListenerMethod);
             } else {
-                Warn($"{nameof(DoTask)}: Listener {listener.GetScriptPathInScene()} is not ready, skipping");
+                _Warn($"{nameof(_DoTask)}: Listener {listener._GetScriptPathInScene()} is not ready, skipping");
             }
 
             listener.EventInstigator = null;
@@ -436,15 +434,15 @@ namespace TLP.UdonUtils.Runtime.Events
             return TaskResult.Unknown;
         }
 
-        public override int GetNeededSteps() {
+        public override int _GetNeededSteps() {
             return ListenerCount;
         }
         #endregion
 
         #region Internal
-        private bool AddListener(TlpBaseBehaviour listener) {
+        private bool _AddListener(TlpBaseBehaviour listener) {
 #if TLP_DEBUG
-            DebugLog(nameof(AddListener));
+            _DebugLog(nameof(_AddListener));
 #endif
             if (!Utilities.IsValid(listener)) {
                 return false;
@@ -465,8 +463,8 @@ namespace TLP.UdonUtils.Runtime.Events
         }
 
 
-        private static int Consolidate(TlpBaseBehaviour[] list, int elements) {
-            int end = Mathf.Min(elements, list.LengthSafe());
+        private static int _Consolidate(TlpBaseBehaviour[] list, int elements) {
+            int end = Mathf.Min(elements, list._LengthSafe());
             int valid = 0;
             int moveIndex = InvalidIndex;
             for (int i = 0; i < end; i++) {

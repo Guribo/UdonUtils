@@ -1,10 +1,8 @@
 ﻿using JetBrains.Annotations;
 using UdonSharp;
 using UnityEngine;
-using VRC.SDK3.Rendering;
-using VRC.SDKBase;
-
 #if UNITY_EDITOR
+using TLP.UdonUtils.Editor.Core;
 using TLP.UdonUtils.Runtime.Player;
 using UnityEditor;
 #endif
@@ -13,14 +11,10 @@ using UnityEditor;
 namespace TLP.UdonUtils.Editor.Player
 {
     [CustomEditor(typeof(PlayerCameraTrackerUi))]
-    public class PlayerCameraTrackerUiEditor : UnityEditor.Editor
+    public class PlayerCameraTrackerUiEditor : TlpBehaviourEditor
     {
-        private const string Description = "Tracks the player camera or handheld camera and drones";
-
-        public override void OnInspectorGUI() {
-            EditorGUILayout.HelpBox(Description, MessageType.Info);
-
-            DrawDefaultInspector();
+        protected override string _GetDescription() {
+            return "Tracks the player camera or handheld camera and drones.";
         }
     }
 }
@@ -39,67 +33,39 @@ namespace TLP.UdonUtils.Runtime.Player
         public new const int ExecutionOrder = LookAtPlayerUI.ExecutionOrder + 1;
         #endregion
 
-
-        [Tooltip("If false allowing to switch to Handheld cameras and drones")]
+        #region Configuration
+        [Header("Configuration")]
+        [Tooltip("If false: automatically switches to Handheld cameras and drones")]
         public bool RestrictToMainCamera;
 
-        [Tooltip(
-                "If false the camera rotation is used, if true the player root rotation is used instead in VR " +
-                "(only applies to ScreenCamera, not PhotoCamera/Drone).")]
+        [Tooltip("If false: camera rotation is used. If true: player root rotation is used instead in VR " +
+                 "(only applies to ScreenCamera, not PhotoCamera/Drone).")]
         public bool UsePlayerBaseRotationInVr;
+        #endregion
 
         #region State
         private Transform _ownTransform;
         #endregion
 
-        #region Lifecycle
-        public override void PostLateUpdate() {
-            if (!HasStartedOk || !enabled) {
-                return;
-            }
-
-            if (RestrictToMainCamera) {
-                MoveToScreenCamera();
-                return;
-            }
-
-            var photoCam = VRCCameraSettings.PhotoCamera;
-            if (Utilities.IsValid(photoCam) && photoCam.Active) {
-                _ownTransform.SetPositionAndRotation(photoCam.Position, photoCam.Rotation);
-                return;
-            }
-
-            MoveToScreenCamera();
-        }
-        #endregion
-
         #region Overrides
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
             _ownTransform = transform;
             return true;
         }
-        #endregion
 
-        #region Internal
-        private void MoveToScreenCamera() {
-            var screenCam = VRCCameraSettings.ScreenCamera;
-            if (!Utilities.IsValid(screenCam)) {
+        public override void PostLateUpdate() {
+            if (!HasStartedOk || !isActiveAndEnabled) {
                 return;
             }
 
-            _ownTransform.SetPositionAndRotation(screenCam.Position, GetRotation(screenCam));
-        }
-
-        private Quaternion GetRotation(VRCCameraSettings cam) {
-            if (UsePlayerBaseRotationInVr && LocalPlayer.IsUserInVR()) {
-                return LocalPlayer.GetRotation();
-            }
-
-            return cam.Rotation;
+            VrcCameraSettingUtils.MoveToActivePlayerCamera(_ownTransform,
+                    LocalPlayer,
+                    RestrictToMainCamera,
+                    UsePlayerBaseRotationInVr);
         }
         #endregion
     }

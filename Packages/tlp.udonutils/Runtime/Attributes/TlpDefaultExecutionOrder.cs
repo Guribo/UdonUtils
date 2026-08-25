@@ -17,12 +17,12 @@ public class TlpDefaultExecutionOrder : DefaultExecutionOrder
 {
 #if TLP_DEBUG && UNITY_EDITOR
     [MenuItem("Tools/TLP/UdonUtils/TLP ExecutionOrder/Validate Type Consistency")]
-    public static void ValidateTlpDefaultExecutionOrder() {
+    public static void _ValidateTlpDefaultExecutionOrder() {
         var executingAssembly = Assembly.GetExecutingAssembly();
         TlpLogger.StaticInfo($"Validating {executingAssembly.FullName}", typeof(TlpDefaultExecutionOrder));
 
-        ReportDuplicateTargetTypes();
-        ValidateTargetTypeConsistency();
+        _ReportDuplicateTargetTypes();
+        _ValidateTargetTypeConsistency();
     }
 #endif
 
@@ -38,7 +38,7 @@ public class TlpDefaultExecutionOrder : DefaultExecutionOrder
     /// Finds all classes that have TlpDefaultExecutionOrder attribute and groups them by target type
     /// </summary>
     /// <returns>Dictionary where key is the target type and value is list of classes using that target type</returns>
-    private static Dictionary<Type, List<Type>> GroupClassesByTargetType() {
+    private static Dictionary<Type, List<Type>> _GroupClassesByTargetType() {
         var result = new Dictionary<Type, List<Type>>();
 
         var allTypes = Assembly.GetExecutingAssembly().GetTypes();
@@ -63,14 +63,14 @@ public class TlpDefaultExecutionOrder : DefaultExecutionOrder
     /// Finds duplicate target types (target types used by more than one class)
     /// </summary>
     /// <returns>Dictionary of target types that are used by multiple classes</returns>
-    private static Dictionary<Type, List<Type>> FindDuplicateTargetTypes() {
-        var allGroups = GroupClassesByTargetType();
+    private static Dictionary<Type, List<Type>> _FindDuplicateTargetTypes() {
+        var allGroups = _GroupClassesByTargetType();
         return allGroups.Where(kvp => kvp.Value.Count > 1)
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
 
 
-    private static void ValidateTargetTypeConsistency() {
+    private static void _ValidateTargetTypeConsistency() {
         var allTypes = Assembly.GetExecutingAssembly().GetTypes();
 
         foreach (var type in allTypes) {
@@ -88,8 +88,8 @@ public class TlpDefaultExecutionOrder : DefaultExecutionOrder
     }
 
 
-    private static void ReportDuplicateTargetTypes() {
-        var duplicates = FindDuplicateTargetTypes();
+    private static void _ReportDuplicateTargetTypes() {
+        var duplicates = _FindDuplicateTargetTypes();
         foreach (var kvp in duplicates) {
             var sb = new StringBuilder();
             sb.Append($"Target type {kvp.Key.Name} is used by multiple classes:");

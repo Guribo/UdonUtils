@@ -2,6 +2,7 @@
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
+using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Rendering
@@ -25,16 +26,17 @@ namespace TLP.UdonUtils.Runtime.Rendering
 
         private int _renderId = int.MinValue;
 
-        public void OnEnable() {
+        internal void OnEnable() {
+            
             if (!Utilities.IsValid(ReflectionProbe)) {
-                Error($"{nameof(ReflectionProbe)} not set");
+                _Error($"{nameof(ReflectionProbe)} not set");
                 return;
             }
 
-            UpdateReflections();
+            _UpdateReflections();
         }
 
-        public void UpdateReflections() {
+        public void _UpdateReflections() {
             if (!(gameObject.activeInHierarchy
                   && enabled
                   && Utilities.IsValid(ReflectionProbe))) {
@@ -45,7 +47,7 @@ namespace TLP.UdonUtils.Runtime.Rendering
                 _renderId = ReflectionProbe.RenderProbe();
             }
 
-            SendCustomEventDelayedSeconds(nameof(UpdateReflections), UpdateInterval);
+            SendCustomEventDelayedSeconds(nameof(_UpdateReflections), UpdateInterval);
         }
     }
 }

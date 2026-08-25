@@ -80,14 +80,14 @@ namespace Tlp.UdonUtils.Runtime
 #if TLP_DEBUG
         private void FixedUpdate() {
             if (Time.frameCount % 100 == 0) {
-                Info(
+                _Info(
                         $"{nameof(FixedUpdate)}: Current fixed delta time={Time.fixedDeltaTime:F6}s, target: {_targetFixedDeltaTime:F6}s ({_targetFixedUpdateRate:F3}/s)");
             }
         }
 
         public override void PostLateUpdate() {
             if (Time.frameCount % 100 == 0) {
-                Info(
+                _Info(
                         $"{nameof(PostLateUpdate)}: Current fixed delta time={Time.fixedDeltaTime:F6}s, target: {_targetFixedDeltaTime:F6}s ({_targetFixedUpdateRate:F3}/s)");
             }
         }
@@ -96,7 +96,7 @@ namespace Tlp.UdonUtils.Runtime
         private void Update() {
 #if TLP_DEBUG
             if (Time.frameCount % 100 == 0) {
-                Info(
+                _Info(
                         $"{nameof(Update)}: Current fixed delta time={Time.fixedDeltaTime:F6}s, target: {_targetFixedDeltaTime:F6}s ({_targetFixedUpdateRate:F3}/s)");
             }
 
@@ -110,8 +110,8 @@ namespace Tlp.UdonUtils.Runtime
             Time.fixedDeltaTime = _targetFixedDeltaTime;
         }
 
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 

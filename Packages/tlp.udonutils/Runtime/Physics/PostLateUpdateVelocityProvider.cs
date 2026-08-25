@@ -57,12 +57,12 @@ namespace TLP.UdonUtils.Runtime.Physics
             }
 
 #if TLP_DEBUG
-            UpdateDebugEditorValues();
+            _UpdateDebugEditorValues();
 #endif
         }
 
-        public override void SetTeleported(bool keepVelocity = true) {
-            base.SetTeleported(keepVelocity);
+        public override void _SetTeleported(bool keepVelocity = true) {
+            base._SetTeleported(keepVelocity);
             if (keepVelocity) {
                 var position = RelativeTo.InverseTransformPoint(ToTrack.position);
                 for (int i = 0; i < _position.Length; i++) {
@@ -71,7 +71,7 @@ namespace TLP.UdonUtils.Runtime.Physics
             }
         }
 
-        public override double GetLatestSnapShot(
+        public override double _GetLatestSnapShot(
                 out Vector3 position,
                 out Vector3 velocity,
                 out Vector3 acceleration,
@@ -94,8 +94,8 @@ namespace TLP.UdonUtils.Runtime.Physics
         }
 
 
-        public override void Clear() {
-            base.Clear();
+        public override void _Clear() {
+            base._Clear();
             var position = RelativeTo.InverseTransformPoint(ToTrack.position);
             for (int i = 0; i < _position.Length; i++) {
                 _position[i] = position;

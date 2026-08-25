@@ -1,7 +1,7 @@
 ﻿using JetBrains.Annotations;
-using TLP.UdonUtils.Runtime.Events;
 using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Common
@@ -25,11 +25,11 @@ namespace TLP.UdonUtils.Runtime.Common
 
         private void LateUpdate() {
             if (Input.GetKeyDown(gameobjectToggle)) {
-                Toggle();
+                _Toggle();
             }
         }
 
-        internal void Toggle() {
+        internal void _Toggle() {
             if (Utilities.IsValid(gameObjectToToggle)) {
                 gameObjectToToggle.SetActive(!gameObjectToToggle.activeSelf);
                 var sound = gameObjectToToggle.activeSelf ? activationSound : deactivationSound;
@@ -41,7 +41,11 @@ namespace TLP.UdonUtils.Runtime.Common
         }
 
         public override void Interact() {
-            Toggle();
+            if (NetworkCalling.InNetworkCall) {
+                _Warn($"{nameof(Interact)}: called during network call, skipping");
+                return;
+            }
+            _Toggle();
         }
     }
 }

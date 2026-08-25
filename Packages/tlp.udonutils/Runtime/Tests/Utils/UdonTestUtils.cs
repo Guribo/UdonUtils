@@ -257,7 +257,7 @@ namespace TLP.UdonUtils.Runtime.Tests.Utils
                 Debug.Assert(api.IsOwner(o));
             }
 
-            public void Deconstruct() {
+            public void _Deconstruct() {
                 foreach (var vrcPlayerApi in _idToPlayer.Values) {
                     Object.DestroyImmediate(vrcPlayerApi.VrcPlayerApi.gameObject);
                 }
@@ -303,7 +303,7 @@ namespace TLP.UdonUtils.Runtime.Tests.Utils
                 return _vrcPlayerToPlayer[playerApi];
             }
 
-            public void RemovePlayer(VRCPlayerApi player) {
+            public void _RemovePlayer(VRCPlayerApi player) {
                 player.RemoveFromList();
                 Assert.IsFalse(player.IsValid());
                 Assert.IsFalse(Utilities.IsValid(player));

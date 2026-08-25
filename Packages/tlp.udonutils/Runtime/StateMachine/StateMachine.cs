@@ -63,18 +63,18 @@ namespace TLP.UdonUtils.Runtime.StateMachine
         #endregion
 
         #region Lifecycle
-        public virtual void OnEnable() {
+        protected internal virtual void OnEnable() {
 #if TLP_DEBUG
-            DebugLog(nameof(OnEnable));
+            _DebugLog(nameof(OnEnable));
 #endif
-            if (IsInitialized()) {
+            if (_IsInitialized()) {
                 StateMachineState.enabled = true;
             }
         }
 
-        public virtual void OnDisable() {
+        protected internal virtual void OnDisable() {
 #if TLP_DEBUG
-            DebugLog(nameof(OnDisable));
+            _DebugLog(nameof(OnDisable));
 #endif
             if (AllStates == null) {
                 return;
@@ -99,9 +99,9 @@ namespace TLP.UdonUtils.Runtime.StateMachine
 
         /// <returns>false if not yet initialized, true otherwise</returns>
         [PublicAPI]
-        public bool IsInitialized() {
+        public bool _IsInitialized() {
 #if TLP_DEBUG
-            DebugLog(nameof(IsInitialized));
+            _DebugLog(nameof(_IsInitialized));
 #endif
             return Utilities.IsValid(StateMachineState);
         }
@@ -110,15 +110,15 @@ namespace TLP.UdonUtils.Runtime.StateMachine
         /// Restarts the current state if the StateMachine is initialized
         /// </summary>
         /// <returns>true on success, false otherwise</returns>
-        public bool RestartCurrentState() {
+        public bool _RestartCurrentState() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(RestartCurrentState));
+            _DebugLog(nameof(_RestartCurrentState));
 #endif
             #endregion
 
-            if (!IsInitialized()) {
-                Error("Not initialized");
+            if (!_IsInitialized()) {
+                _Error("Not initialized");
                 return false;
             }
 
@@ -131,49 +131,49 @@ namespace TLP.UdonUtils.Runtime.StateMachine
         /// <param name="newStateIndex"></param>
         /// <returns>false if index invalid or caller not owner</returns>
         [PublicAPI]
-        public bool OwnerSetNewState(int newStateIndex) {
+        public bool _OwnerSetNewState(int newStateIndex) {
 #if TLP_DEBUG
-            DebugLog(nameof(OwnerSetNewState));
+            _DebugLog(nameof(_OwnerSetNewState));
 #endif
             if (newStateIndex < 0) {
-                Error($"{nameof(newStateIndex)} must be non-negative");
+                _Error($"{nameof(newStateIndex)} must be non-negative");
                 return false;
             }
 
             if (AllStates == null) {
-                Error($"{nameof(AllStates)} is null");
+                _Error($"{nameof(AllStates)} is null");
                 return false;
             }
 
             if (newStateIndex >= AllStates.Length) {
-                Error(
+                _Error(
                         $"{nameof(newStateIndex)} {newStateIndex} is out of bounds of {nameof(AllStates)}[{AllStates.Length}]");
                 return false;
             }
 
             if (newStateIndex != WorkingStateIndex) {
-                if (!MarkNetworkDirty()) {
+                if (!_MarkNetworkDirty()) {
                     return false;
                 }
 
                 if (Utilities.IsValid(OptionalNetworkTime)) {
                     WorkingStateIndex = newStateIndex;
                     ScheduledTransitionTarget = newStateIndex;
-                    WorkingTransitionTime = OptionalNetworkTime.TimeAsDouble() + EventSyncDelay;
-                    SendCustomEventDelayedSeconds(nameof(Delayed_ActiveSyncedState), EventSyncDelay);
+                    WorkingTransitionTime = OptionalNetworkTime._TimeAsDouble() + EventSyncDelay;
+                    SendCustomEventDelayedSeconds(nameof(_Delayed_ActiveSyncedState), EventSyncDelay);
                     return true;
                 }
             } else if (newStateIndex == LocalStateIndex) {
                 return true;
             }
 
-            if (IsInitialized()) {
+            if (_IsInitialized()) {
                 StateMachineState.enabled = false;
             }
 
             var newState = AllStates[newStateIndex];
             if (!Utilities.IsValid(newState)) {
-                Error($"{nameof(OwnerSetNewState)}: {nameof(AllStates)} is null at index {newStateIndex}");
+                _Error($"{nameof(_OwnerSetNewState)}: {nameof(AllStates)} is null at index {newStateIndex}");
                 return false;
             }
 
@@ -186,32 +186,32 @@ namespace TLP.UdonUtils.Runtime.StateMachine
 
 
         [PublicAPI]
-        public bool LocalOnlySetNewState(int newStateIndex) {
+        public bool _LocalOnlySetNewState(int newStateIndex) {
 #if TLP_DEBUG
-            DebugLog(nameof(LocalOnlySetNewState));
+            _DebugLog(nameof(_LocalOnlySetNewState));
 #endif
             if (newStateIndex == LocalStateIndex) {
                 return true;
             }
 
             if (newStateIndex < 0) {
-                Error($"{nameof(newStateIndex)} must be non-negative");
+                _Error($"{nameof(newStateIndex)} must be non-negative");
                 return false;
             }
 
             if (AllStates == null) {
-                Error($"{nameof(AllStates)} is null");
+                _Error($"{nameof(AllStates)} is null");
                 return false;
             }
 
             if (newStateIndex >= AllStates.Length) {
-                Error(
+                _Error(
                         $"{nameof(newStateIndex)} {newStateIndex} is out of bounds of {nameof(AllStates)}[{AllStates.Length}]");
 
                 return false;
             }
 
-            if (IsInitialized()) {
+            if (_IsInitialized()) {
                 StateMachineState.enabled = false;
             }
 
@@ -231,19 +231,19 @@ namespace TLP.UdonUtils.Runtime.StateMachine
         /// the remaining delay of the first call</remarks>
         /// <param name="targetState"></param>
         /// <param name="delaySeconds"></param>
-        public bool TransitionToDelayed(StateMachineState targetState, float delaySeconds) {
+        public bool _TransitionToDelayed(StateMachineState targetState, float delaySeconds) {
             if (!Utilities.IsValid(targetState)) {
-                Error($"{nameof(targetState)} invalid");
+                _Error($"{nameof(targetState)} invalid");
                 return false;
             }
 
             if (!Networking.IsOwner(gameObject)) {
-                Error($"{nameof(TransitionToDelayed)} caller must be owner");
+                _Error($"{nameof(_TransitionToDelayed)} caller must be owner");
                 return false;
             }
 
             DelayedTransitionTarget = targetState;
-            SendCustomEventDelayedSeconds(nameof(Delayed_TransitionToNext), delaySeconds);
+            SendCustomEventDelayedSeconds(nameof(_Delayed_TransitionToNext), delaySeconds);
             return true;
         }
         #endregion
@@ -251,63 +251,63 @@ namespace TLP.UdonUtils.Runtime.StateMachine
         #region Network Events
         public override void OnPreSerialization() {
             base.OnPreSerialization();
-            WriteNetworkState();
+            _WriteNetworkState();
         }
 
         public override void OnDeserialization(DeserializationResult deserializationResult) {
             base.OnDeserialization(deserializationResult);
-            ReadNetworkState();
+            _ReadNetworkState();
 
             if (Utilities.IsValid(OptionalNetworkTime)) {
-                if (TryScheduleDelayedTransition()) {
+                if (_TryScheduleDelayedTransition()) {
                     return;
                 }
             }
 
-            LocalOnlySetNewState(WorkingStateIndex);
+            _LocalOnlySetNewState(WorkingStateIndex);
         }
 
         public override void OnOwnershipTransferred(VRCPlayerApi player) {
             base.OnOwnershipTransferred(player);
-            if (!player.IsLocalSafe()) {
+            if (!player._IsLocalSafe()) {
                 return;
             }
 
-            if (!RestartCurrentState()) {
-                Error("Local player failed to restart current state after gaining ownership");
+            if (!_RestartCurrentState()) {
+                _Error("Local player failed to restart current state after gaining ownership");
             }
         }
         #endregion
 
         #region Internal
-        internal bool Initialize() {
+        internal bool _Initialize() {
 #if TLP_DEBUG
-            DebugLog(nameof(Initialize));
+            _DebugLog(nameof(_Initialize));
 #endif
-            if (IsInitialized()) {
+            if (_IsInitialized()) {
                 return true;
             }
 
-            if (AllStates.LengthSafe() < 1) {
-                Error($"{nameof(AllStates)} is empty");
+            if (AllStates._LengthSafe() < 1) {
+                _Error($"{nameof(AllStates)} is empty");
                 return false;
             }
 
             var firstState = AllStates[0];
             if (!Utilities.IsValid(firstState)) {
-                Error("First state must be valid");
+                _Error("First state must be valid");
                 return false;
             }
 
-            if (!InitializeAllStates()) {
+            if (!_InitializeAllStates()) {
                 return false;
             }
 
-            if (OwnerSetNewState(0) || LocalOnlySetNewState(0)) {
+            if (_OwnerSetNewState(0) || _LocalOnlySetNewState(0)) {
                 return true;
             }
 
-            Error("Could not initialize state as non-owner");
+            _Error("Could not initialize state as non-owner");
             return false;
         }
 
@@ -315,15 +315,15 @@ namespace TLP.UdonUtils.Runtime.StateMachine
         /// <see cref="AllStates"/> must not be null
         /// </summary>
         /// <returns>true on success, false if an element was invalid</returns>
-        internal bool InitializeAllStates() {
+        internal bool _InitializeAllStates() {
 #if TLP_DEBUG
-            DebugLog(nameof(InitializeAllStates));
+            _DebugLog(nameof(_InitializeAllStates));
 #endif
             for (int i = 0; i < AllStates.Length; ++i) {
                 var state = AllStates[i];
 
                 if (!Utilities.IsValid(state)) {
-                    Error($"State at position {i} must be valid");
+                    _Error($"State at position {i} must be valid");
                     return false;
                 }
 
@@ -332,7 +332,7 @@ namespace TLP.UdonUtils.Runtime.StateMachine
                         continue;
                     }
 
-                    Error($"State at position {j} must only exist once in {nameof(AllStates)}");
+                    _Error($"State at position {j} must only exist once in {nameof(AllStates)}");
                     return false;
                 }
             }
@@ -348,23 +348,23 @@ namespace TLP.UdonUtils.Runtime.StateMachine
             return true;
         }
 
-        private bool TryScheduleDelayedTransition() {
-            double delay = WorkingTransitionTime - OptionalNetworkTime.Time();
+        private bool _TryScheduleDelayedTransition() {
+            double delay = WorkingTransitionTime - OptionalNetworkTime._Time();
             if (delay <= 0f) {
                 return false;
             }
 
             ScheduledTransitionTarget = WorkingStateIndex;
-            SendCustomEventDelayedSeconds(nameof(Delayed_ActiveSyncedState), (float) delay);
+            SendCustomEventDelayedSeconds(nameof(_Delayed_ActiveSyncedState), (float)delay);
             return true;
         }
 
-        private void ReadNetworkState() {
+        private void _ReadNetworkState() {
             WorkingStateIndex = SyncedStateIndex;
             WorkingTransitionTime = SyncedTransitionTime;
         }
 
-        private void WriteNetworkState() {
+        private void _WriteNetworkState() {
             SyncedStateIndex = WorkingStateIndex;
             SyncedTransitionTime = WorkingTransitionTime;
         }
@@ -374,26 +374,26 @@ namespace TLP.UdonUtils.Runtime.StateMachine
         /// DO NOT CALL DIRECTLY!
         /// Performs the scheduled transition to <see cref="DelayedTransitionTarget"/>
         /// </summary>
-        public void Delayed_TransitionToNext() {
+        public void _Delayed_TransitionToNext() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(Delayed_TransitionToNext));
+            _DebugLog(nameof(_Delayed_TransitionToNext));
 #endif
             #endregion
 
             if (!Utilities.IsValid(DelayedTransitionTarget)) {
-                Warn(
-                        $"{nameof(Delayed_TransitionToNext)} had no target. {nameof(TransitionToDelayed)} was most likely called multiple times.");
+                _Warn(
+                        $"{nameof(_Delayed_TransitionToNext)} had no target. {nameof(_TransitionToDelayed)} was most likely called multiple times.");
                 return;
             }
 
             if (!Networking.IsOwner(gameObject)) {
-                Warn(
-                        $"Caller of {nameof(Delayed_TransitionToNext)} has no longer ownership, aborting scheduled transition to {DelayedTransitionTarget.GetScriptPathInScene()}");
+                _Warn(
+                        $"Caller of {nameof(_Delayed_TransitionToNext)} has no longer ownership, aborting scheduled transition to {DelayedTransitionTarget._GetScriptPathInScene()}");
                 return;
             }
 
-            OwnerSetNewState(DelayedTransitionTarget.StateMachineIndex);
+            _OwnerSetNewState(DelayedTransitionTarget.StateMachineIndex);
             DelayedTransitionTarget = null;
         }
 
@@ -401,30 +401,30 @@ namespace TLP.UdonUtils.Runtime.StateMachine
         /// DO NOT CALL DIRECTLY!
         /// Performs the scheduled transition to <see cref="ScheduledTransitionTarget"/>
         /// </summary>
-        public void Delayed_ActiveSyncedState() {
+        public void _Delayed_ActiveSyncedState() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(Delayed_ActiveSyncedState));
+            _DebugLog(nameof(_Delayed_ActiveSyncedState));
 #endif
             #endregion
 
             if (ScheduledTransitionTarget != WorkingStateIndex) {
-                Warn("Another state is already pending, discarding delayed transition");
+                _Warn("Another state is already pending, discarding delayed transition");
                 return;
             }
 
-            LocalOnlySetNewState(WorkingStateIndex);
+            _LocalOnlySetNewState(WorkingStateIndex);
         }
         #endregion
         #endregion
 
         #region Overrides
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
-            return Initialize();
+            return _Initialize();
         }
         #endregion
     }

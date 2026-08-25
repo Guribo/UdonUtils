@@ -14,7 +14,7 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
         [PublicAPI]
         public new const int ExecutionOrder = View.ExecutionOrder + 1;
 
-        public override void OnModelChanged() {
+        public override void _OnModelChanged() {
         }
     }
 }

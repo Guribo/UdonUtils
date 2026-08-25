@@ -1,5 +1,4 @@
-﻿using System;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using UdonSharp;
 using UnityEngine;
 
@@ -26,7 +25,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
             _frameOfUpdate = UnityEngine.Time.frameCount;
         }
 
-        public override float Time() {
+        public override float _Time() {
             if (_frameOfUpdate != UnityEngine.Time.frameCount) {
                 Update();
             }
@@ -34,7 +33,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
             return (float)_realTime;
         }
 
-        public override double TimeAsDouble() {
+        public override double _TimeAsDouble() {
             if (_frameOfUpdate != UnityEngine.Time.frameCount) {
                 Update();
             }

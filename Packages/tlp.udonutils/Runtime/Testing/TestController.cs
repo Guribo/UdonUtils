@@ -56,23 +56,23 @@ namespace TLP.UdonUtils.Runtime.Testing
         private int _testIndex;
         private bool _pendingNextStep;
 
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
-            if (!InitializeMvc(TestData, TestResultsUi, this, TestDataChangeEvent)) {
-                Error($"{LogPrefix} {name}.Start: failed to initialize MVC");
+            if (!_InitializeMvc(TestData, TestResultsUi, this, TestDataChangeEvent)) {
+                _Error($"{LogPrefix} {name}.Start: failed to initialize MVC");
                 return false;
             }
 
             return true;
         }
 
-        protected override bool InitializeInternal() {
+        protected override bool _InitializeInternal() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(InitializeInternal));
+            _DebugLog(nameof(_InitializeInternal));
 #endif
             #endregion
 
@@ -84,67 +84,67 @@ namespace TLP.UdonUtils.Runtime.Testing
 
             TestData.Dirty = true;
 
-            return TestData.NotifyIfDirty(1) && base.InitializeInternal();
+            return TestData._NotifyIfDirty(1) && base._InitializeInternal();
         }
 
         public override void OnPlayerJoined(VRCPlayerApi player) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(OnPlayerJoined)} {player.ToStringSafe()}");
+            _DebugLog($"{nameof(OnPlayerJoined)} {player._ToStringSafe()}");
 #endif
             #endregion
 
 
             if (OnlyMasterCanStart && !Networking.IsMaster) {
-                Info($"{LogPrefix} {name}.OnPlayerJoined: Only master can start test");
+                _Info($"{LogPrefix} {name}.OnPlayerJoined: Only master can start test");
                 return;
             }
 
-            if (StartOnLocalPlayerJoin && player.IsLocalSafe()) {
-                Info($"{LogPrefix} {name}.OnPlayerJoined: starting after local player {player.ToStringSafe()} joined");
+            if (StartOnLocalPlayerJoin && player._IsLocalSafe()) {
+                _Info($"{LogPrefix} {name}.OnPlayerJoined: starting after local player {player._ToStringSafe()} joined");
                 // start the tests
                 _isTesting = true;
-                ContinueTesting();
+                _ContinueTesting();
                 return;
             }
 
             if (StartOnOtherPlayerJoin) {
-                Info($"{LogPrefix} {name}.OnPlayerJoined: starting after other player {player.ToStringSafe()} joined");
+                _Info($"{LogPrefix} {name}.OnPlayerJoined: starting after other player {player._ToStringSafe()} joined");
                 // start the tests
                 _isTesting = true;
-                ContinueTesting();
+                _ContinueTesting();
                 return;
             }
 
-            Info($"{LogPrefix} {name}.OnPlayerJoined: not started due to settings");
+            _Info($"{LogPrefix} {name}.OnPlayerJoined: not started due to settings");
         }
 
-        public void Update() {
+        internal void Update() {
             if (OnlyMasterCanStart && !Networking.IsMaster) {
                 return;
             }
 
             if (_pendingNextStep) {
                 _pendingNextStep = false;
-                ContinueTesting();
+                _ContinueTesting();
             }
 
             if (_isTesting) {
                 if (Input.GetKey(AbortKey0)
                     && Input.GetKey(AbortKey1)) {
-                    AbortTestRun();
+                    _AbortTestRun();
                 }
             } else {
                 if (Input.GetKey(StartKey0)
                     && Input.GetKey(StartKey1)
                     && Input.GetKey(StartKey2)) {
-                    StartTestRun();
+                    _StartTestRun();
                 }
             }
         }
 
-        public void AbortTestRun() {
-            Info($"{LogPrefix} {name}.AbortTestRun: aborting after current test");
+        public void _AbortTestRun() {
+            _Info($"{LogPrefix} {name}.AbortTestRun: aborting after current test");
 
             for (++_testIndex; _testIndex < TestData.Tests.Count; ++_testIndex) {
                 var testCase = (TestCase)TestData.Tests[_testIndex].Reference;
@@ -155,19 +155,19 @@ namespace TLP.UdonUtils.Runtime.Testing
             _testIndex = TestData.Tests.Count;
 
             TestData.Dirty = true;
-            TestData.NotifyIfDirty(1);
+            TestData._NotifyIfDirty(1);
         }
 
-        public void StartTestRun() {
+        public void _StartTestRun() {
             if (_isTesting) {
-                Warn(
+                _Warn(
                         $"{LogPrefix} {name}.StartTestRun: can not start a new test while another " +
                         $"one is still running"
                 );
                 return;
             }
 
-            Info($"{LogPrefix} {name}.StartTestRun");
+            _Info($"{LogPrefix} {name}.StartTestRun");
 
             _isTesting = true;
             _testIndex = 0;
@@ -177,36 +177,36 @@ namespace TLP.UdonUtils.Runtime.Testing
                 var testCase = (TestCase)TestData.Tests[i].Reference;
                 testCase.Status = TestCaseStatus.Ready;
                 TestData.Dirty = true;
-                TestData.NotifyIfDirty(1);
+                TestData._NotifyIfDirty(1);
             }
         }
 
-        private void ContinueTesting() {
+        private void _ContinueTesting() {
             int numberOfTests = TestData.Tests.Count;
             if (numberOfTests > 0 && _testIndex > -1 && _testIndex < numberOfTests) {
                 var testCase = (TestCase)TestData.Tests[_testIndex].Reference;
                 if (!testCase) {
-                    Error($"{LogPrefix} {name}.ContinueTesting: tests contains invalid behaviour");
+                    _Error($"{LogPrefix} {name}.ContinueTesting: tests contains invalid behaviour");
                     return;
                 }
 
                 var context = testCase.gameObject;
                 if (!_testInitialized) {
-                    Info($"{LogPrefix} {name}.ContinueTesting: Initializing test {context}");
+                    _Info($"{LogPrefix} {name}.ContinueTesting: Initializing test {context}");
                     testCase.TestController = this;
-                    testCase.Initialize();
+                    testCase._Initialize();
                     return;
                 }
 
                 if (!_testCompleted) {
-                    Info($"{LogPrefix} {name}.ContinueTesting: Running test {context}");
-                    testCase.Run();
+                    _Info($"{LogPrefix} {name}.ContinueTesting: Running test {context}");
+                    testCase._Run();
                     return;
                 }
 
                 if (!_testCleanedUp) {
-                    Info($"{LogPrefix} {name}.ContinueTesting: Cleaning up test {context}");
-                    testCase.CleanUp();
+                    _Info($"{LogPrefix} {name}.ContinueTesting: Cleaning up test {context}");
+                    testCase._CleanUp();
                     return;
                 }
 
@@ -220,10 +220,10 @@ namespace TLP.UdonUtils.Runtime.Testing
                 _pendingNextStep = _isTesting;
 
                 if (!_isTesting) {
-                    Info($"{LogPrefix} {name}.ContinueTesting: All test completed");
+                    _Info($"{LogPrefix} {name}.ContinueTesting: All test completed");
                 }
             } else {
-                Warn($"{LogPrefix} {name}.ContinueTesting: test run aborted");
+                _Warn($"{LogPrefix} {name}.ContinueTesting: test run aborted");
                 _testIndex = 0;
                 _isTesting = false;
                 _testInitialized = false;
@@ -233,18 +233,18 @@ namespace TLP.UdonUtils.Runtime.Testing
             }
         }
 
-        public void TestInitialized(bool success) {
+        public void _TestInitialized(bool success) {
             var testCase = (TestCase)TestData.Tests[_testIndex].Reference;
             if (success) {
-                Info($"{LogPrefix} {name}.TestInitialized: Initialized test successfully");
+                _Info($"{LogPrefix} {name}.TestInitialized: Initialized test successfully");
                 testCase.Status = TestCaseStatus.Running;
             } else {
-                Error($"{LogPrefix} {name}.TestInitialized: Test initialization failed");
+                _Error($"{LogPrefix} {name}.TestInitialized: Test initialization failed");
                 testCase.Status = TestCaseStatus.Failed;
             }
 
             TestData.Dirty = true;
-            TestData.NotifyIfDirty(1);
+            TestData._NotifyIfDirty(1);
 
             _testInitialized = true;
             if (!success) {
@@ -254,35 +254,35 @@ namespace TLP.UdonUtils.Runtime.Testing
             _pendingNextStep = true;
         }
 
-        public void TestCompleted(bool success) {
+        public void _TestCompleted(bool success) {
             var testCase = (TestCase)TestData.Tests[_testIndex].Reference;
 
             if (success) {
-                Info($"{LogPrefix} {name}.TestCompleted: PASS");
+                _Info($"{LogPrefix} {name}.TestCompleted: PASS");
                 testCase.Status = TestCaseStatus.Passed;
             } else {
-                Error($"{LogPrefix} {name}.TestCompleted: FAIL");
+                _Error($"{LogPrefix} {name}.TestCompleted: FAIL");
                 testCase.Status = TestCaseStatus.Failed;
             }
 
             TestData.Dirty = true;
-            TestData.NotifyIfDirty(1);
+            TestData._NotifyIfDirty(1);
 
             _testCompleted = true;
             _pendingNextStep = true;
         }
 
-        public void TestCleanedUp(bool success) {
+        public void _TestCleanedUp(bool success) {
             var testCase = (TestCase)TestData.Tests[_testIndex].Reference;
             if (success) {
-                Info($"{LogPrefix} {name}.TestCleanedUp: Cleaned up test successfully");
+                _Info($"{LogPrefix} {name}.TestCleanedUp: Cleaned up test successfully");
             } else {
-                Error($"{LogPrefix} {name}.TestCleanedUp: Test cleanup failed");
+                _Error($"{LogPrefix} {name}.TestCleanedUp: Test cleanup failed");
                 testCase.Status = TestCaseStatus.Failed;
             }
 
             TestData.Dirty = true;
-            TestData.NotifyIfDirty(1);
+            TestData._NotifyIfDirty(1);
 
             // ensure we don't get any more messages from the test
             testCase.TestController = null;

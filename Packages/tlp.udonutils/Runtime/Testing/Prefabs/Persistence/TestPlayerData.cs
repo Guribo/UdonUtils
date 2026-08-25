@@ -25,45 +25,45 @@ namespace TLP.UdonUtils.Runtime.Testing
         private const int VrcLimitBytes = 100_000;
         #endregion
 
-        protected override void InitializeTest() {
-            if (!PlayerDataRestoredEvent.IsPlayerDataRestored(Networking.LocalPlayer)) {
-                Error($"{nameof(InitializeTest)}: Player data was not restored yet");
-                TestController.TestInitialized(false);
+        protected override void _InitializeTest() {
+            if (!PlayerDataRestoredEvent._IsPlayerDataRestored(Networking.LocalPlayer)) {
+                _Error($"{nameof(_InitializeTest)}: Player data was not restored yet");
+                TestController._TestInitialized(false);
                 return;
             }
 
             if (PlayerData.TryGetBytes(Networking.LocalPlayer, _dataKey, out var data)) {
-                DebugLog($"Read {data.LengthSafe()} bytes of persistent player data");
+                _DebugLog($"Read {data._LengthSafe()} bytes of persistent player data");
             }
 
             PlayerData.SetBytes(_dataKey, new byte[0]);
-            TestController.TestInitialized(true);
+            TestController._TestInitialized(true);
         }
 
 
-        protected override void RunTest() {
+        protected override void _RunTest() {
             for (_bytes = 0; _bytes <= VrcLimitBytes; _bytes += 1_000) {
                 PlayerData.SetBytes(_dataKey, new byte[_bytes]);
                 var data = PlayerData.GetBytes(Networking.LocalPlayer, _dataKey);
 
                 // verify saving the player data succeeded up to the limit
-                if (data.LengthSafe() != _bytes) {
-                    Error(
-                            $"{nameof(RunTest)}: Failed to store {_bytes} bytes of persistent player data, was {data.LengthSafe()} bytes");
-                    TestController.TestCompleted(false);
+                if (data._LengthSafe() != _bytes) {
+                    _Error(
+                            $"{nameof(_RunTest)}: Failed to store {_bytes} bytes of persistent player data, was {data._LengthSafe()} bytes");
+                    TestController._TestCompleted(false);
                     return;
                 }
             }
         }
 
-        protected override void CleanUpTest() {
+        protected override void _CleanUpTest() {
             PlayerData.SetBytes(_dataKey, new byte[0]);
-            base.CleanUpTest();
+            base._CleanUpTest();
         }
 
         public override void OnPlayerDataUpdated(VRCPlayerApi player, PlayerData.Info[] infos) {
-            Info(
-                    $"{nameof(OnPlayerDataUpdated)}: {player.DisplayNameSafe()}({player.PlayerIdSafe()}) : {infos.LengthSafe()} infos received");
+            _Info(
+                    $"{nameof(OnPlayerDataUpdated)}: {player._DisplayNameSafe()}({player._PlayerIdSafe()}) : {infos._LengthSafe()} infos received");
             base.OnPlayerDataUpdated(player, infos);
 
             if (Status != TestCaseStatus.Running || _bytes < VrcLimitBytes) {
@@ -71,27 +71,27 @@ namespace TLP.UdonUtils.Runtime.Testing
             }
 
             if (!PlayerData.TryGetBytes(Networking.LocalPlayer, _dataKey, out var data)) {
-                Error($"Failed to retrieve persistent player data");
-                TestController.TestCompleted(false);
+                _Error($"Failed to retrieve persistent player data");
+                TestController._TestCompleted(false);
                 return;
             }
 
-            if (data.LengthSafe() != VrcLimitBytes) {
-                Error(
-                        $"{nameof(OnPlayerDataUpdated)}: Failed to store {VrcLimitBytes} bytes of persistent player data, was {data.LengthSafe()} bytes");
-                TestController.TestCompleted(false);
+            if (data._LengthSafe() != VrcLimitBytes) {
+                _Error(
+                        $"{nameof(OnPlayerDataUpdated)}: Failed to store {VrcLimitBytes} bytes of persistent player data, was {data._LengthSafe()} bytes");
+                TestController._TestCompleted(false);
                 return;
             }
 
-            Info($"{data.LengthSafe()} of persistent player data was successfully saved globally");
-            TestController.TestCompleted(true);
+            _Info($"{data._LengthSafe()} of persistent player data was successfully saved globally");
+            TestController._TestCompleted(true);
         }
 
         public override void OnPlayerRestored(VRCPlayerApi player) {
-            Info($"{nameof(OnPlayerRestored)}: {player.DisplayNameSafe()}({player.PlayerIdSafe()})");
+            _Info($"{nameof(OnPlayerRestored)}: {player._DisplayNameSafe()}({player._PlayerIdSafe()})");
             base.OnPlayerRestored(player);
 
-            if (!player.IsLocalSafe()) return;
+            if (!player._IsLocalSafe()) return;
         }
     }
 }

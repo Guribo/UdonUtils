@@ -12,26 +12,26 @@ namespace TLP.UdonUtils.Runtime.Extensions
         /// </summary>
         /// <param name="behaviour"></param>
         /// <returns>true on success, false otherwise</returns>
-        public static bool TryReturnToPool(this TlpBaseBehaviour behaviour) {
+        public static bool _TryReturnToPool(this TlpBaseBehaviour behaviour) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            TlpLogger.StaticDebugLog($"{nameof(TryReturnToPool)}: {behaviour.GetScriptPathInScene()}", null);
+            TlpLogger.StaticDebugLog($"{nameof(_TryReturnToPool)}: {behaviour._GetScriptPathInScene()}", null);
 #endif
             #endregion
 
             if (!Utilities.IsValid(behaviour)) {
-                TlpLogger.StaticError($"{nameof(TryReturnToPool)}: {nameof(behaviour)} invalid", null);
+                TlpLogger.StaticError($"{nameof(_TryReturnToPool)}: {nameof(behaviour)} invalid", null);
                 return false;
             }
 
             var behaviourPool = (Pool.Pool)behaviour.Pool;
             if (behaviour.PoolableInUse && Utilities.IsValid(behaviourPool)) {
-                behaviourPool.Return(behaviour.gameObject);
+                behaviourPool._Return(behaviour.gameObject);
                 return true;
             }
 
             TlpLogger.StaticWarning(
-                    $"{nameof(TryReturnToPool)}: {behaviour.GetScriptPathInScene()} was no pool-able in use",
+                    $"{nameof(_TryReturnToPool)}: {behaviour._GetScriptPathInScene()} was no pool-able in use",
                     null);
 
             return false;
@@ -42,26 +42,26 @@ namespace TLP.UdonUtils.Runtime.Extensions
         /// If returning is not possible, the GameObject is destroyed.
         /// </summary>
         /// <param name="behaviour"></param>
-        public static void ReturnToPoolOrDestroy(this TlpBaseBehaviour behaviour) {
+        public static void _ReturnToPoolOrDestroy(this TlpBaseBehaviour behaviour) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            TlpLogger.StaticDebugLog($"{nameof(ReturnToPoolOrDestroy)}: {behaviour.GetScriptPathInScene()}", null);
+            TlpLogger.StaticDebugLog($"{nameof(_ReturnToPoolOrDestroy)}: {behaviour._GetScriptPathInScene()}", null);
 #endif
             #endregion
 
             if (!Utilities.IsValid(behaviour)) {
-                TlpLogger.StaticError($"{nameof(ReturnToPoolOrDestroy)}: {nameof(behaviour)} invalid", null);
+                TlpLogger.StaticError($"{nameof(_ReturnToPoolOrDestroy)}: {nameof(behaviour)} invalid", null);
                 return;
             }
 
             var behaviourPool = (Pool.Pool)behaviour.Pool;
             if (behaviour.PoolableInUse && Utilities.IsValid(behaviourPool)) {
-                behaviourPool.Return(behaviour.gameObject);
+                behaviourPool._Return(behaviour.gameObject);
                 return;
             }
 
             TlpLogger.StaticWarning(
-                    $"{nameof(ReturnToPoolOrDestroy)}: {behaviour.GetScriptPathInScene()} was no pool-able in use",
+                    $"{nameof(_ReturnToPoolOrDestroy)}: {behaviour._GetScriptPathInScene()} was no pool-able in use",
                     null);
 
 

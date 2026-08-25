@@ -27,8 +27,8 @@ namespace TLP.UdonUtils.Runtime.Pool
         public Pool OptionalDefaultPool;
 
         #region Internal
-        private bool AttachToRuntimeFactoriesGameObject() {
-            if (!FindFactoriesGameObject(out var runtimeFactories)) {
+        private bool _AttachToRuntimeFactoriesGameObject() {
+            if (!_FindFactoriesGameObject(out var runtimeFactories)) {
                 return false;
             }
 
@@ -39,93 +39,92 @@ namespace TLP.UdonUtils.Runtime.Pool
 
 
         #region Overrides
-
-        protected override bool InitializeFactory() {
+        protected override bool _InitializeFactory() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(InitializeFactory));
+            _DebugLog(nameof(_InitializeFactory));
 #endif
 #endregion
             if (!Utilities.IsValid(Prototype)) {
-                Error($"{gameObject.name}: {nameof(Prototype)} is not set");
+                _Error($"{gameObject.name}: {nameof(Prototype)} is not set");
                 return false;
             }
 
             if (Utilities.IsValid(OptionalDefaultPool)) {
-                DebugLog($"Using {nameof(OptionalDefaultPool)}");
+                _DebugLog($"Using {nameof(OptionalDefaultPool)}");
                 _productPool = OptionalDefaultPool;
                 return true;
             }
 
-            if (!AttachToRuntimeFactoriesGameObject()) {
+            if (!_AttachToRuntimeFactoriesGameObject()) {
                 return false;
             }
 
             if (!Utilities.IsValid(PoolFactory)) {
-                Error($"{nameof(PoolFactory)} not set");
+                _Error($"{nameof(PoolFactory)} not set");
                 return false;
             }
 
-            var poolGameObject = PoolFactory.CreateInstance();
+            var poolGameObject = PoolFactory._CreateInstance();
             if (!poolGameObject) {
                 return false;
             }
 
             _productPool = poolGameObject.GetComponent<Pool>();
             if (!Utilities.IsValid(_productPool)) {
-                Error($"Created {nameof(poolGameObject)} has no {nameof(Pool)} attached");
+                _Error($"Created {nameof(poolGameObject)} has no {nameof(Pool)} attached");
                 Destroy(poolGameObject);
                 return false;
             }
 
             _productPool.PoolInstancePrefab = Prototype.gameObject;
             _productPool.gameObject.name =
-                    $"{nameof(Pool)}_of_{UdonCommon.UdonTypeNameShort(Prototype.GetUdonTypeName())}s";
+                    $"{nameof(Pool)}_of_{UdonCommon._UdonTypeNameShort(Prototype.GetUdonTypeName())}s";
 
-            if (ConfigurePool(_productPool)) {
+            if (_ConfigurePool(_productPool)) {
                 poolGameObject.SetActive(true);
                 return true;
             }
 
-            Error("Failed to configure pool");
+            _Error("Failed to configure pool");
             return false;
         }
 
-        protected virtual bool ConfigurePool(Pool pool) {
+        protected virtual bool _ConfigurePool(Pool pool) {
             return true;
         }
         #endregion
 
 
         #region Public
-        protected override GameObject ProduceInstance() {
+        protected override GameObject _ProduceInstance() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(ProduceInstance));
+            _DebugLog(nameof(_ProduceInstance));
 #endif
             #endregion
 
             if (!HasStartedOk) {
-                Error($"{nameof(ProduceInstance)}: Not initialized");
+                _Error($"{nameof(_ProduceInstance)}: Not initialized");
                 return null;
             }
 
-            return _productPool.Get();
+            return _productPool._Get();
         }
 
-        public void Return(GameObject instance) {
+        public void _Return(GameObject instance) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(Return));
+            _DebugLog(nameof(_Return));
 #endif
             #endregion
 
             if (!HasStartedOk) {
-                Error($"{nameof(Return)}: Not initialized");
+                _Error($"{nameof(_Return)}: Not initialized");
                 return;
             }
 
-            _productPool.Return(instance);
+            _productPool._Return(instance);
         }
         #endregion
     }

@@ -46,15 +46,15 @@ namespace TLP.UdonUtils.Runtime.Common
         /// Validation method to enforce that the StationState is used indirectly by another Script
         /// </summary>
         [PublicAPI]
-        public bool ValidateNotOnStationGameObject(VRCStation station) {
+        public bool _ValidateNotOnStationGameObject(VRCStation station) {
             if (!HasStartedOk) {
                 return false;
             }
 
             if (!ReferenceEquals(station, Station)) {
-                Error(
+                _Error(
                         $"Provided {nameof(VRCStation)} is not own {nameof(Station)}: " +
-                        $"{station.GetComponentPathInScene()} != {Station.GetComponentPathInScene()}");
+                        $"{station._GetComponentPathInScene()} != {Station._GetComponentPathInScene()}");
                 return false;
             }
 
@@ -62,8 +62,8 @@ namespace TLP.UdonUtils.Runtime.Common
                 return true;
             }
 
-            Error(
-                    $"{nameof(StationState)} is on the same GameObject as the station: {Station.GetComponentPathInScene()}");
+            _Error(
+                    $"{nameof(StationState)} is on the same GameObject as the station: {Station._GetComponentPathInScene()}");
             return false;
         }
 
@@ -71,7 +71,7 @@ namespace TLP.UdonUtils.Runtime.Common
         /// Validation method to enforce that the StationState is updated directly by the VRCStation
         /// </summary>
         [PublicAPI]
-        public bool ValidateOnStationGameObject() {
+        public bool _ValidateOnStationGameObject() {
             if (!HasStartedOk) {
                 return false;
             }
@@ -81,28 +81,28 @@ namespace TLP.UdonUtils.Runtime.Common
                 return true;
             }
 
-            Error($"{nameof(StationState)} found no {nameof(VRCStation)} on its own GameObject");
+            _Error($"{nameof(StationState)} found no {nameof(VRCStation)} on its own GameObject");
             return false;
         }
         #endregion
 
         #region Overrides
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
-            return ValidateDependencies();
+            return _ValidateDependencies();
         }
 
         public override void OnStationEntered(VRCPlayerApi player) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(OnStationEntered)}: {player.ToStringSafe()}");
+            _DebugLog($"{nameof(OnStationEntered)}: {player._ToStringSafe()}");
 #endif
             #endregion
 
-            IsLocalPlayerInStation = player.IsLocalSafe();
+            IsLocalPlayerInStation = player._IsLocalSafe();
             IsStationOccupied = Utilities.IsValid(player);
             PlayerInStation = player;
         }
@@ -110,7 +110,7 @@ namespace TLP.UdonUtils.Runtime.Common
         public override void OnStationExited(VRCPlayerApi player) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(OnStationExited)}: {player.ToStringSafe()}");
+            _DebugLog($"{nameof(OnStationExited)}: {player._ToStringSafe()}");
 #endif
             #endregion
 
@@ -121,8 +121,8 @@ namespace TLP.UdonUtils.Runtime.Common
         #endregion
 
         #region Internal
-        private bool ValidateDependencies() {
-            if (!IsSet(Station, nameof(Station))) {
+        private bool _ValidateDependencies() {
+            if (!_IsSet(Station, nameof(Station))) {
                 return false;
             }
 

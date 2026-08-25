@@ -29,26 +29,26 @@ namespace TLP.UdonUtils.Runtime.Testing
         [UdonSynced]
         public double TesterDelta;
 
-        protected override void InitializeTest() {
+        protected override void _InitializeTest() {
             if (!Utilities.IsValid(TimeSource)) {
-                Error("TimeSource is not set");
-                TestController.TestInitialized(false);
+                _Error("TimeSource is not set");
+                TestController._TestInitialized(false);
                 return;
             }
 
             if (!Utilities.IsValid(UtcTimeSource)) {
-                Error($"{nameof(UtcTimeSource)} is not set");
-                TestController.TestInitialized(false);
+                _Error($"{nameof(UtcTimeSource)} is not set");
+                TestController._TestInitialized(false);
                 return;
             }
 
             if (VRCPlayerApi.GetPlayerCount() != 2) {
-                Error("Two players required");
-                TestController.TestInitialized(false);
+                _Error("Two players required");
+                TestController._TestInitialized(false);
                 return;
             }
 
-            TestController.TestInitialized(true);
+            TestController._TestInitialized(true);
         }
 
         [UdonSynced]
@@ -57,16 +57,16 @@ namespace TLP.UdonUtils.Runtime.Testing
         private double _workingTesterDelta;
 
 
-        protected override void RunTest() {
+        protected override void _RunTest() {
             if (!Networking.IsOwner(gameObject)) {
                 Networking.SetOwner(Networking.LocalPlayer, gameObject);
             }
 
             _pendingResponse = true;
-            Trigger(0.0);
-            MarkNetworkDirty();
+            _Trigger(0.0);
+            _MarkNetworkDirty();
             RequestSerialization();
-            SendCustomEventDelayedSeconds(nameof(Delayed_Timeout), 5f);
+            SendCustomEventDelayedSeconds(nameof(_Delayed_Timeout), 5f);
         }
 
         public override void OnDeserialization(DeserializationResult deserializationResult) {
@@ -84,47 +84,47 @@ namespace TLP.UdonUtils.Runtime.Testing
                     Networking.SetOwner(Networking.LocalPlayer, gameObject);
                 }
 
-                SendCustomEventDelayedSeconds(nameof(Delayed_Response), 1f);
+                SendCustomEventDelayedSeconds(nameof(_Delayed_Response), 1f);
             } else if (Status == TestCaseStatus.Running) {
                 // player who started the test
-                Info("Received response from other player");
-                Trigger(TesterDelta);
+                _Info("Received response from other player");
+                _Trigger(TesterDelta);
             }
         }
 
-        public void Delayed_Response() {
+        public void _Delayed_Response() {
             // other player
             if (!Networking.IsOwner(gameObject)) {
                 Networking.SetOwner(Networking.LocalPlayer, gameObject);
             }
 
             _pendingResponse = false;
-            Trigger(_workingTesterDelta);
-            Info($"Received delta = {_workingTesterDelta:F9}s");
-            Info("Responding to tester");
-            MarkNetworkDirty();
+            _Trigger(_workingTesterDelta);
+            _Info($"Received delta = {_workingTesterDelta:F9}s");
+            _Info("Responding to tester");
+            _MarkNetworkDirty();
             RequestSerialization();
         }
 
-        public void Delayed_Timeout() {
+        public void _Delayed_Timeout() {
             if (Status == TestCaseStatus.Running) {
-                Error("Test timed out");
-                TestController.TestCompleted(false);
+                _Error("Test timed out");
+                TestController._TestCompleted(false);
             }
         }
 
 
-        public void Trigger(double testerDelta) {
-            double serverTime = TimeSource.TimeAsDouble();
-            double currentTimeUtc = UtcTimeSource.TimeAsDouble();
+        public void _Trigger(double testerDelta) {
+            double serverTime = TimeSource._TimeAsDouble();
+            double currentTimeUtc = UtcTimeSource._TimeAsDouble();
 
             TesterDelta = currentTimeUtc - serverTime;
-            Info($"currentTimeUtc: {currentTimeUtc:F9}s");
-            Info($"TimeSource time: {serverTime:F9}s");
-            Info($"Delta: {TesterDelta:F9}s");
+            _Info($"currentTimeUtc: {currentTimeUtc:F9}s");
+            _Info($"TimeSource time: {serverTime:F9}s");
+            _Info($"Delta: {TesterDelta:F9}s");
             if (testerDelta > 0) {
-                Info($"Delta of player who started the test: {testerDelta:F9}");
-                Info($"Difference: {TesterDelta - testerDelta:F9}");
+                _Info($"Delta of player who started the test: {testerDelta:F9}");
+                _Info($"Difference: {TesterDelta - testerDelta:F9}");
 
                 if (!Utilities.IsValid(TestController)) {
                     return;
@@ -132,26 +132,26 @@ namespace TLP.UdonUtils.Runtime.Testing
 
                 if (Status == TestCaseStatus.Running) {
                     if (Math.Abs(TesterDelta - testerDelta) > 3e-3) {
-                        Error("Delta between players was more than 3ms");
-                        TestController.TestCompleted(false);
+                        _Error("Delta between players was more than 3ms");
+                        TestController._TestCompleted(false);
                     } else {
-                        Info("Delta was less than 3ms");
-                        TestController.TestCompleted(true);
+                        _Info("Delta was less than 3ms");
+                        TestController._TestCompleted(true);
                     }
                 }
             }
         }
 
-        protected override void CleanUpTest() {
+        protected override void _CleanUpTest() {
             if (!Networking.IsOwner(gameObject)) {
                 Networking.SetOwner(Networking.LocalPlayer, gameObject);
             }
 
             _pendingResponse = false;
             TesterDelta = 0;
-            MarkNetworkDirty();
+            _MarkNetworkDirty();
             RequestSerialization();
-            TestController.TestCleanedUp(true);
+            TestController._TestCleanedUp(true);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace TLP.UdonUtils.Runtime.Sources.FrameCount
         public new const int ExecutionOrder = FrameCountSource.ExecutionOrder + 1;
 
         /// <summary>
-        /// Constant value returned by the method <see cref="Frame"/>
+        /// Constant value returned by the method <see cref="_Frame"/>
         /// </summary>
         [Tooltip("Constant value returned by the method Frame")]
         [FormerlySerializedAs("Value")]
@@ -30,7 +30,7 @@ namespace TLP.UdonUtils.Runtime.Sources.FrameCount
         ///
         /// </summary>
         /// <returns>Value of <see cref="Frames"/></returns>
-        public override int Frame() {
+        public override int _Frame() {
             return Frames;
         }
     }

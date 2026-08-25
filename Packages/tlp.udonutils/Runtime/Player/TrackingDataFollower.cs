@@ -15,7 +15,7 @@ namespace TLP.UdonUtils.Runtime.Player
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = WeaponsEvent.ExecutionOrder + 1;
+        public new const int ExecutionOrder = TlpExecutionOrder.WeaponsStart + 1;
 
         public VRCPlayerApi Player;
 
@@ -25,10 +25,10 @@ namespace TLP.UdonUtils.Runtime.Player
         [FormerlySerializedAs("useLocalPlayerByDefault")]
         public bool UseLocalPlayerByDefault = true;
 
-        protected Transform OwnTransform;
+        private Transform OwnTransform;
 
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 

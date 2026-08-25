@@ -1,6 +1,8 @@
 ﻿using JetBrains.Annotations;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.Serialization;
+using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Player
@@ -24,26 +26,27 @@ namespace TLP.UdonUtils.Runtime.Player
         /// </summary>
         internal const float DefaultRange = 25f;
 
+        [FormerlySerializedAs("playerFarRangeMapping")]
         [Tooltip("Defines the far voice range of all players depending on the number of players in the world")]
-        public AnimationCurve playerFarRangeMapping = AnimationCurve.Linear(1, 25, 80, 10);
+        public AnimationCurve PlayerFarRangeMapping = AnimationCurve.Linear(1, 25, 80, 10);
 
         internal void OnEnable() {
-            UpdatePlayerVoiceRange(false);
+            _UpdatePlayerVoiceRange(false);
         }
 
         internal void OnDisable() {
-            UpdatePlayerVoiceRange(true);
+            _UpdatePlayerVoiceRange(true);
         }
 
         public override void OnPlayerJoined(VRCPlayerApi player) {
-            UpdatePlayerVoiceRange(false);
+            _UpdatePlayerVoiceRange(false);
         }
 
         public override void OnPlayerLeft(VRCPlayerApi player) {
-            UpdatePlayerVoiceRange(false);
+            _UpdatePlayerVoiceRange(false);
         }
 
-        internal float GetRange(AnimationCurve rangeMapping, int playerCount) {
+        internal float _GetRange(AnimationCurve rangeMapping, int playerCount) {
             if (!Utilities.IsValid(rangeMapping)) {
                 Debug.LogWarning("playerRangeMapping invalid, returning default range 25");
                 return 25f;
@@ -52,7 +55,7 @@ namespace TLP.UdonUtils.Runtime.Player
             return rangeMapping.Evaluate(playerCount);
         }
 
-        internal void UpdateVoiceRange(VRCPlayerApi[] playerApis, float voiceRange) {
+        internal void _UpdateVoiceRange(VRCPlayerApi[] playerApis, float voiceRange) {
             if (!Utilities.IsValid(playerApis)) {
                 return;
             }
@@ -70,13 +73,13 @@ namespace TLP.UdonUtils.Runtime.Player
         /// 
         /// </summary>
         /// <param name="reset">if true all player voices are reset to use the <see cref="DefaultRange"/></param>
-        internal void UpdatePlayerVoiceRange(bool reset) {
+        internal void _UpdatePlayerVoiceRange(bool reset) {
             int playerCount = VRCPlayerApi.GetPlayerCount();
             var players = new VRCPlayerApi[playerCount];
             VRCPlayerApi.GetPlayers(players);
 
-            float range = reset ? DefaultRange : GetRange(playerFarRangeMapping, playerCount);
-            UpdateVoiceRange(players, range);
+            float range = reset ? DefaultRange : _GetRange(PlayerFarRangeMapping, playerCount);
+            _UpdateVoiceRange(players, range);
         }
     }
 }

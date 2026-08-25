@@ -44,21 +44,20 @@ namespace TLP.UdonUtils.Runtime.Sync
         private int SyncTimeoutSeconds = 3;
 
         #region Public API
-        public void ReturnOwnershipToMaster() {
+        public void _ReturnOwnershipToMaster() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(ReturnOwnershipToMaster));
+            _DebugLog(nameof(_ReturnOwnershipToMaster));
 #endif
             #endregion
 
-
-            if (_masterId.IsValidPlayer(out var master) && master.IsMasterSafe()) {
+            if (_masterId._IsValidPlayer(out var master) && master._IsMasterSafe()) {
                 Networking.SetOwner(master, gameObject);
                 return;
             }
 
-            master = GetMaster();
-            _masterId = master.PlayerIdSafe();
+            master = _GetMaster();
+            _masterId = master._PlayerIdSafe();
             RequestSerialization();
             Networking.SetOwner(master, gameObject);
         }
@@ -66,7 +65,7 @@ namespace TLP.UdonUtils.Runtime.Sync
         /// <summary>
         /// Use in OnDeserialization of scripts that rely on the RoundRobinSynchronizer
         /// </summary>
-        public void ResetTimeout() {
+        public void _ResetTimeout() {
             _expireTime = Time.timeSinceLevelLoad + SyncTimeoutSeconds;
             SendCustomEventDelayedSeconds(nameof(_CheckOwnershipReturned), SyncTimeoutSeconds);
         }
@@ -76,22 +75,22 @@ namespace TLP.UdonUtils.Runtime.Sync
         public override void OnOwnershipTransferred(VRCPlayerApi player) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(OnOwnershipTransferred)} to {player.ToStringSafe()}");
+            _DebugLog($"{nameof(OnOwnershipTransferred)} to {player._ToStringSafe()}");
 #endif
             #endregion
 
-            StartSyncOnClient();
+            _StartSyncOnClient();
         }
 
         public override void OnPlayerJoined(VRCPlayerApi player) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(OnPlayerJoined)} {player.ToStringSafe()}");
+            _DebugLog($"{nameof(OnPlayerJoined)} {player._ToStringSafe()}");
 #endif
             #endregion
 
 
-            UpdatePlayerList();
+            _UpdatePlayerList();
 
             if (Networking.IsMaster) {
                 SendCustomEventDelayedSeconds(nameof(_CheckOwnershipReturned), SyncTimeoutSeconds);
@@ -102,43 +101,43 @@ namespace TLP.UdonUtils.Runtime.Sync
         public override bool OnOwnershipRequest(VRCPlayerApi requestingPlayer, VRCPlayerApi requestedOwner) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(
-                    $"{nameof(OnOwnershipRequest)} from {requestingPlayer.ToStringSafe()} to set owner to {requestedOwner.ToStringSafe()}"
+            _DebugLog(
+                    $"{nameof(OnOwnershipRequest)} from {requestingPlayer._ToStringSafe()} to set owner to {requestedOwner._ToStringSafe()}"
             );
 #endif
             #endregion
 
-            if (requestingPlayer.IsMasterSafe()) {
+            if (requestingPlayer._IsMasterSafe()) {
                 // master is always allowed to request ownership
                 return true;
             }
 
-            if (!Utilities.IsValid(_currentPlayer) && requestedOwner.IsMasterSafe()) {
+            if (!Utilities.IsValid(_currentPlayer) && requestedOwner._IsMasterSafe()) {
                 // any player is allowed to return the ownership to the master if the target player is invalid
                 return true;
             }
 
             // otherwise, only the target player is allowed to return ownership to the master
-            return requestingPlayer.PlayerIdSafe() == _currentPlayer && requestedOwner.IsMasterSafe();
+            return requestingPlayer._PlayerIdSafe() == _currentPlayer && requestedOwner._IsMasterSafe();
         }
         #endregion
 
         #region Internal
-        private void UpdatePlayerList() {
-            _players = _players.ResizeOrCreate(VRCPlayerApi.GetPlayerCount());
+        private void _UpdatePlayerList() {
+            _players = _players._ResizeOrCreate(VRCPlayerApi.GetPlayerCount());
             VRCPlayerApi.GetPlayers(_players);
         }
 
-        private VRCPlayerApi GetMaster() {
+        private VRCPlayerApi _GetMaster() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(GetMaster));
+            _DebugLog(nameof(_GetMaster));
 #endif
             #endregion
 
-            UpdatePlayerList();
+            _UpdatePlayerList();
             foreach (var vrcPlayerApi in _players) {
-                if (vrcPlayerApi.IsMasterSafe()) {
+                if (vrcPlayerApi._IsMasterSafe()) {
                     return vrcPlayerApi;
                 }
             }
@@ -146,15 +145,15 @@ namespace TLP.UdonUtils.Runtime.Sync
             return null;
         }
 
-        private void MasterTransferOwnershipToNextPlayer(VRCPlayerApi master) {
+        private void _MasterTransferOwnershipToNextPlayer(VRCPlayerApi master) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(MasterTransferOwnershipToNextPlayer));
+            _DebugLog(nameof(_MasterTransferOwnershipToNextPlayer));
 #endif
             #endregion
 
-            if (_players.LengthSafe() == 0) {
-                UpdatePlayerList();
+            if (_players._LengthSafe() == 0) {
+                _UpdatePlayerList();
             }
 
             int playerCount = VRCPlayerApi.GetPlayerCount();
@@ -162,14 +161,14 @@ namespace TLP.UdonUtils.Runtime.Sync
             // for safety reasons we abort after each player has been visited, should not be needed as the loop
             // should generally finish after one iteration
             for (int i = 0; i < playerCount; i++) {
-                _currentPlayerIndex.MoveIndexRightLooping(_players.Length);
+                _currentPlayerIndex._MoveIndexRightLooping(_players.Length);
                 var nextPlayer = _players[_currentPlayerIndex];
                 if (!Utilities.IsValid(nextPlayer)) {
-                    UpdatePlayerList();
-                    _currentPlayerIndex.MoveIndexRightLooping(_players.Length, 0);
+                    _UpdatePlayerList();
+                    _currentPlayerIndex._MoveIndexRightLooping(_players.Length, 0);
                     nextPlayer = _players[_currentPlayerIndex];
                     if (!Utilities.IsValid(nextPlayer)) {
-                        Error("Invalid player in player list even after updating the list!");
+                        _Error("Invalid player in player list even after updating the list!");
                         continue;
                     }
                 }
@@ -180,20 +179,20 @@ namespace TLP.UdonUtils.Runtime.Sync
                 Networking.SetOwner(nextPlayer, gameObject);
 
                 if (nextPlayer.isMaster) {
-                    StartSyncOnClient();
+                    _StartSyncOnClient();
                 }
 
                 break;
             }
 
-            ResetTimeout();
+            _ResetTimeout();
         }
 
 
         public void _CheckOwnershipReturned() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(_CheckOwnershipReturned));
+            _DebugLog(nameof(_CheckOwnershipReturned));
 #endif
             #endregion
 
@@ -201,27 +200,27 @@ namespace TLP.UdonUtils.Runtime.Sync
                 Time.timeSinceLevelLoad > _expireTime - Time.deltaTime) {
                 var master = Networking.LocalPlayer;
                 Networking.SetOwner(master, gameObject);
-                MasterTransferOwnershipToNextPlayer(master);
+                _MasterTransferOwnershipToNextPlayer(master);
             }
         }
 
-        private void StartSyncOnClient() {
+        private void _StartSyncOnClient() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(StartSyncOnClient));
+            _DebugLog(nameof(_StartSyncOnClient));
 #endif
             #endregion
 
 
             if (!Utilities.IsValid(StartSync)) {
-                Error($"{nameof(StartSync)} not set");
-                ReturnOwnershipToMaster();
+                _Error($"{nameof(StartSync)} not set");
+                _ReturnOwnershipToMaster();
                 return;
             }
 
-            if (!StartSync.Raise(this)) {
-                Error($"Failed to raise {nameof(StartSync)}");
-                ReturnOwnershipToMaster();
+            if (!StartSync._Raise(this)) {
+                _Error($"Failed to raise {nameof(StartSync)}");
+                _ReturnOwnershipToMaster();
             }
         }
         #endregion

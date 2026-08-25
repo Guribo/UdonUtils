@@ -1,6 +1,5 @@
 ﻿using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Extensions;
-using TLP.UdonUtils.Runtime.Sources.Time.Experimental;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -22,19 +21,21 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         public new const int ExecutionOrder = UnscaledTimeSinceGameStart.ExecutionOrder + 1;
 
 
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
-            string existingInstance = Networking.LocalPlayer.GetPlayerTagSafe(nameof(VrcNetworkTime));
+            string existingInstance = Networking.LocalPlayer._GetPlayerTagSafe(nameof(VrcNetworkTime));
             string idString = GetInstanceID().ToString();
 
             if (!string.IsNullOrEmpty(existingInstance) && existingInstance != idString) {
-                ErrorAndDisableGameObject($"Another instance of {nameof(VrcNetworkTime)} already exists: {idString} (this) != {existingInstance} (other)");
+                _ErrorAndDisableGameObject(
+                        $"Another instance of {nameof(VrcNetworkTime)} already exists: {idString} (this) != {existingInstance} (other)");
                 return false;
             }
-            Networking.LocalPlayer.SetPlayerTagSafe(nameof(VrcNetworkTime), idString);
+
+            Networking.LocalPlayer._SetPlayerTagSafe(nameof(VrcNetworkTime), idString);
             return true;
         }
 
@@ -53,12 +54,12 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         private double _latestTime;
 
         /// <returns><see cref="Networking.GetServerTimeInSeconds"/></returns>
-        public override float Time() {
+        public override float _Time() {
             return (float)LatestTime;
         }
 
         /// <returns><see cref="Networking.GetServerTimeInSeconds"/></returns>
-        public override double TimeAsDouble() {
+        public override double _TimeAsDouble() {
             return LatestTime;
         }
     }

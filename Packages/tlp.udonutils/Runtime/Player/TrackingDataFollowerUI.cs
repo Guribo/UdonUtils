@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace TLP.UdonUtils.Runtime.Player
 {
-    [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
+    [UdonBehaviourSyncMode(BehaviourSyncMode.NoVariableSync)]
     [DefaultExecutionOrder(ExecutionOrder)]
     [TlpDefaultExecutionOrder(typeof(TrackingDataFollowerUI), ExecutionOrder)]
     public class TrackingDataFollowerUI : TrackingDataFollower

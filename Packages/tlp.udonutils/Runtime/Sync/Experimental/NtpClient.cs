@@ -64,7 +64,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         #endregion
 
         #region Lifecycle
-        public void Update()
+        internal void Update()
         {
             if (Networking.IsMaster) {
                 return;
@@ -74,12 +74,12 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
                 return;
             }
 
-            if (TimeSource.Time() < NextRequestTime) {
+            if (TimeSource._Time() < NextRequestTime) {
                 return;
             }
 
-            RequestNtpSynchronization();
-            NextRequestTime = TimeSource.Time() + RequestInterval;
+            _RequestNtpSynchronization();
+            NextRequestTime = TimeSource._Time() + RequestInterval;
         }
         #endregion
 
@@ -88,9 +88,9 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         {
             base.OnPreSerialization();
 
-            WorkingRequestSendTime = GetRawTime();
+            WorkingRequestSendTime = _GetRawTime();
 #if TLP_DEBUG
-            DebugLog($"Client requesting: {nameof(WorkingRequestSendTime)}: {WorkingRequestSendTime:F9}");
+            _DebugLog($"Client requesting: {nameof(WorkingRequestSendTime)}: {WorkingRequestSendTime:F9}");
 #endif
             RequestSendTime = WorkingRequestSendTime;
         }
@@ -99,7 +99,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         {
             base.OnDeserialization(deserializationResult);
             if (!HasStartedOk) {
-                Error($"{nameof(OnDeserialization)}: Not initialized");
+                _Error($"{nameof(OnDeserialization)}: Not initialized");
                 return;
             }
 
@@ -111,13 +111,13 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
                 return;
             }
 
-            double receiveTime = Server.OwnNtpClient.GetAdjustedLocalTime();
+            double receiveTime = Server.OwnNtpClient._GetAdjustedLocalTime();
 #if TLP_DEBUG
-            DebugLog($"Client request arrived: {nameof(RequestSendTime)}: {RequestSendTime:F9}, " +
-                     $"receive time: {receiveTime:F9} ");
+            _DebugLog($"Client request arrived: {nameof(RequestSendTime)}: {RequestSendTime:F9}, " +
+                      $"receive time: {receiveTime:F9} ");
 #endif
-            if (!Server.AddRequest(this, receiveTime)) {
-                Error("Failed to add request to server");
+            if (!Server._AddRequest(this, receiveTime)) {
+                _Error("Failed to add request to server");
             }
         }
         #endregion
@@ -125,54 +125,54 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         #region Public
         /// <returns>Returns the local time + offset if master
         /// and only the local time if not master</returns>
-        public double GetTime()
+        public double _GetTime()
         {
             if (HasStartedOk) {
-                return Networking.IsMaster ? GetAdjustedLocalTime() : TimeSource.Time();
+                return Networking.IsMaster ? _GetAdjustedLocalTime() : TimeSource._Time();
             }
 
-            Error($"{nameof(GetTime)}: Not initialized");
+            _Error($"{nameof(_GetTime)}: Not initialized");
             return float.MinValue;
         }
 
         /// <returns>the local time without offset</returns>
-        public double GetRawTime()
+        public double _GetRawTime()
         {
             if (HasStartedOk) {
-                return TimeSource.TimeAsDouble();
+                return TimeSource._TimeAsDouble();
             }
 
-            Error($"{nameof(GetRawTime)}: Not initialized");
+            _Error($"{nameof(_GetRawTime)}: Not initialized");
             return float.MinValue;
         }
 
         /// <returns>the local time + offset</returns>
-        public double GetAdjustedLocalTime()
+        public double _GetAdjustedLocalTime()
         {
             if (HasStartedOk) {
-                return TimeSource.TimeAsDouble() + ClockOffset;
+                return TimeSource._TimeAsDouble() + ClockOffset;
             }
 
-            Error($"{nameof(GetAdjustedLocalTime)}: Not initialized");
+            _Error($"{nameof(_GetAdjustedLocalTime)}: Not initialized");
             return float.MinValue;
         }
 
-        public void AdjustRequestTiming()
+        public void _AdjustRequestTiming()
         {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(AdjustRequestTiming));
+            _DebugLog(nameof(_AdjustRequestTiming));
 #endif
             #endregion
 
             NextRequestTime += 0.1f * RequestInterval;
         }
 
-        public bool UpdateOffset(double requestReceiveTime, double responseSendTime, double responseReceiveTime)
+        public bool _UpdateOffset(double requestReceiveTime, double responseSendTime, double responseReceiveTime)
         {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            Info(
+            _Info(
                     $"{nameof(WorkingRequestSendTime)}: {WorkingRequestSendTime:F5}; " +
                     $"{nameof(requestReceiveTime)}: {requestReceiveTime:F5}; " +
                     $"{nameof(responseSendTime)}: {responseSendTime:F5}; " +
@@ -181,34 +181,34 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
             #endregion
 
             if (!HasStartedOk) {
-                Error($"{nameof(UpdateOffset)}: Not initialized");
+                _Error($"{nameof(_UpdateOffset)}: Not initialized");
                 return false;
             }
 
-            double ping = GetDelta(WorkingRequestSendTime, requestReceiveTime, responseSendTime, responseReceiveTime);
+            double ping = _GetDelta(WorkingRequestSendTime, requestReceiveTime, responseSendTime, responseReceiveTime);
             if (ping < 0f) {
-                AdjustRequestTiming();
-                Warn($"Ping {ping} is negative, skipping offset update and adjusting request timing.");
+                _AdjustRequestTiming();
+                _Warn($"Ping {ping} is negative, skipping offset update and adjusting request timing.");
                 return false;
             }
 
             PingToMaster = ping;
 
             // failure cases already covered by GetDelta above
-            GetClockOffset(
+            _GetClockOffset(
                     WorkingRequestSendTime,
                     requestReceiveTime,
                     responseSendTime,
                     responseReceiveTime,
                     out double offsetSample);
 
-            SaveOffsetSample(offsetSample);
-            double newAverageOffset = GetNewAverageClockOffset();
+            _SaveOffsetSample(offsetSample);
+            double newAverageOffset = _GetNewAverageClockOffset();
 
 #if TLP_DEBUG
-            DebugLog($"New client time offset: {newAverageOffset:F9} change: " +
-                     $"{1000f * (newAverageOffset - ClockOffset):F3} ms; Ping to master: " +
-                     $"{1000f * PingToMaster:F3}ms; Latency to master: {1000f * LatencyToMaster:F3}ms");
+            _DebugLog($"New client time offset: {newAverageOffset:F9} change: " +
+                      $"{1000f * (newAverageOffset - ClockOffset):F3} ms; Ping to master: " +
+                      $"{1000f * PingToMaster:F3}ms; Latency to master: {1000f * LatencyToMaster:F3}ms");
 #endif
             ClockOffset = newAverageOffset;
             return true;
@@ -224,7 +224,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         /// <param name="responseSendTime"></param>
         /// <param name="responseReceiveTime"></param>
         /// <returns>-1 if requestSendTime > responseReceiveTime or requestReceiveTime > responseSendTime</returns>
-        public static double GetDelta(
+        public static double _GetDelta(
                 double requestSendTime,
                 double requestReceiveTime,
                 double responseSendTime,
@@ -233,13 +233,13 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         {
             if (requestSendTime > responseReceiveTime) {
                 Debug.LogError(
-                        $"{nameof(NtpClient)}.{nameof(GetDelta)}: {nameof(requestSendTime)} must be <= {nameof(responseReceiveTime)}");
+                        $"{nameof(NtpClient)}.{nameof(_GetDelta)}: {nameof(requestSendTime)} must be <= {nameof(responseReceiveTime)}");
                 return -1f;
             }
 
             if (requestReceiveTime > responseSendTime) {
                 Debug.LogError(
-                        $"{nameof(NtpClient)}.{nameof(GetDelta)}: {nameof(requestReceiveTime)} must be <= {nameof(responseSendTime)}");
+                        $"{nameof(NtpClient)}.{nameof(_GetDelta)}: {nameof(requestReceiveTime)} must be <= {nameof(responseSendTime)}");
                 return -1f;
             }
 
@@ -258,7 +258,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         /// <param name="responseReceiveTime"></param>
         /// <param name="offset"></param>
         /// <returns>false if requestSendTime > responseReceiveTime or requestReceiveTime > responseSendTime</returns>
-        public static bool GetClockOffset(
+        public static bool _GetClockOffset(
                 double requestSendTime,
                 double requestReceiveTime,
                 double responseSendTime,
@@ -268,14 +268,14 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         {
             if (requestSendTime > responseReceiveTime) {
                 Debug.LogError(
-                        $"{nameof(NtpClient)}.{nameof(GetDelta)}: {nameof(requestSendTime)} must be <= {nameof(responseReceiveTime)}");
+                        $"{nameof(NtpClient)}.{nameof(_GetDelta)}: {nameof(requestSendTime)} must be <= {nameof(responseReceiveTime)}");
                 offset = 0f;
                 return false;
             }
 
             if (requestReceiveTime > responseSendTime) {
                 Debug.LogError(
-                        $"{nameof(NtpClient)}.{nameof(GetDelta)}: {nameof(requestReceiveTime)} must be <= {nameof(responseSendTime)}");
+                        $"{nameof(NtpClient)}.{nameof(_GetDelta)}: {nameof(requestReceiveTime)} must be <= {nameof(responseSendTime)}");
                 offset = 0f;
                 return false;
             }
@@ -289,30 +289,30 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         #endregion
 
         #region TlpBase Overrides
-        protected override bool SetupAndValidate()
+        protected override bool _SetupAndValidate()
         {
-            if (!base.SetupAndValidate()) {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
             if (!Utilities.IsValid(TimeSource)) {
-                Error($"{nameof(SetupAndValidate)}: {nameof(TimeSource)} not set");
+                _Error($"{nameof(_SetupAndValidate)}: {nameof(TimeSource)} not set");
                 return false;
             }
 
             if (!Utilities.IsValid(Server)) {
-                Error($"{nameof(SetupAndValidate)}: {nameof(Server)} not set");
+                _Error($"{nameof(_SetupAndValidate)}: {nameof(Server)} not set");
                 return false;
             }
 
             if (!Utilities.IsValid(Server.NtpTime)) {
-                Error($"{nameof(SetupAndValidate)}: {nameof(Server)}.{nameof(Server.NtpTime)} not set");
+                _Error($"{nameof(_SetupAndValidate)}: {nameof(Server)}.{nameof(Server.NtpTime)} not set");
                 return false;
             }
 
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (ClockOffsetSamples < 1) {
-                Error($"{nameof(ClockOffsetSamples)} must be >= 1");
+                _Error($"{nameof(ClockOffsetSamples)} must be >= 1");
                 return false;
             }
 
@@ -327,35 +327,35 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         #endregion
 
         #region Internal
-        private double GetNewAverageClockOffset()
+        private double _GetNewAverageClockOffset()
         {
             double newAverageOffset = 0f;
-            int maxSamples = ClockOffsetHistory.LengthSafe();
+            int maxSamples = ClockOffsetHistory._LengthSafe();
             int startIndex = ClockOffsetIndex;
             for (int i = CurrentClockOffsetSamples - 1; i >= 0; i--) {
                 newAverageOffset += ClockOffsetHistory[startIndex] / CurrentClockOffsetSamples;
-                startIndex.MoveIndexLeftLooping(maxSamples);
+                startIndex._MoveIndexLeftLooping(maxSamples);
             }
 
             return newAverageOffset;
         }
 
-        private void SaveOffsetSample(double offset)
+        private void _SaveOffsetSample(double offset)
         {
-            int maxSamples = ClockOffsetHistory.LengthSafe();
-            ClockOffsetIndex.MoveIndexRightLooping(maxSamples);
+            int maxSamples = ClockOffsetHistory._LengthSafe();
+            ClockOffsetIndex._MoveIndexRightLooping(maxSamples);
             ClockOffsetHistory[ClockOffsetIndex] = offset;
             CurrentClockOffsetSamples = Mathf.Min(maxSamples, CurrentClockOffsetSamples + 1);
         }
 
-        internal bool RequestNtpSynchronization()
+        internal bool _RequestNtpSynchronization()
         {
             if (!Networking.IsOwner(Networking.LocalPlayer, gameObject)) {
-                Error("Not Owner");
+                _Error("Not Owner");
                 return false;
             }
 
-            MarkNetworkDirty();
+            _MarkNetworkDirty();
             RequestSerialization();
             return true;
         }

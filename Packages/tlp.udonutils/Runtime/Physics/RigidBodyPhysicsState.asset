@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: RigidBodyPhysicsState
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: d3ba85d9d94efd78bb911ea5ba96b785,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 0dc8c7466ac2ce84f9b564e6c34d4554,
     type: 2}
   udonAssembly: 
   assemblyError: 

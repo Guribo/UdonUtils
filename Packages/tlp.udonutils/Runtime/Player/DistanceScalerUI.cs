@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.Serialization;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Player
@@ -15,34 +16,42 @@ namespace TLP.UdonUtils.Runtime.Player
         [PublicAPI]
         public new const int ExecutionOrder = PlayerCameraTrackerUi.ExecutionOrder + 1;
 
-        public VRCPlayerApi player;
-        public bool useLocalPlayerByDefault = true;
-        public float scale = 0.1f;
-        public float minSize = 0.00001f;
-        public float maxSize = 1000f;
+        public VRCPlayerApi Player;
+
+        [FormerlySerializedAs("useLocalPlayerByDefault")]
+        public bool UseLocalPlayerByDefault = true;
+
+        [FormerlySerializedAs("scale")]
+        public float Scale = 0.1f;
+
+        [FormerlySerializedAs("minSize")]
+        public float MinSize = 0.00001f;
+
+        [FormerlySerializedAs("maxSize")]
+        public float MaxSize = 1000f;
 
 
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
-            if (useLocalPlayerByDefault) {
-                player = Networking.LocalPlayer;
+            if (UseLocalPlayerByDefault) {
+                Player = Networking.LocalPlayer;
             }
 
             return true;
         }
 
         public override void PostLateUpdate() {
-            if (!Utilities.IsValid(player)) {
+            if (!Utilities.IsValid(Player)) {
                 return;
             }
 
-            var trackingData = player.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
+            var trackingData = Player.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
             float distance = Vector3.Distance(transform.position, trackingData.position);
 
-            float clampedScale = Mathf.Clamp(scale * distance, minSize, maxSize);
+            float clampedScale = Mathf.Clamp(Scale * distance, MinSize, MaxSize);
 
             transform.localScale = new Vector3(clampedScale, clampedScale, clampedScale);
         }

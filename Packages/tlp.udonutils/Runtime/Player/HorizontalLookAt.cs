@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.Serialization;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Player
@@ -19,16 +20,17 @@ namespace TLP.UdonUtils.Runtime.Player
         [PublicAPI]
         public new const int ExecutionOrder = LateBoneFollower.ExecutionOrder + 1;
 
+        [FormerlySerializedAs("weight")]
         [Tooltip(
                 "e.g. 0.5 makes it blend 50% between initial rotation and target rotation, 1.0 makes it look directly at the player"
         )]
         [Range(0, 1)]
-        public float weight = 1f;
+        public float Weight = 1f;
 
         private Quaternion _initialRotation;
 
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
@@ -37,7 +39,7 @@ namespace TLP.UdonUtils.Runtime.Player
             return true;
         }
 
-        public void Update() {
+        internal void Update() {
             var localPlayer = Networking.LocalPlayer;
             if (!Utilities.IsValid(localPlayer)) {
                 return;
@@ -47,7 +49,7 @@ namespace TLP.UdonUtils.Runtime.Player
             var targetRotation = Quaternion.LookRotation(vectorToTarget, Vector3.up);
 
             // blend from initial rotation to target rotation based on strength
-            float yaw = Quaternion.Slerp(_initialRotation, targetRotation, weight).eulerAngles.y;
+            float yaw = Quaternion.Slerp(_initialRotation, targetRotation, Weight).eulerAngles.y;
 
             // only apply yaw rotation part to this transform
             transform.rotation = Quaternion.Euler(0, yaw, 0);

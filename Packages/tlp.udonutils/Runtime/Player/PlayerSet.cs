@@ -56,57 +56,57 @@ namespace TLP.UdonUtils.Runtime.Player
         #region Public API
         /// <param name="player"></param>
         /// <returns>Success, InvalidArgument if player invalid, AlreadyPresent</returns>
-        public PlayerListResult AddPlayer(VRCPlayerApi player) {
+        public PlayerListResult _AddPlayer(VRCPlayerApi player) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(AddPlayer)} {player.ToStringSafe()}");
+            _DebugLog($"{nameof(_AddPlayer)} {player._ToStringSafe()}");
 #endif
             #endregion
 
             if (!Utilities.IsValid(player)) {
-                Error("Player invalid");
+                _Error("Player invalid");
                 return PlayerListResult.InvalidArgument;
             }
 
             if (_playerSet.ContainsKey(player.playerId)) {
-                Warn($"{player.DisplayNameSafe()} already present");
+                _Warn($"{player._DisplayNameSafe()} already present");
                 return PlayerListResult.AlreadyPresent;
             }
 
-            DiscardInvalidPlayers();
+            _DiscardInvalidPlayers();
             _playerSet.Add(player.playerId, new DataToken());
-            UpdateToNetworkData();
+            _UpdateToNetworkData();
             return PlayerListResult.Success;
         }
 
         /// <param name="player"></param>
         /// <returns>Success, InvalidArgument if player invalid, NotPresent</returns>
-        public PlayerListResult RemovePlayer(VRCPlayerApi player) {
+        public PlayerListResult _RemovePlayer(VRCPlayerApi player) {
 #if TLP_DEBUG
-            DebugLog($"{nameof(RemovePlayer)} {player.ToStringSafe()}");
+            _DebugLog($"{nameof(_RemovePlayer)} {player._ToStringSafe()}");
 #endif
             if (!Utilities.IsValid(player)) {
-                Error("Player invalid");
+                _Error("Player invalid");
                 return PlayerListResult.InvalidArgument;
             }
 
             if (!_playerSet.Remove(player.playerId)) {
-                Warn($"{player.DisplayNameSafe()} was not in the list");
+                _Warn($"{player._DisplayNameSafe()} was not in the list");
                 return PlayerListResult.NotPresent;
             }
 
-            DiscardInvalidPlayers();
-            UpdateToNetworkData();
+            _DiscardInvalidPlayers();
+            _UpdateToNetworkData();
             return PlayerListResult.Success;
         }
 
 
-        public bool Contains(VRCPlayerApi playerApi) {
-            bool result = _playerSet.ContainsKey(playerApi.PlayerIdSafe());
+        public bool _Contains(VRCPlayerApi playerApi) {
+            bool result = _playerSet.ContainsKey(playerApi._PlayerIdSafe());
 
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(Contains)} {playerApi.ToStringSafe()}? {result}");
+            _DebugLog($"{nameof(_Contains)} {playerApi._ToStringSafe()}? {result}");
 #endif
             #endregion
 
@@ -117,9 +117,9 @@ namespace TLP.UdonUtils.Runtime.Player
         /// 
         /// </summary>
         /// <returns>number of valid players in the list after disposing of all invalid ids</returns>
-        public void Clear() {
+        public void _Clear() {
 #if TLP_DEBUG
-            DebugLog(nameof(Clear));
+            _DebugLog(nameof(_Clear));
 #endif
             _playerSet.Clear();
             WorkingValues = new int[0];
@@ -141,7 +141,7 @@ namespace TLP.UdonUtils.Runtime.Player
             if (SyncPaused) {
                 #region TLP_DEBUG
 #if TLP_DEBUG
-                DebugLog($"{nameof(OnPreSerialization)} skipped (sync paused)");
+                _DebugLog($"{nameof(OnPreSerialization)} skipped (sync paused)");
 #endif
                 #endregion
 
@@ -155,35 +155,35 @@ namespace TLP.UdonUtils.Runtime.Player
             if (SyncPaused) {
                 #region TLP_DEBUG
 #if TLP_DEBUG
-                DebugLog($"{nameof(OnDeserialization)} skipped (sync paused)");
+                _DebugLog($"{nameof(OnDeserialization)} skipped (sync paused)");
 #endif
                 #endregion
 
                 return;
             }
 
-            UpdateFromNetworkData();
+            _UpdateFromNetworkData();
             base.OnDeserialization(deserializationResult);
 
             // ensure that any invalid entries or duplicates are removed
-            UpdateToNetworkData();
+            _UpdateToNetworkData();
         }
         #endregion
 
         #region Internal
-        private void UpdateToNetworkData() {
+        private void _UpdateToNetworkData() {
             int playerCount = _playerSet.Count;
-            WorkingValues = WorkingValues.ResizeOrCreate(playerCount);
+            WorkingValues = WorkingValues._ResizeOrCreate(playerCount);
             var players = _playerSet.GetKeys();
             for (int i = 0; i < playerCount; i++) {
                 WorkingValues[i] = players[i].Int;
             }
         }
 
-        internal void DiscardInvalidPlayers() {
+        internal void _DiscardInvalidPlayers() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(DiscardInvalidPlayers));
+            _DebugLog(nameof(_DiscardInvalidPlayers));
 #endif
             #endregion
 
@@ -192,31 +192,31 @@ namespace TLP.UdonUtils.Runtime.Player
 
             for (int i = 0; i < playerCount; ++i) {
                 int playerId = players[i].Int;
-                if (Utilities.IsValid(playerId.IdToVrcPlayer())) {
+                if (Utilities.IsValid(playerId._IdToVrcPlayer())) {
                     continue;
                 }
 
-                Warn($"Removing now invalid player id {playerId} ({TryGetPlayerName(playerId)})");
+                _Warn($"Removing now invalid player id {playerId} ({_TryGetPlayerName(playerId)})");
                 _playerSet.Remove(playerId);
             }
         }
 
-        private void UpdateFromNetworkData() {
+        private void _UpdateFromNetworkData() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(UpdateFromNetworkData));
+            _DebugLog(nameof(_UpdateFromNetworkData));
 #endif
             #endregion
 
             _playerSet.Clear();
             foreach (int playerId in SyncedValues) {
-                if (!playerId.IsValidPlayer(out var unused)) {
-                    Warn($"Removing now invalid player id {playerId} ({TryGetPlayerName(playerId)})");
+                if (!playerId._IsValidPlayer(out var unused)) {
+                    _Warn($"Removing now invalid player id {playerId} ({_TryGetPlayerName(playerId)})");
                     continue;
                 }
 
                 if (_playerSet.ContainsKey(playerId)) {
-                    Warn($"Removing duplicate player id {playerId} ({TryGetPlayerName(playerId)})");
+                    _Warn($"Removing duplicate player id {playerId} ({_TryGetPlayerName(playerId)})");
                     continue;
                 }
 
@@ -224,10 +224,10 @@ namespace TLP.UdonUtils.Runtime.Player
             }
         }
 
-        private string TryGetPlayerName(int playerId) {
+        private string _TryGetPlayerName(int playerId) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(TryGetPlayerName)} for player {playerId}");
+            _DebugLog($"{nameof(_TryGetPlayerName)} for player {playerId}");
 #endif
             #endregion
 

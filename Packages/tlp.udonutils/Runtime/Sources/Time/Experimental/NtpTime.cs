@@ -31,39 +31,39 @@ namespace TLP.UdonUtils.Runtime.Sources.Time.Experimental
         #region Public
         /// <returns>Returns the <see cref="NtpClient"/> time,
         /// returns float.MinValue when initialization failed</returns>
-        public override float Time() {
+        public override float _Time() {
             if (Utilities.IsValid(NtpClient)) {
-                return (float) NtpClient.GetAdjustedLocalTime();
+                return (float)NtpClient._GetAdjustedLocalTime();
             }
 
-            Warn($"{nameof(Time)}: {nameof(NtpClient)} not yet set (player objects not yet loaded)");
+            _Warn($"{nameof(_Time)}: {nameof(NtpClient)} not yet set (player objects not yet loaded)");
             return float.MinValue;
         }
 
         /// <returns><see cref="NtpTime"/> only provides float accuracy,
         /// returns float.MinValue when initialization failed</returns>
-        public override double TimeAsDouble() {
+        public override double _TimeAsDouble() {
             if (Utilities.IsValid(NtpClient)) {
-                return NtpClient.GetAdjustedLocalTime();
+                return NtpClient._GetAdjustedLocalTime();
             }
 
-            Warn($"{nameof(TimeAsDouble)}: {nameof(NtpClient)} not yet set (player objects not yet loaded)");
+            _Warn($"{nameof(_TimeAsDouble)}: {nameof(NtpClient)} not yet set (player objects not yet loaded)");
             return float.MinValue;
         }
         #endregion
 
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
             if (!Utilities.IsValid(NtpServer)) {
-                Error($"{nameof(NtpServer)} not set");
+                _Error($"{nameof(NtpServer)} not set");
                 return false;
             }
 
             if (!Utilities.IsValid(NtpClient)) {
-                Error($"{nameof(NtpClient)} not set");
+                _Error($"{nameof(NtpClient)} not set");
                 return false;
             }
 

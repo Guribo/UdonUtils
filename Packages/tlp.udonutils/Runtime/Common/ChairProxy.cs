@@ -22,52 +22,52 @@ namespace TLP.UdonUtils.Runtime.Common
         protected Chair ActualChair;
 
         [PublicAPI]
-        public virtual bool OnLocalPlayerEntered() {
+        public virtual bool _OnLocalPlayerEntered() {
 #if TLP_DEBUG
-            DebugLog(nameof(OnLocalPlayerEntered));
+            _DebugLog(nameof(_OnLocalPlayerEntered));
 #endif
             if (!Utilities.IsValid(ActualChair)) {
-                Error($"{nameof(OnLocalPlayerEntered)}.{nameof(ActualChair)} not set");
+                _Error($"{nameof(_OnLocalPlayerEntered)}.{nameof(ActualChair)} not set");
                 return false;
             }
 
             var go = gameObject;
-            return OwnershipTransfer.TransferOwnershipFrom(go, go, Networking.LocalPlayer, true);
+            return OwnershipTransfer._TransferOwnershipFrom(go, go, Networking.LocalPlayer, true);
         }
 
         [PublicAPI]
-        public virtual bool OnLocalPlayerExited() {
+        public virtual bool _OnLocalPlayerExited() {
 #if TLP_DEBUG
-            DebugLog(nameof(OnLocalPlayerExited));
+            _DebugLog(nameof(_OnLocalPlayerExited));
 #endif
             if (!Utilities.IsValid(ActualChair)) {
-                Error($"{nameof(OnLocalPlayerExited)}.{nameof(ActualChair)} not set");
+                _Error($"{nameof(_OnLocalPlayerExited)}.{nameof(ActualChair)} not set");
                 return false;
             }
 
             var go = gameObject;
-            return OwnershipTransfer.TransferOwnershipFrom(go, go, Networking.GetOwner(ActualChair.gameObject), true);
+            return OwnershipTransfer._TransferOwnershipFrom(go, go, Networking.GetOwner(ActualChair.gameObject), true);
         }
 
         [PublicAPI]
-        public virtual bool OnRemotePlayerEntered(VRCPlayerApi remotePlayer) {
+        public virtual bool _OnRemotePlayerEntered(VRCPlayerApi remotePlayer) {
 #if TLP_DEBUG
-            DebugLog(nameof(OnRemotePlayerEntered));
+            _DebugLog(nameof(_OnRemotePlayerEntered));
 #endif
             return true;
         }
 
         [PublicAPI]
-        public virtual bool OnRemotePlayerExited(VRCPlayerApi remotePlayer) {
+        public virtual bool _OnRemotePlayerExited(VRCPlayerApi remotePlayer) {
 #if TLP_DEBUG
-            DebugLog(nameof(OnRemotePlayerExited));
+            _DebugLog(nameof(_OnRemotePlayerExited));
 #endif
             return true;
         }
 
         [PublicAPI]
-        public VRCPlayerApi GetSeatedPlayer() {
-            return Utilities.IsValid(ActualChair) ? ActualChair.GetSeatedPlayer() : null;
+        public VRCPlayerApi _GetSeatedPlayer() {
+            return Utilities.IsValid(ActualChair) ? ActualChair._GetSeatedPlayer() : null;
         }
     }
 }

@@ -15,7 +15,7 @@ namespace TLP.UdonUtils.Runtime.Common
         /// Copies all physics state values from another instance.
         /// </summary>
         /// <param name="other">The source physics state to copy from.</param>
-        public virtual bool CopyFrom(Snapshot other) {
+        public virtual bool _CopyFrom(Snapshot other) {
             if (!Utilities.IsValid(other)) {
                 return false;
             }

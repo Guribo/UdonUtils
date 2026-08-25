@@ -1,5 +1,4 @@
 ﻿using JetBrains.Annotations;
-using TLP.UdonUtils.Runtime.DesignPatterns.MVC;
 using TLP.UdonUtils.Runtime.Events;
 using UdonSharp;
 using UnityEngine;

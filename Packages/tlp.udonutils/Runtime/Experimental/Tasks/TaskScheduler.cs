@@ -107,7 +107,7 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             }
 
             double startTime = Time.realtimeSinceStartupAsDouble;
-            float dynamicLimit = DynamicIdleLimit > DynamicLimit && IsPlayerIdle() ? DynamicIdleLimit : DynamicLimit;
+            float dynamicLimit = DynamicIdleLimit > DynamicLimit && _IsPlayerIdle() ? DynamicIdleLimit : DynamicLimit;
 
             // reduced PID controller to just "I"
             float targetDeltaTime = Time.fixedDeltaTime * dynamicLimit;
@@ -122,18 +122,18 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             while (true) {
                 if (PendingTasks.Count < 1) break;
 
-                _taskIndex.MoveIndexRightLooping(PendingTasks.Count);
+                _taskIndex._MoveIndexRightLooping(PendingTasks.Count);
                 var pendingTask = PendingTasks[_taskIndex];
                 if (pendingTask.IsNull) {
-                    RemoveTask(null, _taskIndex);
-                    _taskIndex.MoveIndexLeftLooping(PendingTasks.Count);
+                    _RemoveTask(null, _taskIndex);
+                    _taskIndex._MoveIndexLeftLooping(PendingTasks.Count);
                     continue;
                 }
 
                 var task = (Task)pendingTask.Reference;
                 if (!Utilities.IsValid(task)) {
-                    RemoveTask(null, _taskIndex);
-                    _taskIndex.MoveIndexLeftLooping(PendingTasks.Count);
+                    _RemoveTask(null, _taskIndex);
+                    _taskIndex._MoveIndexLeftLooping(PendingTasks.Count);
                     continue;
                 }
 
@@ -149,7 +149,7 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                     if (remainingTime < task.EstimatedStepDuration) {
                         #region TLP_DEBUG
 #if TLP_DEBUG
-                        DebugLog($"{nameof(PostLateUpdate)}: {nameof(task)}={task.GetScriptPathInScene()} would take too long");
+                        _DebugLog($"{nameof(PostLateUpdate)}: {nameof(task)}={task._GetScriptPathInScene()} would take too long");
 #endif
                         #endregion
                         ++skipCount;
@@ -165,20 +165,20 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                 }
 
                 if (task.State == TaskState.Pending) {
-                    if (!task.PrepareForRun()) {
-                        RemoveTask(task, _taskIndex);
-                        _taskIndex.MoveIndexLeftLooping(PendingTasks.Count);
+                    if (!task._PrepareForRun()) {
+                        _RemoveTask(task, _taskIndex);
+                        _taskIndex._MoveIndexLeftLooping(PendingTasks.Count);
                         continue;
                     }
                 }
 
-                var taskState = task.Run();
+                var taskState = task._Run();
                 if (task.Result != TaskResult.Blocked) {
                     skipCount = 0;
                 } else {
                     #region TLP_DEBUG
 #if TLP_DEBUG
-                    DebugLog($"{nameof(PostLateUpdate)}: {nameof(task)}={task.GetScriptPathInScene()} is blocked");
+                    _DebugLog($"{nameof(PostLateUpdate)}: {nameof(task)}={task._GetScriptPathInScene()} is blocked");
 #endif
 #endregion
                     ++skipCount;
@@ -196,18 +196,18 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                     if (!ReferenceEquals(task, _taskWithMostSteps)
                         && (!Utilities.IsValid(_taskWithMostSteps)
                             || _taskWithMostSteps.State == TaskState.Finished
-                            || _taskWithMostSteps.GetNeededSteps() < task.GetNeededSteps())) {
+                            || _taskWithMostSteps._GetNeededSteps() < task._GetNeededSteps())) {
                         _taskWithMostSteps = task;
                     }
                 } else {
-                    RemoveTask(task, _taskIndex);
-                    _taskIndex.MoveIndexLeftLooping(PendingTasks.Count);
+                    _RemoveTask(task, _taskIndex);
+                    _taskIndex._MoveIndexLeftLooping(PendingTasks.Count);
                 }
 
                 if (Utilities.IsValid(task)) {
                     // 1. check in case the task was destroyed in RemoveTask after notifying the instigator
                     // 2. update average time to prevent overshoot in the future
-                    task.UpdateEstimatedStepDuration((float)(Time.realtimeSinceStartupAsDouble - iterationStartTime));
+                    task._UpdateEstimatedStepDuration((float)(Time.realtimeSinceStartupAsDouble - iterationStartTime));
                 }
             }
 
@@ -217,7 +217,7 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             _averageIterations = Mathf.Lerp(_averageIterations, iteration, 0.1f);
 #if TLP_DEBUG
             if (Time.frameCount % 100 == 0) {
-                Info(
+                _Info(
                         $"{nameof(PostLateUpdate)}: Completed {iteration} iterations in {1000 * (newTimeCompleted - startTime):F6}ms, skipped task steps={totalSkips}, avg. iterations={_averageIterations:F1}, real dt={1000 * _realDeltaTime:F3}ms");
             }
 #endif
@@ -225,7 +225,7 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         #endregion
 
         #region Internal
-        private bool IsPlayerIdle() {
+        private bool _IsPlayerIdle() {
             var player = Networking.LocalPlayer;
             if (!Utilities.IsValid(player)) return false;
             var head = player.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
@@ -281,28 +281,28 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             return true;
         }
 
-        private void RemoveTask(Task task, int index) {
+        private void _RemoveTask(Task task, int index) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(RemoveTask)} index {index}");
+            _DebugLog($"{nameof(_RemoveTask)} index {index}");
 #endif
             #endregion
 
             if (index < 0 || index >= PendingTasks.Count) {
-                Error($"{nameof(RemoveTask)}: {nameof(index)} out of range");
+                _Error($"{nameof(_RemoveTask)}: {nameof(index)} out of range");
                 return;
             }
 
             PendingTasks.RemoveAt(index);
             if (!Utilities.IsValid(task)) {
-                RemoveAllInvalidTasks();
+                _RemoveAllInvalidTasks();
             } else {
                 bool hasInstigatorEntry = UniqueTasks.TryGetValue(task, TokenType.Reference, out var instigatorToken);
 
                 // remove first before notifying instigator, in case the task will be added again
                 if (!UniqueTasks.Remove(task)) {
-                    Error(
-                            $"{nameof(RemoveTask)}: Failed to remove {task.GetScriptPathInScene()} from {nameof(UniqueTasks)}");
+                    _Error(
+                            $"{nameof(_RemoveTask)}: Failed to remove {task._GetScriptPathInScene()} from {nameof(UniqueTasks)}");
                 }
 
                 bool wasActive = Utilities.IsValid(task.ActiveScheduler);
@@ -316,12 +316,12 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                         if (Utilities.IsValid(instigator)) {
                             instigator.EventInstigator = this;
                             instigator.SetProgramVariable(FinishedTaskVariableName, task);
-                            instigator.OnEvent(FinishedTaskCallbackName);
+                            instigator._OnEvent(FinishedTaskCallbackName);
                             instigator.EventInstigator = null;
                             instigator.SetProgramVariable(FinishedTaskVariableName, null);
                         } else {
-                            Error(
-                                    $"{nameof(RemoveTask)}: {nameof(instigator)} invalid, {task.GetScriptPathInScene()} has no owner");
+                            _Error(
+                                    $"{nameof(_RemoveTask)}: {nameof(instigator)} invalid, {task._GetScriptPathInScene()} has no owner");
                         }
                     }
                 }
@@ -329,12 +329,12 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                 if (task.State != TaskState.Finished) {
                     #region TLP_DEBUG
 #if TLP_DEBUG
-                    Warn(
-                            $"{nameof(RemoveTask)}: {nameof(task)}={task.GetScriptPathInScene()} seems to have been re-scheduled by '{instigator.GetScriptPathInScene()}' before cleanup could occur");
+                    _Warn(
+                            $"{nameof(_RemoveTask)}: {nameof(task)}={task._GetScriptPathInScene()} seems to have been re-scheduled by '{instigator._GetScriptPathInScene()}' before cleanup could occur");
 #endif
                     #endregion
-                } else if (!task.DeInitTask()) {
-                    Error($"{nameof(RemoveTask)}: Failed to de-init {task.GetScriptPathInScene()} after completion");
+                } else if (!task._DeInitTask()) {
+                    _Error($"{nameof(_RemoveTask)}: Failed to de-init {task._GetScriptPathInScene()} after completion");
                 }
             }
 
@@ -343,10 +343,10 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             }
         }
 
-        private void RemoveAllInvalidTasks() {
+        private void _RemoveAllInvalidTasks() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(RemoveAllInvalidTasks));
+            _DebugLog(nameof(_RemoveAllInvalidTasks));
 #endif
             #endregion
 
@@ -355,8 +355,8 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                 var dataToken = keys[i];
                 if (dataToken.IsNull || !Utilities.IsValid((Task)dataToken.Reference)) {
                     if (!UniqueTasks.Remove(dataToken)) {
-                        Error(
-                                $"{nameof(RemoveAllInvalidTasks)}: Failed to remove {dataToken} from {nameof(UniqueTasks)}");
+                        _Error(
+                                $"{nameof(_RemoveAllInvalidTasks)}: Failed to remove {dataToken} from {nameof(UniqueTasks)}");
                     }
                 }
             }
@@ -364,40 +364,40 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         #endregion
 
         #region Public API
-        public bool AddTask(TlpBaseBehaviour instigator, Task task) {
+        public bool _AddTask(TlpBaseBehaviour instigator, Task task) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(
-                    $"{nameof(AddTask)}: instigator={instigator.GetScriptPathInScene()}, task={task.GetScriptPathInScene()}");
+            _DebugLog(
+                    $"{nameof(_AddTask)}: instigator={instigator._GetScriptPathInScene()}, task={task._GetScriptPathInScene()}");
 #endif
             #endregion
 
             if (!Utilities.IsValid(instigator)) {
-                Error($"{nameof(instigator)} invalid");
+                _Error($"{nameof(instigator)} invalid");
                 return false;
             }
 
             if (!Utilities.IsValid(task)) {
-                Error($"{nameof(task)} invalid");
+                _Error($"{nameof(task)} invalid");
                 return false;
             }
 
             if (Utilities.IsValid(task.ActiveScheduler)) {
-                Error(
-                        $"{task.GetScriptPathInScene()} already is scheduled in {task.ActiveScheduler.GetScriptPathInScene()}");
+                _Error(
+                        $"{task._GetScriptPathInScene()} already is scheduled in {task.ActiveScheduler._GetScriptPathInScene()}");
                 return false;
             }
 
             if (UniqueTasks.ContainsKey(task)) {
-                Error($"{task.GetScriptPathInScene()} is already present");
+                _Error($"{task._GetScriptPathInScene()} is already present");
                 return false;
             }
 
             task.ActiveScheduler = this;
             task.TaskInstigator = instigator;
 
-            if (!task.PrepareForRun()) {
-                Error($"{nameof(AddTask)}: failed to prepare for run");
+            if (!task._PrepareForRun()) {
+                _Error($"{nameof(_AddTask)}: failed to prepare for run");
 
                 task.ActiveScheduler = null;
                 task.TaskInstigator = null;
@@ -413,33 +413,33 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             return true;
         }
 
-        public static bool AddTaskToDefaultScheduler(TlpBaseBehaviour instigator, Task task) {
+        public static bool _AddTaskToDefaultScheduler(TlpBaseBehaviour instigator, Task task) {
             if (!Utilities.IsValid(task)) {
                 TlpLogger.StaticError($"{nameof(task)} invalid", null);
                 return false;
             }
 
             if (!Utilities.IsValid(task.DefaultScheduler)) {
-                task.DefaultScheduler = TlpSingleton.GetInstance<TaskScheduler>(GameObjectName);
+                task.DefaultScheduler = TlpSingleton._GetInstance<TaskScheduler>(GameObjectName);
                 if (!Utilities.IsValid(task.DefaultScheduler)) {
                     TlpLogger.StaticError($"{GameObjectName} not found in the scene", null);
                     return false;
                 }
             }
 
-            return task.DefaultScheduler.AddTask(instigator, task);
+            return task.DefaultScheduler._AddTask(instigator, task);
         }
 
-        public void CancelTask(Task task) {
+        public void _CancelTask(Task task) {
             if (Utilities.IsValid(task)) {
-                RemoveTask(task, PendingTasks.IndexOf(task));
+                _RemoveTask(task, PendingTasks.IndexOf(task));
             }
         }
 
-        public float GetProgress(out Task longestTask) {
+        public float _GetProgress(out Task longestTask) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(GetProgress)}: {nameof(_taskWithMostSteps)}={_taskWithMostSteps.GetScriptPathInScene()}");
+            _DebugLog($"{nameof(_GetProgress)}: {nameof(_taskWithMostSteps)}={_taskWithMostSteps._GetScriptPathInScene()}");
 #endif
             #endregion
 

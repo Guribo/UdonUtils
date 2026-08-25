@@ -17,25 +17,25 @@ namespace TLP.UdonUtils.Runtime.StateMachine.Example
 
         public GameObject ThingToToggle;
 
-        public override void OnStateEntered() {
+        public override void _OnStateEntered() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnStateEntered));
+            _DebugLog(nameof(_OnStateEntered));
 #endif
             #endregion
 
-            Info($"Hello from {this.GetScriptPathInScene()}");
+            _Info($"Hello from {this._GetScriptPathInScene()}");
             ThingToToggle.SetActive(true);
         }
 
-        public override void OnStateExited() {
+        public override void _OnStateExited() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnStateExited));
+            _DebugLog(nameof(_OnStateExited));
 #endif
             #endregion
 
-            Info($"Goodbye from {this.GetScriptPathInScene()}");
+            _Info($"Goodbye from {this._GetScriptPathInScene()}");
             ThingToToggle.SetActive(false);
         }
     }

@@ -19,15 +19,15 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         private int _steps;
 
         private void OnEnable() {
-            TaskScheduler.AddTaskToDefaultScheduler(this, this);
+            TaskScheduler._AddTaskToDefaultScheduler(this, this);
         }
 
         private const string ExtraWork = "Extra Work";
 
-        protected override TaskResult DoTask(float stepDeltaTime) {
+        protected override TaskResult _DoTask(float stepDeltaTime) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-        DebugLog($"{nameof(DoTask)}: {nameof(stepDeltaTime)}={stepDeltaTime}");
+        _DebugLog($"{nameof(_DoTask)}: {nameof(stepDeltaTime)}={stepDeltaTime}");
 #endif
 #endregion
             if (_steps >= 100) return TaskResult.Succeeded;
@@ -39,33 +39,33 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             //     Info(ExtraWork);
             // }
 
-            Info($"Step {_steps++}");
-            SetProgress(_steps / 100f);
+            _Info($"Step {_steps++}");
+            _SetProgress(_steps / 100f);
             return TaskResult.Unknown;
         }
 
-        public override int GetNeededSteps() {
+        public override int _GetNeededSteps() {
             return 100;
         }
 
-        protected override bool InitTask() {
+        protected override bool _InitTask() {
             _steps = 0;
             return true;
         }
 
-        public override void OnEvent(string eventName) {
+        public override void _OnEvent(string eventName) {
             switch (eventName) {
-                case nameof(OnTaskFinished):
-                    OnTaskFinished();
+                case nameof(_OnTaskFinished):
+                    _OnTaskFinished();
                     break;
                 default:
-                    base.OnEvent(eventName);
+                    base._OnEvent(eventName);
                     break;
             }
         }
 
-        private void OnTaskFinished() {
-            TaskScheduler.AddTaskToDefaultScheduler(this, this);
+        private void _OnTaskFinished() {
+            TaskScheduler._AddTaskToDefaultScheduler(this, this);
         }
     }
 }

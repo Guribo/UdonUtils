@@ -13,7 +13,7 @@ namespace TLP.UdonUtils.Editor.Physics
     [CustomEditor(typeof(RigidbodyRecorder))]
     public class RigidbodyRecorderEditor : TlpBehaviourEditor
     {
-        protected override string GetDescription()
+        protected override string _GetDescription()
         {
             return "Records the state of a rigidbody in a history over time.";
         }
@@ -40,24 +40,26 @@ namespace TLP.UdonUtils.Runtime.Physics
         public RigidbodyHistory History;
         #endregion
 
-        protected override bool SetupAndValidate()
+        protected override bool _SetupAndValidate()
         {
-            if (!base.SetupAndValidate()) return false;
-
-            if (!IsSet(PhysicsState, nameof(PhysicsState))) {
-                return false;
-            }
-            
-            if (!IsSet(History, nameof(History))) {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
-            if (!IsSet(VelocityProvider, nameof(VelocityProvider))) {
+            if (!_IsSet(PhysicsState, nameof(PhysicsState))) {
                 return false;
             }
 
-            if (!History.Initialize(1024)) {
-                Error("Failed to initialize history");
+            if (!_IsSet(History, nameof(History))) {
+                return false;
+            }
+
+            if (!_IsSet(VelocityProvider, nameof(VelocityProvider))) {
+                return false;
+            }
+
+            if (!History._Initialize(1024)) {
+                _Error("Failed to initialize history");
                 return false;
             }
 
@@ -68,7 +70,7 @@ namespace TLP.UdonUtils.Runtime.Physics
         private void FixedUpdate()
         {
             if (!HasStartedOk) return;
-            PhysicsState.Time = VelocityProvider.GetLatestSnapShot(
+            PhysicsState.Time = VelocityProvider._GetLatestSnapShot(
                     out PhysicsState.Position,
                     out PhysicsState.LinearVelocity,
                     out PhysicsState.LinearAcceleration,
@@ -78,8 +80,8 @@ namespace TLP.UdonUtils.Runtime.Physics
                     out PhysicsState.RelativeTo,
                     out PhysicsState.CircleAngularVelocityDegrees);
 
-            if (!History.AddFromSnapshot(PhysicsState)) {
-                Error("Failed to add velocity from provider to history");
+            if (!History._AddFromSnapshot(PhysicsState)) {
+                _Error("Failed to add velocity from provider to history");
             }
         }
         #endregion

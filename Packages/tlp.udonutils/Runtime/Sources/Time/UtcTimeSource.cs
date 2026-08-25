@@ -25,16 +25,16 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
 
         /// <summary>
         /// Do not use as float is not accurate enough!
-        /// <remarks>Use <see cref="TimeAsDouble"/> instead or enable <see cref="InReferenceToLevelLoad"/>.</remarks>
+        /// <remarks>Use <see cref="_TimeAsDouble"/> instead or enable <see cref="InReferenceToLevelLoad"/>.</remarks>
         /// </summary>
         /// <returns>returns 0.0f</returns>
-        public override float Time() {
-            Error($"{nameof(UtcTimeSource)} does not support float, use TimeAsDouble() instead");
+        public override float _Time() {
+            _Error($"{nameof(UtcTimeSource)} does not support float, use TimeAsDouble() instead");
             return 0f;
         }
 
         /// <returns>Utc time in reference to 1970/01/01 00:00.000000 </returns>
-        public override double TimeAsDouble() {
+        public override double _TimeAsDouble() {
             if (!_referenceTimeSet) {
                 _referenceTimeUtc = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                 _referenceTimeSet = true;

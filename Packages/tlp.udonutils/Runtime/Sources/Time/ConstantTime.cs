@@ -40,32 +40,32 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         /// Returns the constant <see cref="Seconds"/>.
         /// </summary>
         /// <returns>Time in seconds</returns>
-        public override float Time() {
+        public override float _Time() {
             return (float)Seconds;
         }
 
         /// <returns>the constant <see cref="Seconds"/></returns>
-        public override double TimeAsDouble() {
+        public override double _TimeAsDouble() {
             return Seconds;
         }
 
         /// <returns>the constant <see cref="FixedDeltaTimeSeconds"/></returns>
-        public override float FixedDeltaTime() {
+        public override float _FixedDeltaTime() {
             return FixedDeltaTimeSeconds;
         }
 
         /// <returns>the constant <see cref="SmoothDeltaTimeSeconds"/></returns>
-        public override float SmoothDeltaTime() {
+        public override float _SmoothDeltaTime() {
             return SmoothDeltaTimeSeconds;
         }
 
         /// <returns>the constant <see cref="DeltaTimeSeconds"/></returns>
-        public override float DeltaTime() {
+        public override float _DeltaTime() {
             return DeltaTimeSeconds;
         }
 
-        /// <returns>the constant <see cref="UnscaledDeltaTime"/></returns>
-        public override float UnscaledDeltaTime() {
+        /// <returns>the constant <see cref="_UnscaledDeltaTime"/></returns>
+        public override float _UnscaledDeltaTime() {
             return UnscaledDeltaTimeSeconds;
         }
         #endregion

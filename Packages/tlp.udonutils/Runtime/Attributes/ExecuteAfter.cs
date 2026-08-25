@@ -39,7 +39,7 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
             bool[] includingSubClasses = null,
             bool executeAfterBaseType = true
     ) : base(
-            DetermineOrder(
+            _DetermineOrder(
                     ownType,
                     types,
                     includingSubClasses,
@@ -49,14 +49,14 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
         // nothing
     }
 
-    private static int DetermineOrder(
+    private static int _DetermineOrder(
             Type ownType,
             Type[] types,
             bool[] includingSubClasses,
             bool executeAfterBaseType
     ) {
         try {
-            CheckArguments(ownType, types, includingSubClasses);
+            _CheckArguments(ownType, types, includingSubClasses);
 
             // return known execution order if own type is already processed
             if (s_HandledTypes.TryGetValue(ownType, out var dependency)) {
@@ -67,7 +67,7 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
             dependency = new Dependency();
             s_HandledTypes.Add(ownType, dependency);
 
-            var typesToDependOn = FindAllDirectAndIndirectDependencies(
+            var typesToDependOn = _FindAllDirectAndIndirectDependencies(
                     ownType,
                     types,
                     includingSubClasses,
@@ -76,7 +76,7 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
 
             int max = 0;
             foreach (var type in typesToDependOn) {
-                max = DetermineMaxOrderFromType(ownType, type, dependency, max);
+                max = _DetermineMaxOrderFromType(ownType, type, dependency, max);
             }
 
             if (max == int.MaxValue) {
@@ -102,7 +102,7 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
         }
     }
 
-    private static int DetermineMaxOrderFromType(Type ownType, Type type, Dependency dependency, int max) {
+    private static int _DetermineMaxOrderFromType(Type ownType, Type type, Dependency dependency, int max) {
         if (ownType == type) {
             // own type is not relevant for execution order determination
             return max;
@@ -115,8 +115,8 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
 
         // process already handled types
         if (s_HandledTypes.TryGetValue(type, out var othersDependency)) {
-            CheckForCyclicDependency(ownType, othersDependency, type);
-            max = UpdateMax(othersDependency, max);
+            _CheckForCyclicDependency(ownType, othersDependency, type);
+            max = _UpdateMax(othersDependency, max);
 
             return max;
         }
@@ -125,17 +125,17 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
         var customAttributes = type.GetCustomAttributes<DefaultExecutionOrder>(true);
         foreach (var defaultExecutionOrder in customAttributes) {
             if (s_HandledTypes.TryGetValue(type, out othersDependency)) {
-                CheckForCyclicDependency(ownType, othersDependency, type);
-                max = UpdateMax(othersDependency, max);
+                _CheckForCyclicDependency(ownType, othersDependency, type);
+                max = _UpdateMax(othersDependency, max);
             } else {
-                max = UpdateMax(defaultExecutionOrder, max);
+                max = _UpdateMax(defaultExecutionOrder, max);
             }
         }
 
         return max;
     }
 
-    private static int UpdateMax(DefaultExecutionOrder defaultExecutionOrder, int max) {
+    private static int _UpdateMax(DefaultExecutionOrder defaultExecutionOrder, int max) {
         if (defaultExecutionOrder.order > max) {
             max = defaultExecutionOrder.order;
         }
@@ -143,7 +143,7 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
         return max;
     }
 
-    private static int UpdateMax(Dependency othersDependency, int max) {
+    private static int _UpdateMax(Dependency othersDependency, int max) {
         if (othersDependency.Order > max) {
             max = othersDependency.Order;
         }
@@ -151,7 +151,7 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
         return max;
     }
 
-    private static void CheckForCyclicDependency(Type ownType, Dependency othersDependency, Type type) {
+    private static void _CheckForCyclicDependency(Type ownType, Dependency othersDependency, Type type) {
         if (othersDependency.ExecuteAfter.Contains(ownType)) {
             throw new ArgumentException(
                     $"In {nameof(ExecuteAfterAttribute)}: Cyclic dependency between {ownType.Name} and {type.Name}"
@@ -159,7 +159,7 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
         }
     }
 
-    private static HashSet<Type> FindAllDirectAndIndirectDependencies(
+    private static HashSet<Type> _FindAllDirectAndIndirectDependencies(
             Type ownType,
             Type[] types,
             bool[] includingSubClasses,
@@ -168,21 +168,21 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
         var typesToDependOn = new HashSet<Type>();
         var pending = new HashSet<Type>();
         for (int i = 0; i < types.Length; i++) {
-            AddSpecifiedDependencies(types, includingSubClasses, i, pending);
+            _AddSpecifiedDependencies(types, includingSubClasses, i, pending);
         }
 
         if (executeAfterBaseType) {
-            AddBaseTypeAsDependency(ownType, pending);
+            _AddBaseTypeAsDependency(ownType, pending);
         }
 
         while (pending.Count > 0) {
-            DetermineAllDirectAndIndirectDependencies(pending, typesToDependOn);
+            _DetermineAllDirectAndIndirectDependencies(pending, typesToDependOn);
         }
 
         return typesToDependOn;
     }
 
-    private static void DetermineAllDirectAndIndirectDependencies(
+    private static void _DetermineAllDirectAndIndirectDependencies(
             HashSet<Type> pending,
             HashSet<Type> typesToDependOn
     ) {
@@ -208,7 +208,7 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
         pending.Remove(first);
     }
 
-    private static void AddSpecifiedDependencies(
+    private static void _AddSpecifiedDependencies(
             Type[] types,
             bool[] includingSubClasses,
             int i,
@@ -226,10 +226,10 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
             return;
         }
 
-        AddAllRelevantSubClassesOfType(type, pending);
+        _AddAllRelevantSubClassesOfType(type, pending);
     }
 
-    private static void AddAllRelevantSubClassesOfType(Type type, HashSet<Type> pending) {
+    private static void _AddAllRelevantSubClassesOfType(Type type, HashSet<Type> pending) {
         var subTypes = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(assembly => assembly.GetTypes())
                 .Where(foundType => foundType.IsSubclassOf(type));
@@ -243,7 +243,7 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
         }
     }
 
-    private static void AddBaseTypeAsDependency(Type ownType, HashSet<Type> pending) {
+    private static void _AddBaseTypeAsDependency(Type ownType, HashSet<Type> pending) {
         var type = ownType.BaseType;
         if (type == null) {
             return;
@@ -260,13 +260,13 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
         pending.Add(type);
     }
 
-    private static void CheckArguments(Type ownType, Type[] types, bool[] includingSubClasses) {
-        CheckOwnTypeValidity(ownType);
-        CheckDependencyDimensionValidity(ownType, types, includingSubClasses);
-        CheckDependencyContentValidity(ownType, types);
+    private static void _CheckArguments(Type ownType, Type[] types, bool[] includingSubClasses) {
+        _CheckOwnTypeValidity(ownType);
+        _CheckDependencyDimensionValidity(ownType, types, includingSubClasses);
+        _CheckDependencyContentValidity(ownType, types);
     }
 
-    private static void CheckDependencyContentValidity(Type ownType, Type[] types) {
+    private static void _CheckDependencyContentValidity(Type ownType, Type[] types) {
         foreach (var type in types) {
             if (type == null) {
                 throw new ArgumentNullException(
@@ -294,7 +294,7 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
         }
     }
 
-    private static void CheckDependencyDimensionValidity(Type ownType, Type[] types, bool[] includingSubClasses) {
+    private static void _CheckDependencyDimensionValidity(Type ownType, Type[] types, bool[] includingSubClasses) {
         if (types == null) {
             throw new ArgumentNullException($"Found on {ownType}: {nameof(types)} is null");
         }
@@ -312,7 +312,7 @@ public class ExecuteAfterAttribute : DefaultExecutionOrder
         );
     }
 
-    private static void CheckOwnTypeValidity(Type ownType) {
+    private static void _CheckOwnTypeValidity(Type ownType) {
         if (ownType == null || !ownType.IsSubclassOf(typeof(MonoBehaviour))) {
             throw new ArgumentException($"{nameof(ownType)} must inherit from {nameof(MonoBehaviour)}");
         }

@@ -79,28 +79,28 @@ namespace TLP.UdonUtils.Runtime.Player
         protected virtual void OnEnable() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnEnable));
+            _DebugLog(nameof(OnEnable));
 #endif
             #endregion
 
-            Initialize();
+            _Initialize();
         }
 
 
         protected virtual void OnDisable() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnDisable));
+            _DebugLog(nameof(OnDisable));
 #endif
             #endregion
 
             if (!Utilities.IsValid(BlackListedPlayers)) {
-                Warn($"{nameof(SyncedEventStringArray)} no longer valid during cleanup");
+                _Warn($"{nameof(SyncedEventStringArray)} no longer valid during cleanup");
                 return;
             }
 
-            if (!BlackListedPlayers.RemoveListener(this, true)) {
-                Warn(
+            if (!BlackListedPlayers._RemoveListener(this, true)) {
+                _Warn(
                         $"{nameof(SyncedEventStringArray)} was not being listened to, " +
                         $"did you remove the {nameof(PlayerBlackList)} already manually?"
                 );
@@ -110,10 +110,10 @@ namespace TLP.UdonUtils.Runtime.Player
 
         #region Public API
         [PublicAPI]
-        public bool IsBlackListed(string playerName) {
+        public bool _IsBlackListed(string playerName) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(IsBlackListed)} '{playerName}'");
+            _DebugLog($"{nameof(_IsBlackListed)} '{playerName}'");
 #endif
             #endregion
 
@@ -126,10 +126,10 @@ namespace TLP.UdonUtils.Runtime.Player
         }
 
         [PublicAPI]
-        public bool IsWhiteListed(string playerName) {
+        public bool _IsWhiteListed(string playerName) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(IsWhiteListed)} '{playerName}'");
+            _DebugLog($"{nameof(_IsWhiteListed)} '{playerName}'");
 #endif
             #endregion
 
@@ -147,48 +147,47 @@ namespace TLP.UdonUtils.Runtime.Player
         /// <param name="playerName"></param>
         /// <returns>true on success, false on sync errors or invalid name</returns>
         [PublicAPI]
-        public bool AddToBlackList(string playerName) {
+        public bool _AddToBlackList(string playerName) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(AddToBlackList)} '{playerName}'");
+            _DebugLog($"{nameof(_AddToBlackList)} '{playerName}'");
 #endif
             #endregion
 
             if (string.IsNullOrWhiteSpace(playerName)) {
-                Error($"Empty {nameof(playerName)}");
+                _Error($"Empty {nameof(playerName)}");
                 return false;
             }
 
-            if (DisallowModifyingWhenBlackListed
-                && IsBlackListed(Networking.LocalPlayer.DisplayNameSafe())) {
-                Warn($"You are blacklisted and thus not allowed to blacklist player '{playerName}'");
+            if (DisallowModifyingWhenBlackListed && _IsBlackListed(Networking.LocalPlayer._DisplayNameSafe())) {
+                _Warn($"You are blacklisted and thus not allowed to blacklist player '{playerName}'");
                 return false;
             }
 
             if (_dynamicallyWhiteListedEntries.ContainsKey(playerName)) {
                 _dynamicallyWhiteListedEntries.Remove(playerName);
-                if (!UpdateSyncedPlayerList(_dynamicallyWhiteListedEntries.GetKeys(), WhiteListedPlayers)) {
-                    Error($"Failed to remove blacklisted player '{playerName}' from whitelist for everyone");
+                if (!_UpdateSyncedPlayerList(_dynamicallyWhiteListedEntries.GetKeys(), WhiteListedPlayers)) {
+                    _Error($"Failed to remove blacklisted player '{playerName}' from whitelist for everyone");
                     return false;
                 }
             }
 
             if (_dynamicallyBlackListedEntries.ContainsKey(playerName)) {
                 // already blacklisted
-                if (UpdateSyncedPlayerList(_dynamicallyBlackListedEntries.GetKeys(), BlackListedPlayers)) {
+                if (_UpdateSyncedPlayerList(_dynamicallyBlackListedEntries.GetKeys(), BlackListedPlayers)) {
                     return true;
                 }
 
-                Error($"Failed to add player '{playerName}' to blacklist for everyone");
+                _Error($"Failed to add player '{playerName}' to blacklist for everyone");
                 return false;
             }
 
             _dynamicallyBlackListedEntries[playerName] = true;
-            if (UpdateSyncedPlayerList(_dynamicallyBlackListedEntries.GetKeys(), BlackListedPlayers)) {
+            if (_UpdateSyncedPlayerList(_dynamicallyBlackListedEntries.GetKeys(), BlackListedPlayers)) {
                 return true;
             }
 
-            Error($"Failed to add player '{playerName}' to blacklist for everyone");
+            _Error($"Failed to add player '{playerName}' to blacklist for everyone");
             return false;
         }
 
@@ -199,47 +198,47 @@ namespace TLP.UdonUtils.Runtime.Player
         /// <param name="playerName"></param>
         /// <returns>true on success, false on sync errors or invalid name</returns>
         [PublicAPI]
-        public bool AddToWhiteList(string playerName) {
+        public bool _AddToWhiteList(string playerName) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(AddToWhiteList)} '{playerName}'");
+            _DebugLog($"{nameof(_AddToWhiteList)} '{playerName}'");
 #endif
             #endregion
 
             if (string.IsNullOrWhiteSpace(playerName)) {
-                Error($"Empty {nameof(playerName)}");
+                _Error($"Empty {nameof(playerName)}");
                 return false;
             }
 
-            if (DisallowModifyingWhenBlackListed && IsBlackListed(Networking.LocalPlayer.DisplayNameSafe())) {
-                Warn($"You are blacklisted and thus not allowed to whitelist player '{playerName}'");
+            if (DisallowModifyingWhenBlackListed && _IsBlackListed(Networking.LocalPlayer._DisplayNameSafe())) {
+                _Warn($"You are blacklisted and thus not allowed to whitelist player '{playerName}'");
                 return false;
             }
 
             if (_dynamicallyBlackListedEntries.ContainsKey(playerName)) {
                 _dynamicallyBlackListedEntries.Remove(playerName);
-                if (!UpdateSyncedPlayerList(_dynamicallyBlackListedEntries.GetKeys(), BlackListedPlayers)) {
-                    Error($"Failed to remove blacklisted player '{playerName}' from whitelist for everyone");
+                if (!_UpdateSyncedPlayerList(_dynamicallyBlackListedEntries.GetKeys(), BlackListedPlayers)) {
+                    _Error($"Failed to remove blacklisted player '{playerName}' from whitelist for everyone");
                     return false;
                 }
             }
 
             if (_dynamicallyWhiteListedEntries.ContainsKey(playerName)) {
                 // already whitelisted
-                if (UpdateSyncedPlayerList(_dynamicallyWhiteListedEntries.GetKeys(), WhiteListedPlayers)) {
+                if (_UpdateSyncedPlayerList(_dynamicallyWhiteListedEntries.GetKeys(), WhiteListedPlayers)) {
                     return true;
                 }
 
-                Error($"Failed to add player '{playerName}' to whitelist for everyone");
+                _Error($"Failed to add player '{playerName}' to whitelist for everyone");
                 return false;
             }
 
             _dynamicallyWhiteListedEntries[playerName] = true;
-            if (UpdateSyncedPlayerList(_dynamicallyWhiteListedEntries.GetKeys(), WhiteListedPlayers)) {
+            if (_UpdateSyncedPlayerList(_dynamicallyWhiteListedEntries.GetKeys(), WhiteListedPlayers)) {
                 return true;
             }
 
-            Error($"Failed to add player '{playerName}' to whitelist for everyone");
+            _Error($"Failed to add player '{playerName}' to whitelist for everyone");
             return false;
         }
 
@@ -251,35 +250,35 @@ namespace TLP.UdonUtils.Runtime.Player
         /// <returns>true on success (regardless of if name was part of dynamic lists or not),
         /// false on sync errors or invalid name</returns>
         [PublicAPI]
-        public bool ResetToDefault(string playerName) {
+        public bool _ResetToDefault(string playerName) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(ResetToDefault)} '{playerName}'");
+            _DebugLog($"{nameof(_ResetToDefault)} '{playerName}'");
 #endif
             #endregion
 
             if (string.IsNullOrWhiteSpace(playerName)) {
-                Error($"Empty {nameof(playerName)}");
+                _Error($"Empty {nameof(playerName)}");
                 return false;
             }
 
-            if (DisallowModifyingWhenBlackListed && IsBlackListed(Networking.LocalPlayer.DisplayNameSafe())) {
-                Warn($"You are blacklisted and thus not allowed to whitelist player '{playerName}'");
+            if (DisallowModifyingWhenBlackListed && _IsBlackListed(Networking.LocalPlayer._DisplayNameSafe())) {
+                _Warn($"You are blacklisted and thus not allowed to whitelist player '{playerName}'");
                 return false;
             }
 
             if (_dynamicallyBlackListedEntries.ContainsKey(playerName)) {
                 _dynamicallyBlackListedEntries.Remove(playerName);
-                if (!UpdateSyncedPlayerList(_dynamicallyBlackListedEntries.GetKeys(), BlackListedPlayers)) {
-                    Error($"Failed to sync blacklisted player '{playerName}' with other players");
+                if (!_UpdateSyncedPlayerList(_dynamicallyBlackListedEntries.GetKeys(), BlackListedPlayers)) {
+                    _Error($"Failed to sync blacklisted player '{playerName}' with other players");
                     return false;
                 }
             }
 
             if (_dynamicallyWhiteListedEntries.ContainsKey(playerName)) {
                 _dynamicallyWhiteListedEntries.Remove(playerName);
-                if (!UpdateSyncedPlayerList(_dynamicallyWhiteListedEntries.GetKeys(), BlackListedPlayers)) {
-                    Error($"Failed to sync blacklisted player '{playerName}' with other players");
+                if (!_UpdateSyncedPlayerList(_dynamicallyWhiteListedEntries.GetKeys(), BlackListedPlayers)) {
+                    _Error($"Failed to sync blacklisted player '{playerName}' with other players");
                     return false;
                 }
             }
@@ -288,41 +287,41 @@ namespace TLP.UdonUtils.Runtime.Player
         }
         #endregion
 
-        public override void OnEvent(string eventName) {
+        public override void _OnEvent(string eventName) {
             switch (eventName) {
-                case nameof(OnSharedBlacklistChanged):
+                case nameof(_OnSharedBlacklistChanged):
                 {
                     #region TLP_DEBUG
 #if TLP_DEBUG
-                    DebugLog($"{nameof(OnEvent)} {eventName}");
+                    _DebugLog($"{nameof(_OnEvent)} {eventName}");
 #endif
                     #endregion
 
-                    OnSharedBlacklistChanged();
+                    _OnSharedBlacklistChanged();
                     break;
                 }
 
-                case nameof(OnSharedWhitelistChanged):
+                case nameof(_OnSharedWhitelistChanged):
                 {
                     #region TLP_DEBUG
 #if TLP_DEBUG
-                    DebugLog($"{nameof(OnEvent)} {eventName}");
+                    _DebugLog($"{nameof(_OnEvent)} {eventName}");
 #endif
                     #endregion
 
-                    OnSharedWhitelistChanged();
+                    _OnSharedWhitelistChanged();
                     break;
                 }
                 default:
-                    base.OnEvent(eventName);
+                    base._OnEvent(eventName);
                     break;
             }
         }
 
-        private void LoadInitialNames(DataDictionary output, string text) {
+        private void _LoadInitialNames(DataDictionary output, string text) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(LoadInitialNames));
+            _DebugLog(nameof(_LoadInitialNames));
 #endif
             #endregion
 
@@ -341,7 +340,7 @@ namespace TLP.UdonUtils.Runtime.Player
             }
         }
 
-        private void CombineBlackLists(
+        private void _CombineBlackLists(
                 DataDictionary initialBlackListed,
                 DataDictionary dynamicBlackListed,
                 DataDictionary dynamicWhiteListed,
@@ -349,7 +348,7 @@ namespace TLP.UdonUtils.Runtime.Player
         ) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(CombineBlackLists));
+            _DebugLog(nameof(_CombineBlackLists));
 #endif
             #endregion
 
@@ -378,7 +377,7 @@ namespace TLP.UdonUtils.Runtime.Player
             }
         }
 
-        private void CombineWhiteLists(
+        private void _CombineWhiteLists(
                 DataDictionary initialWhiteListed,
                 DataDictionary initialBlackListed,
                 DataDictionary dynamicBlackListed,
@@ -387,7 +386,7 @@ namespace TLP.UdonUtils.Runtime.Player
         ) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(CombineWhiteLists));
+            _DebugLog(nameof(_CombineWhiteLists));
 #endif
             #endregion
 
@@ -425,38 +424,38 @@ namespace TLP.UdonUtils.Runtime.Player
             }
         }
 
-        private void OnSharedBlacklistChanged() {
+        private void _OnSharedBlacklistChanged() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnSharedBlacklistChanged));
+            _DebugLog(nameof(_OnSharedBlacklistChanged));
 #endif
             #endregion
 
-            RefreshReceivedSharedList(_dynamicallyBlackListedEntries, BlackListedPlayers);
-            RebuildResultLists();
+            _RefreshReceivedSharedList(_dynamicallyBlackListedEntries, BlackListedPlayers);
+            _RebuildResultLists();
         }
 
-        private void OnSharedWhitelistChanged() {
+        private void _OnSharedWhitelistChanged() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnSharedWhitelistChanged));
+            _DebugLog(nameof(_OnSharedWhitelistChanged));
 #endif
             #endregion
 
-            RefreshReceivedSharedList(_dynamicallyWhiteListedEntries, WhiteListedPlayers);
-            RebuildResultLists();
+            _RefreshReceivedSharedList(_dynamicallyWhiteListedEntries, WhiteListedPlayers);
+            _RebuildResultLists();
         }
 
-        private void RefreshReceivedSharedList(DataDictionary sharedList, SyncedEventStringArray syncedList) {
+        private void _RefreshReceivedSharedList(DataDictionary sharedList, SyncedEventStringArray syncedList) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(RefreshReceivedSharedList));
+            _DebugLog(nameof(_RefreshReceivedSharedList));
 #endif
             #endregion
 
             sharedList.Clear();
             string[] syncedListValues = syncedList.WorkingValues;
-            if (syncedListValues.LengthSafe() == 0) {
+            if (syncedListValues._LengthSafe() == 0) {
                 return;
             }
 
@@ -470,21 +469,21 @@ namespace TLP.UdonUtils.Runtime.Player
             }
         }
 
-        private void RebuildResultLists() {
+        private void _RebuildResultLists() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(RebuildResultLists));
+            _DebugLog(nameof(_RebuildResultLists));
 #endif
             #endregion
 
-            CombineBlackLists(
+            _CombineBlackLists(
                     _initialBlackListedEntries,
                     _dynamicallyBlackListedEntries,
                     _dynamicallyWhiteListedEntries,
                     _blackListed
             );
 
-            CombineWhiteLists(
+            _CombineWhiteLists(
                     _initialWhiteListedEntries,
                     _initialBlackListedEntries,
                     _dynamicallyBlackListedEntries,
@@ -493,10 +492,10 @@ namespace TLP.UdonUtils.Runtime.Player
             );
         }
 
-        private bool UpdateSyncedPlayerList(DataList playerNames, SyncedEventStringArray syncedNames) {
+        private bool _UpdateSyncedPlayerList(DataList playerNames, SyncedEventStringArray syncedNames) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(UpdateSyncedPlayerList));
+            _DebugLog(nameof(_UpdateSyncedPlayerList));
 #endif
             #endregion
 
@@ -506,66 +505,66 @@ namespace TLP.UdonUtils.Runtime.Player
                 syncedNames.WorkingValues[i] = names[i].String;
             }
 
-            if (syncedNames.TakeOwnership()) {
-                return syncedNames.Raise(this);
+            if (syncedNames._TakeOwnership()) {
+                return syncedNames._Raise(this);
             }
 
-            Error($"Failed to take ownership");
+            _Error($"Failed to take ownership");
             return false;
         }
 
-        internal void Initialize() {
+        internal void _Initialize() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(Initialize));
+            _DebugLog(nameof(_Initialize));
 #endif
             #endregion
 
 
             if (!Utilities.IsValid(BlackListedPlayers)) {
-                ErrorAndDisableComponent($"{nameof(BlackListedPlayers)} is not set");
+                _ErrorAndDisableComponent($"{nameof(BlackListedPlayers)} is not set");
                 return;
             }
 
             if (!Utilities.IsValid(WhiteListedPlayers)) {
-                ErrorAndDisableComponent($"{nameof(WhiteListedPlayers)} is not set");
+                _ErrorAndDisableComponent($"{nameof(WhiteListedPlayers)} is not set");
                 return;
             }
 
-            BlackListedPlayers.ListenerMethod = nameof(OnSharedBlacklistChanged);
-            if (!BlackListedPlayers.AddListenerVerified(this, nameof(OnSharedBlacklistChanged))) {
-                ErrorAndDisableComponent($"Failed listening to {nameof(SyncedEventStringArray)} change event");
+            BlackListedPlayers.ListenerMethod = nameof(_OnSharedBlacklistChanged);
+            if (!BlackListedPlayers._AddListenerVerified(this, nameof(_OnSharedBlacklistChanged))) {
+                _ErrorAndDisableComponent($"Failed listening to {nameof(SyncedEventStringArray)} change event");
                 return;
             }
 
-            WhiteListedPlayers.ListenerMethod = nameof(OnSharedWhitelistChanged);
-            if (!WhiteListedPlayers.AddListenerVerified(this, nameof(OnSharedWhitelistChanged))) {
-                ErrorAndDisableComponent($"Failed listening to {nameof(SyncedEventStringArray)} change event");
+            WhiteListedPlayers.ListenerMethod = nameof(_OnSharedWhitelistChanged);
+            if (!WhiteListedPlayers._AddListenerVerified(this, nameof(_OnSharedWhitelistChanged))) {
+                _ErrorAndDisableComponent($"Failed listening to {nameof(SyncedEventStringArray)} change event");
                 return;
             }
 
             if (Utilities.IsValid(OptionalInitialBlackListedPlayerNames)) {
-                LoadInitialNames(
+                _LoadInitialNames(
                         _initialBlackListedEntries,
                         OptionalInitialBlackListedPlayerNames.text
                 );
             } else {
-                LoadInitialNames(_initialBlackListedEntries, "");
+                _LoadInitialNames(_initialBlackListedEntries, "");
             }
 
             if (Utilities.IsValid(OptionalInitialWhiteListedPlayerNames)) {
-                LoadInitialNames(
+                _LoadInitialNames(
                         _initialWhiteListedEntries,
                         OptionalInitialWhiteListedPlayerNames.text
                 );
             } else {
-                LoadInitialNames(_initialWhiteListedEntries, "");
+                _LoadInitialNames(_initialWhiteListedEntries, "");
             }
 
-            RefreshReceivedSharedList(_dynamicallyWhiteListedEntries, WhiteListedPlayers);
-            RefreshReceivedSharedList(_dynamicallyBlackListedEntries, BlackListedPlayers);
+            _RefreshReceivedSharedList(_dynamicallyWhiteListedEntries, WhiteListedPlayers);
+            _RefreshReceivedSharedList(_dynamicallyBlackListedEntries, BlackListedPlayers);
 
-            RebuildResultLists();
+            _RebuildResultLists();
 
             if (OptionalWhiteListUrl != null && !string.IsNullOrEmpty(OptionalWhiteListUrl.ToString())) {
                 VRCStringDownloader.LoadUrl(OptionalWhiteListUrl, gameObject.GetComponent<UdonBehaviour>());
@@ -583,40 +582,40 @@ namespace TLP.UdonUtils.Runtime.Player
 
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(OnStringLoadSuccess)} {result.Url}\n{result.Result}");
+            _DebugLog($"{nameof(OnStringLoadSuccess)} {result.Url}\n{result.Result}");
 #endif
             #endregion
 
 
             if (result.Url.ToString() == OptionalWhiteListUrl.ToString()) {
-                DebugLog("Updating initial whitelist using downloaded result");
+                _DebugLog("Updating initial whitelist using downloaded result");
                 string initial = Utilities.IsValid(OptionalInitialWhiteListedPlayerNames)
                         ? OptionalInitialWhiteListedPlayerNames.text
                         : "";
-                LoadInitialNames(
+                _LoadInitialNames(
                         _initialWhiteListedEntries,
                         $"{initial}\n{(string.IsNullOrEmpty(result.Result) ? "" : result.Result)}"
                 );
             }
 
             if (result.Url.ToString() == OptionalBlackListUrl.ToString()) {
-                DebugLog("Updating initial blacklist using downloaded result");
+                _DebugLog("Updating initial blacklist using downloaded result");
                 string initial = Utilities.IsValid(OptionalInitialBlackListedPlayerNames)
                         ? OptionalInitialBlackListedPlayerNames.text
                         : "";
-                LoadInitialNames(
+                _LoadInitialNames(
                         _initialBlackListedEntries,
                         $"{initial}\n{(string.IsNullOrEmpty(result.Result) ? "" : result.Result)}"
                 );
             }
 
-            RebuildResultLists();
+            _RebuildResultLists();
         }
 
         public override void OnStringLoadError(IVRCStringDownload result) {
             base.OnStringLoadError(result);
 
-            Error($"{nameof(OnStringLoadError)} {result.Url} {result.Error}");
+            _Error($"{nameof(OnStringLoadError)} {result.Url} {result.Error}");
 
             if (result.Url.ToString() == OptionalWhiteListUrl.ToString()
                 && !string.IsNullOrEmpty(OptionalWhiteListUrl.ToString())
@@ -639,22 +638,22 @@ namespace TLP.UdonUtils.Runtime.Player
                 return;
             }
 
-            DebugLog($"{nameof(OnPlayerJoined)} {player.DisplayNameSafe()}");
+            _DebugLog($"{nameof(OnPlayerJoined)} {player._DisplayNameSafe()}");
 
-            if (IsBlackListed(player.DisplayNameSafe())) {
-                DebugLog($"{player.DisplayNameSafe()} is blacklisted by {name}");
-                Assert(AddToWhiteList(player.DisplayNameSafe()), "Failed to whitelist player");
-                Assert(IsWhiteListed(player.DisplayNameSafe()), "Player not whitelisted after manually adding");
-                Assert(ResetToDefault(player.DisplayNameSafe()), "Failed to reset player");
-                Assert(IsBlackListed(player.DisplayNameSafe()), "Player not blacklisted again after resetting");
+            if (_IsBlackListed(player._DisplayNameSafe())) {
+                _DebugLog($"{player._DisplayNameSafe()} is blacklisted by {name}");
+                _Assert(_AddToWhiteList(player._DisplayNameSafe()), "Failed to whitelist player");
+                _Assert(_IsWhiteListed(player._DisplayNameSafe()), "Player not whitelisted after manually adding");
+                _Assert(_ResetToDefault(player._DisplayNameSafe()), "Failed to reset player");
+                _Assert(_IsBlackListed(player._DisplayNameSafe()), "Player not blacklisted again after resetting");
             }
 
-            if (IsWhiteListed(player.DisplayNameSafe())) {
-                DebugLog($"{player.DisplayNameSafe()} is whitelisted by {name}");
-                Assert(AddToBlackList(player.DisplayNameSafe()), "Failed to blacklist player");
-                Assert(IsBlackListed(player.DisplayNameSafe()), "Player not blacklisted after manually adding");
-                Assert(ResetToDefault(player.DisplayNameSafe()), "Failed to reset player");
-                Assert(IsWhiteListed(player.DisplayNameSafe()), "Player not whitelisted again after resetting");
+            if (_IsWhiteListed(player._DisplayNameSafe())) {
+                _DebugLog($"{player._DisplayNameSafe()} is whitelisted by {name}");
+                _Assert(_AddToBlackList(player._DisplayNameSafe()), "Failed to blacklist player");
+                _Assert(_IsBlackListed(player._DisplayNameSafe()), "Player not blacklisted after manually adding");
+                _Assert(_ResetToDefault(player._DisplayNameSafe()), "Failed to reset player");
+                _Assert(_IsWhiteListed(player._DisplayNameSafe()), "Player not whitelisted again after resetting");
             }
         }
 #endif

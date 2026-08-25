@@ -2,6 +2,7 @@ using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Testing;
 using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
 using VRC.Udon.Common;
 using VRC.Udon.Common.Interfaces;
@@ -16,7 +17,7 @@ namespace TLP.UdonUtils.Runtime.Tests
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TestCase.ExecutionOrder + 1;
+        public new const int ExecutionOrder = TestSanity.ExecutionOrder + 1;
 
         [UdonSynced]
         public int TestVariable;
@@ -26,13 +27,13 @@ namespace TLP.UdonUtils.Runtime.Tests
 
         private bool _ownershipTransferred;
 
-        protected override void InitializeTest() {
-            Info("Initializing ownership transfer test");
+        protected override void _InitializeTest() {
+            _Info("Initializing ownership transfer test");
 
             // Check if we have at least 2 players
             if (VRCPlayerApi.GetPlayerCount() < 2) {
-                Error("Ownership transfer test requires at least 2 players");
-                TestController.TestInitialized(false);
+                _Error("Ownership transfer test requires at least 2 players");
+                TestController._TestInitialized(false);
                 return;
             }
 
@@ -48,7 +49,7 @@ namespace TLP.UdonUtils.Runtime.Tests
                     }
 
                     Networking.SetOwner(player, gameObject);
-                    Info($"Transferred initial ownership to player {player.playerId}");
+                    _Info($"Transferred initial ownership to player {player.playerId}");
                     break;
                 }
             }
@@ -56,7 +57,7 @@ namespace TLP.UdonUtils.Runtime.Tests
             _ownershipTransferred = false;
             _receivedConfirmation = false;
     
-            TestController.TestInitialized(true);
+            TestController._TestInitialized(true);
         }
 
         public override void OnPreSerialization() {
@@ -71,13 +72,14 @@ namespace TLP.UdonUtils.Runtime.Tests
             if (Status != TestCaseStatus.Running
                 && TestVariable == 42 
                 && !Networking.IsOwner(gameObject)) {
-                SendCustomNetworkEvent(NetworkEventTarget.Owner, nameof(RPC_Confirmation));
-                Info("Received TestVariable = 42, sending confirmation");
+                SendCustomNetworkEvent(NetworkEventTarget.Owner, nameof(_RPC_Confirmation));
+                _Info("Received TestVariable = 42, sending confirmation");
             }
         }
 
-        public void RPC_Confirmation() {
-                Info("Received confirmation from other player");
+        [NetworkCallable(1)]
+        public void _RPC_Confirmation() {
+                _Info("Received confirmation from other player");
                 _receivedConfirmation = true;
         }
 
@@ -88,27 +90,27 @@ namespace TLP.UdonUtils.Runtime.Tests
             }
 
             _ownershipTransferred = true;
-            Info("OnOwnershipTransferred called for local player");
+            _Info("OnOwnershipTransferred called for local player");
         }
 
-        public void Delay_RunTest() {
+        public void _Delay_RunTest() {
             if (Status != TestCaseStatus.Running) {
-                Warn("Delay_RunTest called but test is not running, ignoring");
+                _Warn("Delay_RunTest called but test is not running, ignoring");
                 return;
             }
             
-            Info("Running ownership transfer test");
+            _Info("Running ownership transfer test");
 
             // Check if not owner
             if (Networking.IsOwner(gameObject)) {
-                Error("Test requires non-owner to take ownership, but local player is already owner");
-                TestController.TestCompleted(false);
+                _Error("Test requires non-owner to take ownership, but local player is already owner");
+                TestController._TestCompleted(false);
                 return;
             }
 
             if (_ownershipTransferred) {
-                Error("Ownership unexpectedly transferred to local player before test started");
-                TestController.TestCompleted(false);
+                _Error("Ownership unexpectedly transferred to local player before test started");
+                TestController._TestCompleted(false);
                 return;
             }
 
@@ -117,16 +119,16 @@ namespace TLP.UdonUtils.Runtime.Tests
 
             // Verify ownership transferred locally immediately
             if (!Networking.IsOwner(gameObject)) {
-                Error("Ownership was not transferred locally immediately after SetOwner");
-                TestController.TestCompleted(false);
+                _Error("Ownership was not transferred locally immediately after SetOwner");
+                TestController._TestCompleted(false);
                 return;
             }
 
             // Wait for OnOwnershipTransferred to be called (should be immediate)
             // In practice, it is called synchronously
             if (!_ownershipTransferred) {
-                Error("OnOwnershipTransferred was not called after SetOwner");
-                TestController.TestCompleted(false);
+                _Error("OnOwnershipTransferred was not called after SetOwner");
+                TestController._TestCompleted(false);
                 return;
             }
 
@@ -137,29 +139,29 @@ namespace TLP.UdonUtils.Runtime.Tests
             RequestSerialization();
 
             // Wait a bit for network propagation
-            SendCustomEventDelayedSeconds(nameof(CheckReception), 2f);
+            SendCustomEventDelayedSeconds(nameof(_CheckReception), 2f);
         }
 
-        public void CheckReception() {
+        public void _CheckReception() {
             if (Status != TestCaseStatus.Running) {
-                Warn("CheckReception called but test is not running, ignoring");
+                _Warn("CheckReception called but test is not running, ignoring");
                 return;
             }
             if (_receivedConfirmation) {
-                Info("Other player confirmed reception of TestVariable = 42");
-                TestController.TestCompleted(true);
+                _Info("Other player confirmed reception of TestVariable = 42");
+                TestController._TestCompleted(true);
             } else {
-                Error("Other player did not confirm reception of TestVariable = 42");
-                TestController.TestCompleted(false);
+                _Error("Other player did not confirm reception of TestVariable = 42");
+                TestController._TestCompleted(false);
             }
         }
 
-        protected override void RunTest() {
-            SendCustomEventDelayedSeconds(nameof(Delay_RunTest), 3f);
+        protected override void _RunTest() {
+            SendCustomEventDelayedSeconds(nameof(_Delay_RunTest), 3f);
         }
 
-        protected override void CleanUpTest() {
-            Info("Cleaning up ownership transfer test");
+        protected override void _CleanUpTest() {
+            _Info("Cleaning up ownership transfer test");
 
             // Optionally take ownership back to local player
             if (!Networking.IsOwner(gameObject)) {
@@ -170,7 +172,7 @@ namespace TLP.UdonUtils.Runtime.Tests
             _receivedConfirmation = false;
             RequestSerialization();
             
-            TestController.TestCleanedUp(true);
+            TestController._TestCleanedUp(true);
         }
     }
 }

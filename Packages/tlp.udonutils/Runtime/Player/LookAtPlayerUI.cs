@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using UdonSharp;
 using UnityEngine;
+using UnityEngine.Serialization;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Player
@@ -15,28 +16,30 @@ namespace TLP.UdonUtils.Runtime.Player
         [PublicAPI]
         public new const int ExecutionOrder = TrackingDataFollowerUI.ExecutionOrder + 1;
 
-        public VRCPlayerApi player;
-        public bool useLocalPlayerByDefault = true;
+        public VRCPlayerApi Player;
+
+        [FormerlySerializedAs("useLocalPlayerByDefault")]
+        public bool UseLocalPlayerByDefault = true;
 
 
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
-            if (useLocalPlayerByDefault) {
-                player = Networking.LocalPlayer;
+            if (UseLocalPlayerByDefault) {
+                Player = Networking.LocalPlayer;
             }
 
             return true;
         }
 
         public override void PostLateUpdate() {
-            if (!Utilities.IsValid(player)) {
+            if (!Utilities.IsValid(Player)) {
                 return;
             }
 
-            var trackingData = player.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
+            var trackingData = Player.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
             transform.LookAt(trackingData.position);
         }
     }

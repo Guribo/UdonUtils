@@ -3,6 +3,7 @@ using System.Diagnostics;
 using JetBrains.Annotations;
 using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.UdonNetworkCalling;
 
 
 namespace TLP.UdonUtils.Runtime.Sources.Time
@@ -23,15 +24,15 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         [NonSerialized]
         public Stopwatch Stopwatch = new Stopwatch();
 
-        public void OnEnable() {
+        internal void OnEnable() {
             Stopwatch.Start();
         }
 
-        public override float Time() {
+        public override float _Time() {
             return (float)Stopwatch.Elapsed.TotalSeconds;
         }
 
-        public override double TimeAsDouble() {
+        public override double _TimeAsDouble() {
             return Stopwatch.Elapsed.TotalSeconds;
         }
     }

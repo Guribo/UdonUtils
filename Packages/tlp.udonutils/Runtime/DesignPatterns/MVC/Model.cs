@@ -2,6 +2,7 @@
 using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Events;
 using UnityEngine;
+using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
@@ -18,13 +19,13 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
         #endregion
 
         #region Constants
-        private const string OnModelChangedCallbackName = "OnModelChanged";
+        public const string OnModelChangedCallbackName = "_OnModelChanged";
         #endregion
 
         #region State
         /// <summary>
         /// True if Model is currently
-        /// initialized with <see cref="Initialize"/>.
+        /// initialized with <see cref="_Initialize"/>.
         /// </summary>
         public bool IsModelInitialized { get; private set; }
 
@@ -35,7 +36,7 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
             {
                 #region TLP_DEBUG
 #if TLP_DEBUG
-                DebugLog($"{nameof(Dirty)}: {nameof(_dirty)}={value}");
+                _DebugLog($"{nameof(Dirty)}: {nameof(_dirty)}={value}");
 #endif
                 #endregion
 
@@ -51,42 +52,42 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 
         #region PublicAPI
         [PublicAPI]
-        public bool Initialize(UdonEvent changeEvent) {
+        public bool _Initialize(UdonEvent changeEvent) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(Initialize)} with '{changeEvent.GetScriptPathInScene()}'");
+            _DebugLog($"{nameof(_Initialize)} with '{changeEvent._GetScriptPathInScene()}'");
 #endif
             #endregion
 
             if (!IsReceivingStart) {
                 if (!HasStartedOk) {
-                    Error($"{nameof(Initialize)}: {nameof(Initialize)}: Not initialized");
+                    _Error($"{nameof(_Initialize)}: {nameof(_Initialize)}: Not initialized");
                     return false;
                 }
             }
 
             if (!string.IsNullOrEmpty(CriticalError)) {
-                Error($"{nameof(Initialize)}: Can not initialize again due to previous critical error: " +
-                      $"'{CriticalError}'");
+                _Error($"{nameof(_Initialize)}: Can not initialize again due to previous critical error: " +
+                       $"'{CriticalError}'");
                 return false;
             }
 
             if (IsModelInitialized) {
-                Error($"{nameof(Initialize)}: Already initialized");
+                _Error($"{nameof(_Initialize)}: Already initialized");
                 return false;
             }
 
             if (!Utilities.IsValid(changeEvent)) {
-                Error($"{nameof(Initialize)}: {nameof(changeEvent)} invalid");
+                _Error($"{nameof(_Initialize)}: {nameof(changeEvent)} invalid");
                 return false;
             }
 
             Dirty = false;
             ChangeEvent = changeEvent;
             ChangeEvent.ListenerMethod = OnModelChangedCallbackName;
-            if (!ChangeEvent.AddListenerVerified(this, OnModelChangedCallbackName)) {
-                Error($"{nameof(Initialize)}: Adding to {nameof(ChangeEvent)} with callback " +
-                      $"'{OnModelChangedCallbackName}' failed");
+            if (!ChangeEvent._AddListenerVerified(this, OnModelChangedCallbackName)) {
+                _Error($"{nameof(_Initialize)}: Adding to {nameof(ChangeEvent)} with callback " +
+                       $"'{OnModelChangedCallbackName}' failed");
                 return false;
             }
 
@@ -94,19 +95,19 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
             // failed to initialize and are in need of cleanup
             IsModelInitialized = true;
 
-            if (InitializeInternal()) {
+            if (_InitializeInternal()) {
                 return true;
             }
 
-            Error($"{nameof(Initialize)}: Initialization failed. Using {nameof(DeInitialize)} to cleanup.");
-            DeInitialize();
+            _Error($"{nameof(_Initialize)}: Initialization failed. Using {nameof(_DeInitialize)} to cleanup.");
+            _DeInitialize();
             return false;
         }
 
-        public bool DeInitialize() {
+        public bool _DeInitialize() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(DeInitialize));
+            _DebugLog(nameof(_DeInitialize));
 #endif
             #endregion
 
@@ -115,12 +116,12 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
             }
 
             if (Utilities.IsValid(ChangeEvent)) {
-                if (!ChangeEvent.RemoveListener(this, true)) {
-                    Warn($"{nameof(DeInitialize)}: {nameof(ChangeEvent)} wasn't being listened to");
+                if (!ChangeEvent._RemoveListener(this, true)) {
+                    _Warn($"{nameof(_DeInitialize)}: {nameof(ChangeEvent)} wasn't being listened to");
                 }
             }
 
-            if (DeInitializeInternal()) {
+            if (_DeInitializeInternal()) {
                 ChangeEvent = null;
                 IsModelInitialized = false;
                 CriticalError = null;
@@ -129,7 +130,7 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 
             ChangeEvent = null;
             CriticalError = $"De-Initialization failed.";
-            Error(CriticalError);
+            _Error(CriticalError);
             return false;
         }
 
@@ -140,10 +141,10 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
         /// </summary>
         /// <param name="delayFrames"></param>
         /// <returns>true if not dirty or the event was successfully raised or scheduled, false only on error, note that in case of delayFrames > 0 there might be errors at a later point in time that are not captured here</returns>
-        public bool NotifyIfDirty(int delayFrames = 0) {
+        public bool _NotifyIfDirty(int delayFrames = 0) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(NotifyIfDirty)} delayFrames = {delayFrames}");
+            _DebugLog($"{nameof(_NotifyIfDirty)} delayFrames = {delayFrames}");
 #endif
             #endregion
 
@@ -152,32 +153,33 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
             }
 
             if (!IsReceivingStart && !HasStartedOk) {
-                Error($"{nameof(NotifyIfDirty)}: Not initialized");
+                _Error($"{nameof(_NotifyIfDirty)}: Not initialized");
                 return false;
             }
 
             if (!IsModelInitialized) {
-                Error($"{nameof(NotifyIfDirty)}: Model not initialized");
+                _Error($"{nameof(_NotifyIfDirty)}: Model not initialized");
                 return false;
             }
 
             if (!Utilities.IsValid(ChangeEvent)) {
-                Error($"{nameof(NotifyIfDirty)}: {nameof(ChangeEvent)} invalid");
+                _Error($"{nameof(_NotifyIfDirty)}: {nameof(ChangeEvent)} invalid");
                 return false;
             }
 
             if (delayFrames < 1) {
-                if (!ChangeEvent.Raise(this)) {
-                    Error(
-                            $"{nameof(NotifyIfDirty)}: Failed to raise {nameof(ChangeEvent)} '{ChangeEvent.ListenerMethod}'");
+                if (!ChangeEvent._Raise(this)) {
+                    _Error(
+                            $"{nameof(_NotifyIfDirty)}: Failed to raise {nameof(ChangeEvent)} '{ChangeEvent.ListenerMethod}'");
                     return false;
                 }
 
                 return true;
             }
 
-            if (!ChangeEvent.RaiseOnIdle(this, delayFrames)) {
-                Error($"{nameof(NotifyIfDirty)}: Failed to raise {nameof(ChangeEvent)} '{ChangeEvent.ListenerMethod}'");
+            if (!ChangeEvent._RaiseOnIdle(this, delayFrames)) {
+                _Error(
+                        $"{nameof(_NotifyIfDirty)}: Failed to raise {nameof(ChangeEvent)} '{ChangeEvent.ListenerMethod}'");
                 return false;
             }
 
@@ -186,10 +188,10 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
         #endregion
 
         #region Overrides
-        public override void OnEvent(string eventName) {
+        public override void _OnEvent(string eventName) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(OnEvent)} {eventName}");
+            _DebugLog($"{nameof(_OnEvent)} {eventName}");
 #endif
             #endregion
 
@@ -198,7 +200,7 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
                 return;
             }
 
-            base.OnEvent(eventName);
+            base._OnEvent(eventName);
         }
         #endregion
 
@@ -206,11 +208,11 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
         protected virtual void OnDestroy() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnDestroy));
+            _DebugLog(nameof(OnDestroy));
 #endif
             #endregion
 
-            DeInitialize();
+            _DeInitialize();
         }
         #endregion
     }

@@ -46,19 +46,19 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         #region Internal
         internal float EstimatedStepDuration { get; private set; }
 
-        internal int FrameOfLastStep { get; private set; }
-        internal double TimeOfLastStep { get; private set; }
-        internal float StepDeltaTime { get; private set; }
+        private int FrameOfLastStep { get; set; }
+        private double TimeOfLastStep { get; set; }
+        private float StepDeltaTime { get; set; }
 
-        internal void UpdateEstimatedStepDuration(float stepDuration) {
+        internal void _UpdateEstimatedStepDuration(float stepDuration) {
             EstimatedStepDuration = Mathf.Lerp(EstimatedStepDuration, stepDuration, 0.1f);
             EstimatedStepDuration = Mathf.Max(EstimatedStepDuration, stepDuration);
         }
 
-        internal bool PrepareForRun() {
+        internal bool _PrepareForRun() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(PrepareForRun));
+            _DebugLog(nameof(_PrepareForRun));
 #endif
             #endregion
 
@@ -67,7 +67,7 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             Result = TaskResult.Unknown;
             TimeOfLastStep = Time.unscaledTimeAsDouble;
             StepDeltaTime = LimitToOncePerFrame ? Time.unscaledDeltaTime : 0f;
-            if (InitTask()) {
+            if (_InitTask()) {
                 return true;
             }
 
@@ -76,10 +76,10 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             return false;
         }
 
-        private void RunNextStep() {
+        private void _RunNextStep() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(RunNextStep));
+            _DebugLog(nameof(_RunNextStep));
 #endif
             #endregion
 
@@ -87,7 +87,7 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                 if (Time.frameCount == FrameOfLastStep) {
                     #region TLP_DEBUG
 #if TLP_DEBUG
-                    DebugLog($"{nameof(RunNextStep)}: Already ran this frame");
+                    _DebugLog($"{nameof(_RunNextStep)}: Already ran this frame");
 #endif
                     #endregion
 
@@ -102,7 +102,7 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
 
             FrameOfLastStep = Time.frameCount;
 
-            switch (DoTask(StepDeltaTime)) {
+            switch (_DoTask(StepDeltaTime)) {
                 case TaskResult.Unknown:
                     Result = TaskResult.Unknown;
                     break;
@@ -110,7 +110,7 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                     Result = TaskResult.Blocked;
                     break;
                 case TaskResult.Succeeded:
-                    SetProgress(1);
+                    _SetProgress(1);
                     Result = TaskResult.Succeeded;
                     State = TaskState.Finished;
                     break;
@@ -123,7 +123,7 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                     State = TaskState.Finished;
                     break;
                 default:
-                    Error($"Unknown {nameof(TaskState)}: {State}");
+                    _Error($"Unknown {nameof(TaskState)}: {State}");
                     State = TaskState.Finished;
                     Result = TaskResult.Aborted;
                     break;
@@ -134,10 +134,10 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         #endregion
 
         #region Protected
-        protected void SetProgress(float progress) {
+        protected void _SetProgress(float progress) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(SetProgress)}: {nameof(progress)}={progress}");
+            _DebugLog($"{nameof(_SetProgress)}: {nameof(progress)}={progress}");
 #endif
             #endregion
 
@@ -151,10 +151,10 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         ///    Result = <see cref="TaskResult.Unknown"/>;
         /// </summary>
         /// <returns>true when init succeeded</returns>
-        protected virtual bool InitTask() {
+        protected virtual bool _InitTask() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(InitTask));
+            _DebugLog(nameof(_InitTask));
 #endif
             #endregion
 
@@ -176,12 +176,12 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         /// Shall return <see cref="TaskResult.Failed"/> if task failed to produce a result.
         /// Shall return <see cref="TaskResult.Succeeded"/> if task produced the desired result.
         /// </returns>
-        protected virtual TaskResult DoTask(float stepDeltaTime) {
-            return RunStep();
+        protected virtual TaskResult _DoTask(float stepDeltaTime) {
+            return _RunStep();
         }
 
         [Obsolete("Use DoTask(stepDeltaTime) instead")]
-        protected virtual TaskResult RunStep() {
+        protected virtual TaskResult _RunStep() {
             return TaskResult.Succeeded;
         }
 
@@ -193,10 +193,10 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         /// <remarks>Called after instigator is notified about task result, but only if <see cref="TaskState"/> != <see cref="TaskState.Finished"/>;.</remarks>
         /// </summary>
         /// <returns>false to indicated something went wrong</returns>
-        public virtual bool DeInitTask() {
+        public virtual bool _DeInitTask() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(DeInitTask));
+            _DebugLog(nameof(_DeInitTask));
 #endif
             #endregion
 
@@ -213,10 +213,10 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         /// </summary>
         public float Progress { get; private set; }
 
-        public bool TryScheduleTask(TlpBaseBehaviour instigator) {
+        public bool _TryScheduleTask(TlpBaseBehaviour instigator) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(TryScheduleTask));
+            _DebugLog(nameof(_TryScheduleTask));
 #endif
             #endregion
 
@@ -224,23 +224,23 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                 return true;
             }
 
-            if (TaskScheduler.AddTaskToDefaultScheduler(instigator, this)) {
+            if (TaskScheduler._AddTaskToDefaultScheduler(instigator, this)) {
                 return true;
             }
 
-            Error($"{nameof(TryScheduleTask)}: Can't add task to default scheduler");
+            _Error($"{nameof(_TryScheduleTask)}: Can't add task to default scheduler");
             return false;
         }
 
-        public TaskState Run() {
+        public TaskState _Run() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(Run));
+            _DebugLog(nameof(_Run));
 #endif
             #endregion
 
             if (Result == TaskResult.Aborted) {
-                Warn("Task is already aborted");
+                _Warn("Task is already aborted");
                 State = TaskState.Finished;
                 return State;
             }
@@ -248,17 +248,17 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             switch (State) {
                 case TaskState.Pending:
                     State = TaskState.Running;
-                    RunNextStep();
+                    _RunNextStep();
                     break;
                 case TaskState.Running:
 
-                    RunNextStep();
+                    _RunNextStep();
                     break;
                 case TaskState.Finished:
-                    Error("Task is already completed");
+                    _Error("Task is already completed");
                     break;
                 default:
-                    Error($"Unknown {nameof(TaskState)}: {State}");
+                    _Error($"Unknown {nameof(TaskState)}: {State}");
                     State = TaskState.Finished;
                     Result = TaskResult.Aborted;
                     break;
@@ -268,15 +268,15 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         }
 
 
-        public bool Abort() {
+        public bool _Abort() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(Abort));
+            _DebugLog(nameof(_Abort));
 #endif
             #endregion
 
             if (State == TaskState.Finished) {
-                Error("Task is already completed");
+                _Error("Task is already completed");
                 return false;
             }
 
@@ -284,15 +284,15 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             Result = TaskResult.Aborted;
 
             if (Utilities.IsValid(ActiveScheduler)) {
-                ActiveScheduler.CancelTask(this);
+                ActiveScheduler._CancelTask(this);
                 return true;
             }
 
-            Error($"{nameof(Abort)}: was not scheduled");
+            _Error($"{nameof(_Abort)}: was not scheduled");
             return false;
         }
 
-        public virtual int GetNeededSteps() {
+        public virtual int _GetNeededSteps() {
             return 1;
         }
         #endregion

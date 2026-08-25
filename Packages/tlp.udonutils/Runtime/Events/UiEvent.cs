@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.UdonNetworkCalling;
 
 namespace TLP.UdonUtils.Runtime.Events
 {
@@ -17,17 +18,22 @@ namespace TLP.UdonUtils.Runtime.Events
         public override void Interact() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(Interact));
+            _DebugLog(nameof(Interact));
 #endif
             #endregion
-
-            if (!HasStartedOk) {
-                Error($"{nameof(Interact)}: Not initialized");
+            
+            if (NetworkCalling.InNetworkCall) {
+                _Warn($"{nameof(Interact)}: called during network call, skipping");
                 return;
             }
 
-            if (!Raise(this)) {
-                Error($"{nameof(Interact)}: Failed to raise event");
+            if (!HasStartedOk) {
+                _Error($"{nameof(Interact)}: Not initialized");
+                return;
+            }
+
+            if (!_Raise(this)) {
+                _Error($"{nameof(Interact)}: Failed to raise event");
             }
         }
     }

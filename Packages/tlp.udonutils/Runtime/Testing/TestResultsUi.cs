@@ -1,6 +1,5 @@
 ﻿using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.DesignPatterns.MVC;
-using TLP.UdonUtils.Runtime.Testing;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
@@ -25,10 +24,10 @@ namespace TLP.UdonUtils.Runtime.Testing
 
         private readonly DataDictionary _testEntries = new DataDictionary();
 
-        public override void OnModelChanged() {
+        public override void _OnModelChanged() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnModelChanged));
+            _DebugLog(nameof(_OnModelChanged));
 #endif
             #endregion
 
@@ -41,7 +40,7 @@ namespace TLP.UdonUtils.Runtime.Testing
             for (int i = 0; i < tests; i++) {
                 var testCase = (TestCase)testData.Tests[i].Reference;
                 if (_testEntries.ContainsKey(testCase)) {
-                    ((TestResult)_testEntries[testCase].Reference).Initialize(testCase);
+                    ((TestResult)_testEntries[testCase].Reference)._Initialize(testCase);
                     continue;
                 }
 
@@ -49,7 +48,7 @@ namespace TLP.UdonUtils.Runtime.Testing
                 var newTestResult = newEntry.transform.GetComponent<TestResult>();
                 _testEntries.Add(testCase, newTestResult);
 
-                newTestResult.Initialize(testCase);
+                newTestResult._Initialize(testCase);
                 var newEntryTransform = newTestResult.transform;
                 var transformLocalPosition = newEntryTransform.localPosition;
                 newEntryTransform.localPosition = new Vector3(
@@ -58,19 +57,19 @@ namespace TLP.UdonUtils.Runtime.Testing
                         transformLocalPosition.z
                 );
                 newTestResult.gameObject.SetActive(true);
-                DebugLog("Added test result entry");
+                _DebugLog("Added test result entry");
             }
         }
 
-        protected override bool InitializeInternal() {
+        protected override bool _InitializeInternal() {
             if (!Prefab) {
-                Error($"{nameof(Prefab)} not set");
+                _Error($"{nameof(Prefab)} not set");
                 return false;
             }
 
             Prefab.gameObject.SetActive(false);
 
-            return base.InitializeInternal();
+            return base._InitializeInternal();
         }
     }
 }

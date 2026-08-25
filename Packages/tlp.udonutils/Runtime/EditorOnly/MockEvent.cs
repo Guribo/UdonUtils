@@ -26,19 +26,19 @@ namespace TLP.UdonUtils.Runtime.EditorOnly
         [FormerlySerializedAs("Raises")]
         public int Invocations;
 
-        public override bool Raise(TlpBaseBehaviour instigator) {
-            DebugLog(nameof(Raise));
+        public override bool _Raise(TlpBaseBehaviour instigator) {
+            _DebugLog(nameof(_Raise));
             ++Invocations;
             Caller = instigator;
             return true;
         }
 
-        public override bool RaiseOnIdle(
+        public override bool _RaiseOnIdle(
                 TlpBaseBehaviour instigator,
                 int idleFrames = 1,
                 EventTiming eventTiming = EventTiming.Update
         ) {
-            DebugLog(nameof(RaiseOnIdle));
+            _DebugLog(nameof(_RaiseOnIdle));
             RaiseOnIdleEventTiming = eventTiming;
             RaiseOnIdleIdleFrames = idleFrames;
             RaiseOnIdleInstigator = instigator;

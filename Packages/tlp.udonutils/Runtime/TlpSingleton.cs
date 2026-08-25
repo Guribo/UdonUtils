@@ -23,14 +23,14 @@ namespace TLP.UdonUtils.Runtime
         private string SingletonId;
         public string SingletonIdentifier => string.IsNullOrEmpty(SingletonId) ? GetUdonTypeName() : SingletonId;
 
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
             var localPlayer = Networking.LocalPlayer;
             if (!Utilities.IsValid(localPlayer)) {
-                Error("LocalPlayer is not valid");
+                _Error("LocalPlayer is not valid");
                 return false;
             }
 
@@ -38,7 +38,7 @@ namespace TLP.UdonUtils.Runtime
             if (string.IsNullOrEmpty(localPlayer.GetPlayerTag(identifier))) {
                 localPlayer.SetPlayerTag(identifier, identifier);
             } else {
-                Error("Singleton instance already exists/existed!");
+                _Error("Singleton instance already exists/existed!");
                 Destroy(gameObject);
                 return false;
             }
@@ -55,7 +55,7 @@ namespace TLP.UdonUtils.Runtime
         /// null if there is no <see cref="TlpSingleton"/> component on the GameObject,
         /// null if no component of the given type found on the GameObject.
         /// Otherwise, the component of the given type found on the GameObject.</returns>
-        public static T GetInstance<T>(string gameObjectName) where T : UdonSharpBehaviour {
+        public static T _GetInstance<T>(string gameObjectName) where T : UdonSharpBehaviour {
             var instance = GameObject.Find(gameObjectName);
             if (!Utilities.IsValid(instance)) {
                 TlpLogger.StaticError($"GameObject '{gameObjectName}' not found", null);
@@ -64,7 +64,7 @@ namespace TLP.UdonUtils.Runtime
 
             if (!Utilities.IsValid(instance.GetComponent<TlpSingleton>())) {
                 TlpLogger.StaticError(
-                        $"Component '{GetUdonTypeName<TlpSingleton>()}' not found on {instance.transform.GetPathInScene()}",
+                        $"Component '{GetUdonTypeName<TlpSingleton>()}' not found on {instance.transform._GetPathInScene()}",
                         null,
                         instance);
                 return null;
@@ -76,7 +76,7 @@ namespace TLP.UdonUtils.Runtime
             }
 
             TlpLogger.StaticError(
-                    $"Component '{GetUdonTypeName<T>()}' not found on {instance.transform.GetPathInScene()}",
+                    $"Component '{GetUdonTypeName<T>()}' not found on {instance.transform._GetPathInScene()}",
                     null,
                     instance);
             return null;

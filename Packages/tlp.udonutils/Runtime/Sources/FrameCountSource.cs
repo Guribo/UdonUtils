@@ -1,6 +1,5 @@
 ﻿using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Common;
-using TLP.UdonUtils.Runtime.Sources.Time;
 using UnityEngine;
 
 namespace TLP.UdonUtils.Runtime.Sources
@@ -21,6 +20,6 @@ namespace TLP.UdonUtils.Runtime.Sources
         /// Implementation dependent number of frames.
         /// </summary>
         /// <returns>Number of frames</returns>
-        public abstract int Frame();
+        public abstract int _Frame();
     }
 }

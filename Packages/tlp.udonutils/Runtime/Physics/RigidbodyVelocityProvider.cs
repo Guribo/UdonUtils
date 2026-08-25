@@ -46,24 +46,24 @@ namespace TLP.UdonUtils.Runtime.Physics
             _UpdatePositionSnapshot(
                     trackTransform.position,
                     ToTrack.velocity,
-                    TimeSource.FixedDeltaTime(),
-                    TimeSource.TimeAsDouble()
+                    TimeSource._FixedDeltaTime(),
+                    TimeSource._TimeAsDouble()
             );
 
             _UpdateRotationSnapshot(
                     trackTransform.rotation,
                     ToTrack.angularVelocity,
-                    TimeSource.FixedDeltaTime()
+                    TimeSource._FixedDeltaTime()
             );
 
 #if TLP_DEBUG
-            UpdateDebugEditorValues();
+            _UpdateDebugEditorValues();
 #endif
         }
         #endregion
 
         #region Public
-        public override double GetLatestSnapShot(
+        public override double _GetLatestSnapShot(
                 out Vector3 position,
                 out Vector3 velocity,
                 out Vector3 acceleration,
@@ -75,7 +75,7 @@ namespace TLP.UdonUtils.Runtime.Physics
         ) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(GetLatestSnapShot));
+            _DebugLog(nameof(_GetLatestSnapShot));
 #endif
             #endregion
 
@@ -102,7 +102,7 @@ namespace TLP.UdonUtils.Runtime.Physics
             _angularAcceleration[2] = (_angularVelocity[2] - _angularVelocity[1]) / deltaTime;
 
 
-            _rotation = RelativeTo.rotation.normalized.GetDeltaAToB(worldRotation.normalized).normalized;
+            _rotation = RelativeTo.rotation.normalized._GetDeltaAToB(worldRotation.normalized).normalized;
         }
         #endregion
 
@@ -121,9 +121,9 @@ namespace TLP.UdonUtils.Runtime.Physics
 
             _velocity[2] = RelativeTo.InverseTransformVector(rigidBodyVelocity);
 
-            _acceleration[2] = ConstantLinearAcceleration.Acceleration2(_velocity[1], _velocity[2], deltaTime);
+            _acceleration[2] = ConstantLinearAcceleration._Acceleration2(_velocity[1], _velocity[2], deltaTime);
 
-            if (!ConstantCircularVelocity.IsCircularMovement(
+            if (!ConstantCircularVelocity._IsCircularMovement(
                         _velocity[2],
                         _velocity[1],
                         deltaTime,
@@ -141,18 +141,18 @@ namespace TLP.UdonUtils.Runtime.Physics
         #endregion
 
         #region Overrides
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
             if (!Utilities.IsValid(ToTrack)) {
-                Error($"{nameof(ToTrack)} not set");
+                _Error($"{nameof(ToTrack)} not set");
                 return false;
             }
 
             if (!Utilities.IsValid(TimeSource)) {
-                Error($"{nameof(TimeSource)} not set");
+                _Error($"{nameof(TimeSource)} not set");
                 return false;
             }
 

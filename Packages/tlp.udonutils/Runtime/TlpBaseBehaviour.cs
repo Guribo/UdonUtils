@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Extensions;
@@ -7,11 +6,11 @@ using TLP.UdonUtils.Runtime.Logger;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
+using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
 using VRC.Udon.Common;
 using VRC.Udon.Common.Interfaces;
 using Debug = UnityEngine.Debug;
-using Object = UnityEngine.Object;
 
 #if UNITY_EDITOR
 using UdonSharpEditor;
@@ -26,11 +25,11 @@ namespace TLP.UdonUtils.Editor.Core
     /// </summary>
     public abstract class TlpBehaviourEditor : UnityEditor.Editor
     {
-        protected abstract string GetDescription();
+        protected abstract string _GetDescription();
 
         public override void OnInspectorGUI() {
             if (UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target, false, false)) return;
-            EditorGUILayout.HelpBox(GetDescription(), MessageType.Info);
+            EditorGUILayout.HelpBox(_GetDescription(), MessageType.Info);
             base.OnInspectorGUI();
         }
     }
@@ -65,7 +64,8 @@ namespace TLP.UdonUtils.Runtime
     {
         public virtual int ExecutionOrderReadOnly => ExecutionOrder;
 
-        [PublicAPI] public const int ExecutionOrder = TlpExecutionOrder.DefaultStart + 1;
+        [PublicAPI]
+        public const int ExecutionOrder = TlpExecutionOrder.DefaultStart + 1;
 
         #region Constants
         protected const int False = 0;
@@ -116,6 +116,10 @@ namespace TLP.UdonUtils.Runtime
         public ELogLevel Severity = ELogLevel.Debug;
         #endregion
 
+        #region State
+        internal int PendingSerializations;
+        #endregion
+
         #region Networking
         /// <summary>
         /// Can be used to pause any synchronization locally, only works if inheriting scripts
@@ -136,68 +140,63 @@ namespace TLP.UdonUtils.Runtime
                 }
 
                 if (Networking.IsOwner(gameObject)) {
-                    MarkNetworkDirty();
+                    _MarkNetworkDirty();
                     return;
                 }
 
-                SendCustomNetworkEvent(NetworkEventTarget.Owner, nameof(RPC_RequestSerialization));
+                SendCustomNetworkEvent(NetworkEventTarget.Owner, nameof(_RPC_RequestSerialization));
             }
         }
 
         protected VRCPlayerApi LocalPlayer { get; private set; }
 
         [PublicAPI]
-        public bool IsPendingSerialization()
-        {
+        public bool _IsPendingSerialization() {
             return PendingSerializations > 0;
         }
 
         [PublicAPI]
-        public bool DropPendingSerializations()
-        {
+        public bool _DropPendingSerializations() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(DropPendingSerializations));
+            _DebugLog(nameof(_DropPendingSerializations));
 #endif
             #endregion
 
-            bool hadPending = IsPendingSerialization();
+            bool hadPending = _IsPendingSerialization();
             PendingSerializations = 0;
             return hadPending;
         }
 
-        internal int PendingSerializations;
 
         [PublicAPI]
-        public bool MarkNetworkDirty()
-        {
+        public bool _MarkNetworkDirty() {
 #if TLP_DEBUG
-            DebugLog(nameof(MarkNetworkDirty));
+            _DebugLog(nameof(_MarkNetworkDirty));
 #endif
             if (!Networking.IsOwner(gameObject)) {
-                Warn("Can not mark network dirty, not owner");
+                _Warn("Can not mark network dirty, not owner");
                 return false;
             }
 
             if (SyncPaused) {
-                Warn($"Synchronization is paused, set {nameof(SyncPaused)} to false first");
+                _Warn($"Synchronization is paused, set {nameof(SyncPaused)} to false first");
                 return false;
             }
 
             PendingSerializations = Math.Max(1, PendingSerializations + 1);
-            SendCustomEventDelayedFrames(nameof(ExecuteScheduledSerialization), 0);
+            SendCustomEventDelayedFrames(nameof(_ExecuteScheduledSerialization), 0);
             return true;
         }
 
-        public void ExecuteScheduledSerialization()
-        {
+        public void _ExecuteScheduledSerialization() {
 #if TLP_DEBUG
-            DebugLog(nameof(ExecuteScheduledSerialization));
+            _DebugLog(nameof(_ExecuteScheduledSerialization));
 #endif
             if (PendingSerializations < 1) {
                 #region TLP_DEBUG
 #if TLP_DEBUG
-                DebugLog("Nothing to do");
+                _DebugLog("Nothing to do");
 #endif
                 #endregion
 
@@ -209,7 +208,7 @@ namespace TLP.UdonUtils.Runtime
 
                 #region TLP_DEBUG
 #if TLP_DEBUG
-                DebugLog("Not owner");
+                _DebugLog("Not owner");
 #endif
                 #endregion
 
@@ -219,11 +218,10 @@ namespace TLP.UdonUtils.Runtime
             RequestSerialization();
         }
 
-        public override void OnPreSerialization()
-        {
+        public override void OnPreSerialization() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnPreSerialization));
+            _DebugLog(nameof(OnPreSerialization));
 #endif
             #endregion
 
@@ -232,12 +230,13 @@ namespace TLP.UdonUtils.Runtime
             }
         }
 
-        public override void OnPostSerialization(SerializationResult result)
-        {
+        public override void OnPostSerialization(SerializationResult result) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(
-                    $"{nameof(OnPostSerialization)}: {(result.success ? $"Sent {result.byteCount} bytes after {PendingSerializations} send requests" : $"Sending failed, {PendingSerializations} send requests active")}");
+            string statusMessage = result.success
+                    ? $"Sent {result.byteCount} bytes after {PendingSerializations} send requests"
+                    : $"Sending failed, {PendingSerializations} send requests active";
+            _DebugLog($"{nameof(OnPostSerialization)}: {statusMessage}");
 #endif
             #endregion
 
@@ -247,18 +246,17 @@ namespace TLP.UdonUtils.Runtime
             }
 
             if (AutoRetrySendOnFailure) {
-                MarkNetworkDirty();
+                _MarkNetworkDirty();
             }
         }
 
-        public override void OnDeserialization(DeserializationResult deserializationResult)
-        {
+        public override void OnDeserialization(DeserializationResult deserializationResult) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(OnDeserialization)}: VRC: " +
-                     $"sendTime={deserializationResult.sendTime:F6}s; " +
-                     $"receiveTime={deserializationResult.receiveTime:F6}s; " +
-                     $"latency={deserializationResult.Latency() * 1000:F3}ms");
+            _DebugLog($"{nameof(OnDeserialization)}: VRC: " +
+                      $"sendTime={deserializationResult.sendTime:F6}s; " +
+                      $"receiveTime={deserializationResult.receiveTime:F6}s; " +
+                      $"latency={deserializationResult._Latency() * 1000:F3}ms");
 #endif
             #endregion
         }
@@ -271,8 +269,7 @@ namespace TLP.UdonUtils.Runtime
         /// Returns true if the local player successfully owns the network instance of the game object,
         /// false if ownership is not successfully established or the behavior is not initialized correctly.
         /// </returns>
-        public bool EnsureLocalOwnership()
-        {
+        public bool _EnsureLocalOwnership() {
             if (!HasStartedOk) {
                 return false;
             }
@@ -285,7 +282,7 @@ namespace TLP.UdonUtils.Runtime
                 return true;
             }
 
-            Error($"{this.GetScriptPathInScene()} can not be owned by local player");
+            _Error($"{this._GetScriptPathInScene()} can not be owned by local player");
             return false;
         }
 
@@ -293,15 +290,15 @@ namespace TLP.UdonUtils.Runtime
         /// <summary>
         /// Called by remote clients when they unpause synchronization
         /// </summary>
-        public void RPC_RequestSerialization()
-        {
+        [NetworkCallable(1)]
+        public void _RPC_RequestSerialization() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(RPC_RequestSerialization));
+            _DebugLog(nameof(_RPC_RequestSerialization));
 #endif
             #endregion
 
-            bool unused = MarkNetworkDirty();
+            bool unused = _MarkNetworkDirty();
         }
         #endregion
         #endregion
@@ -312,9 +309,9 @@ namespace TLP.UdonUtils.Runtime
         /// <summary>
         /// Whether Unity has called the Start method
         /// </summary>
-        public bool IsReceivingStart { private set; get; }
+        protected bool IsReceivingStart { get; private set; }
 
-        public bool HasReceivedStart { protected set; get; }
+        public bool HasReceivedStart { get; protected set; }
 
         public bool HasStartedOk
         {
@@ -325,17 +322,17 @@ namespace TLP.UdonUtils.Runtime
                 }
 
                 if (HasReceivedStart) {
-                    Error($"Accessing {nameof(HasStartedOk)} after validation failed");
+                    _Error($"Accessing {nameof(HasStartedOk)} after validation failed");
                     return false;
                 }
 
                 if (IsReceivingStart) {
-                    Error($"Accessing {nameof(HasStartedOk)} during {nameof(Start)}");
+                    _Error($"Accessing {nameof(HasStartedOk)} during {nameof(Start)}");
                     return false;
                 }
 
                 if (!Utilities.IsValid(Networking.LocalPlayer)) {
-                    Error($"{nameof(HasStartedOk)}: No active {nameof(Networking.LocalPlayer)}");
+                    _Error($"{nameof(HasStartedOk)}: No active {nameof(Networking.LocalPlayer)}");
                     return false;
                 }
 
@@ -364,14 +361,7 @@ namespace TLP.UdonUtils.Runtime
 #endif
         #endregion
 
-
-#if UNITY_INCLUDE_TESTS && !COMPILER_UDONSHARP
-        public bool IsActiveAndEnabled => Utilities.IsValid(this) && enabled;
-#else
-        public bool IsActiveAndEnabled => Utilities.IsValid(this) && enabled && gameObject.activeInHierarchy;
-#endif
-
-        public virtual bool HasFailedToStart => (IsReceivingStart || HasReceivedStart) && !HasStartedOk;
+        public bool HasFailedToStart => (IsReceivingStart || HasReceivedStart) && !HasStartedOk;
         #endregion
 
 #if UNITY_EDITOR && !COMPILER_UDONSHARP
@@ -380,7 +370,6 @@ namespace TLP.UdonUtils.Runtime
         internal void Start()
         {
 #endif
-
             if (HasReceivedStart) {
                 return;
             }
@@ -390,24 +379,24 @@ namespace TLP.UdonUtils.Runtime
             #region TLP_DEBUG
 #if TLP_DEBUG
             if (!_isEarlyStart) {
-                DebugLog(nameof(Start));
+                _DebugLog(nameof(Start));
                 if (Utilities.IsValid(Networking.LocalPlayer)) {
-                    AssertExecutionOrderCorrect();
+                    _AssertExecutionOrderCorrect();
                 }
             } else {
-                DebugLog($"{nameof(Start)} (early)");
+                _DebugLog($"{nameof(Start)} (early)");
             }
 #endif
             #endregion
 
             LocalPlayer = Networking.LocalPlayer;
-            if (SetupAndValidate() && IsSet(LocalPlayer, nameof(LocalPlayer))) {
+            if (_SetupAndValidate() && _IsSet(LocalPlayer, nameof(LocalPlayer))) {
                 HasStartedOk = true;
             } else {
                 HasStartedOk = false;
-                ErrorAndDisableGameObject(
+                _ErrorAndDisableGameObject(
                         $"Some dependencies are not set up correctly. " +
-                        $"Deactivating GameObject '{transform.GetPathInScene()}'");
+                        $"Deactivating GameObject '{transform._GetPathInScene()}'");
             }
 
             IsReceivingStart = false;
@@ -421,52 +410,49 @@ namespace TLP.UdonUtils.Runtime
         /// that e.g. all serialized references are set up correctly.
         /// </summary>
         /// <returns>shall return false if any essential reference is missing</returns>
-        protected virtual bool SetupAndValidate()
-        {
+        protected virtual bool _SetupAndValidate() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(SetupAndValidate));
+            _DebugLog(nameof(_SetupAndValidate));
 #endif
             #endregion
 
-            if (GetLogger()) {
+            if (_GetLogger()) {
                 return true;
             }
 
-            if (MissingLoggerLogged()) {
+            if (_MissingLoggerLogged()) {
                 // no need to fail again on all the other scripts if the first
                 // one already logged the error regarding the missing logger
                 return true;
             }
 
-            GloballyRememberMissingLoggerLogged();
+            _GloballyRememberMissingLoggerLogged();
             Debug.LogError(
                     $"{LOGPrefix}: No active {nameof(TlpLogger)} found. Please add the Prefab 'TLP_Logger' to your scene and make sure the GameObject is activated",
                     this);
             return false;
         }
 
-        private static void GloballyRememberMissingLoggerLogged()
-        {
+        private static void _GloballyRememberMissingLoggerLogged() {
             Networking.LocalPlayer.SetPlayerTag(PlayerTagTlpLoggerMissingLogged, "true");
         }
         #endregion
 
         #region Logging
         private bool _hadLogger;
-        private string LOGPrefix => $"[{ExecutionOrderReadOnly} {this.GetScriptPathInScene()}] ";
+        private string LOGPrefix => $"[{ExecutionOrderReadOnly} {this._GetScriptPathInScene()}] ";
 
 
         protected TlpLogger Logger { private set; get; }
 
-        public void DebugLog(string message)
-        {
+        public void _DebugLog(string message) {
 #if TLP_DEBUG
             if ((int)Severity < (int)ELogLevel.Debug) {
                 return;
             }
 
-            if (GetLogger()) {
+            if (_GetLogger()) {
                 Logger.DebugLog(LOGPrefix, message, ExecutionOrder, this);
             } else {
                 Debug.Log(LOGPrefix + message, this);
@@ -474,66 +460,59 @@ namespace TLP.UdonUtils.Runtime
 #endif
         }
 
-        public void Info(string message)
-        {
+        protected void _Info(string message) {
             if ((int)Severity < (int)ELogLevel.Info) {
                 return;
             }
 
-            if (GetLogger()) {
+            if (_GetLogger()) {
                 Logger.Info(LOGPrefix, message, this);
             } else {
                 Debug.Log(LOGPrefix + message, this);
             }
         }
 
-        public void Warn(string message)
-        {
+        protected void _Warn(string message) {
             if ((int)Severity < (int)ELogLevel.Warning) {
                 return;
             }
 
-            if (GetLogger()) {
+            if (_GetLogger()) {
                 Logger.Warn(LOGPrefix, message, this);
             } else {
                 Debug.LogWarning(LOGPrefix + message, this);
             }
         }
 
-        protected void ErrorAndDisableComponent(string message)
-        {
-            Error(message);
+        protected void _ErrorAndDisableComponent(string message) {
+            _Error(message);
             enabled = false;
         }
 
-        protected void ErrorAndDisableGameObject(string message)
-        {
-            Error(message);
+        protected void _ErrorAndDisableGameObject(string message) {
+            _Error(message);
             gameObject.SetActive(false);
         }
 
-        protected void ErrorAndDisableComponentAndGameObject(string message)
-        {
-            Error(message);
+        private void _ErrorAndDisableComponentAndGameObject(string message) {
+            _Error(message);
             enabled = false;
             gameObject.SetActive(false);
         }
 
-        public void Error(string message)
-        {
+        protected void _Error(string message) {
             if ((int)Severity < (int)ELogLevel.Assertion) {
                 return;
             }
 
-            if (GetLogger()) {
+            if (_GetLogger()) {
                 Logger.Error(LOGPrefix, message, this);
             } else {
                 Debug.LogError(LOGPrefix + message, this);
             }
         }
 
-        private bool GetLogger()
-        {
+        private bool _GetLogger() {
             if (Utilities.IsValid(Logger)) {
                 return true;
             }
@@ -544,8 +523,8 @@ namespace TLP.UdonUtils.Runtime
 #if TLP_DEBUG
                     Debug.LogWarning($"{LOGPrefix} : Logger is already destroyed", this);
 #endif
-                } else if (!MissingLoggerLogged()) {
-                    GloballyRememberMissingLoggerLogged();
+                } else if (!_MissingLoggerLogged()) {
+                    _GloballyRememberMissingLoggerLogged();
                     Debug.LogError(
                             $"{LOGPrefix}: No active TlpLogger found. Please add the Prefab '{TlpLogger.ExpectedGameObjectName()}' to your scene and make sure the GameObject is activated",
                             this);
@@ -559,28 +538,7 @@ namespace TLP.UdonUtils.Runtime
             return Utilities.IsValid(Logger);
         }
 
-        /// <summary>
-        /// Notes: Has no effect unless the corresponding compiler flag is set in Unity via the menu
-        /// <b>TLP/UdonUtils/Log Assertion Errors/Enable</b>.<br/>
-        /// The option is saved in the Editor Preferences and will be the same across multiple Unity projects that use
-        /// the same Unity version!
-        ///<br/><br/>
-        /// When active it will return false if the condition is false, it will log an error message filled
-        /// with the name of the context object the error occurred on and with the given error message.
-        /// </summary>
-        /// <param name="condition">Condition expected to be true, false with log the error message</param>
-        /// <param name="message">Compact error message, will be surrounded by context info</param>
-        /// <param name="context">Object which is relevant to the condition failing, usually a behaviour or GameObject</param>
-        /// <returns>The value of condition</returns>
-        [Obsolete("Use Assert(bool condition, string message) instead", true)]
-        protected bool Assert(bool condition, string message, Object context)
-        {
-            return false;
-        }
-
-        [Conditional("TLP_DEBUG")]
-        protected void Assert(bool condition, string message)
-        {
+        protected void _Assert(bool condition, string message) {
             if ((int)Severity < (int)ELogLevel.Assertion) {
                 return;
             }
@@ -589,30 +547,36 @@ namespace TLP.UdonUtils.Runtime
                 return;
             }
 
-            ErrorAndDisableComponentAndGameObject("Assertion failed :  '" + message + "'");
+            _ErrorAndDisableComponentAndGameObject("Assertion failed :  '" + message + "'");
             Debug.Assert(condition, message);
         }
         #endregion
 
         #region Event listening
-        [FormerlySerializedAs("eventInstigator")] [HideInInspector] [PublicAPI]
+        [FormerlySerializedAs("eventInstigator")]
+        [HideInInspector]
+        [PublicAPI]
         public TlpBaseBehaviour EventInstigator;
 
         [PublicAPI]
-        public virtual void OnEvent(string eventName)
-        {
+        public virtual void _OnEvent(string eventName) {
 #if TLP_DEBUG
-            DebugLog_OnEvent(eventName);
+            _DebugLog_OnEvent(eventName);
 #endif
-            Error($"Unhandled event '{eventName}'");
+            _Error($"Unhandled event '{eventName}'");
         }
         #endregion
 
         #region Pool
-        [FormerlySerializedAs("pool")] [PublicAPI] [HideInInspector] public TlpBaseBehaviour Pool;
+        [FormerlySerializedAs("pool")]
+        [PublicAPI]
+        [HideInInspector]
+        public TlpBaseBehaviour Pool;
 
         // true if retrieved from the pool (use the pool reference to return it)
-        [PublicAPI] [HideInInspector] public bool PoolableInUse;
+        [PublicAPI]
+        [HideInInspector]
+        public bool PoolableInUse;
 
         /// <summary>
         /// Called after instantiation (before OnReadyForUse) by the pool if this is a new instances that was never in the pool.
@@ -622,10 +586,9 @@ namespace TLP.UdonUtils.Runtime
         /// Note: Pooled objects returned from the pool have this method called before they are enabled!
         /// </summary>
         [PublicAPI]
-        public virtual void OnCreated()
-        {
+        public virtual void _OnCreated() {
 #if TLP_DEBUG
-            DebugLog(nameof(OnCreated));
+            _DebugLog(nameof(_OnCreated));
 #endif
         }
 
@@ -635,10 +598,9 @@ namespace TLP.UdonUtils.Runtime
         /// Note: Pooled objects returned from the pool have this method called before they are enabled!
         /// </summary>
         [PublicAPI]
-        public virtual void OnReadyForUse()
-        {
+        public virtual void _OnReadyForUse() {
 #if TLP_DEBUG
-            DebugLog(nameof(OnReadyForUse));
+            _DebugLog(nameof(_OnReadyForUse));
 #endif
         }
 
@@ -649,27 +611,24 @@ namespace TLP.UdonUtils.Runtime
         /// Note: Pooled objects returning to the pool have this method called after they are disabled!
         /// </summary>
         [PublicAPI]
-        public virtual void OnPrepareForReturnToPool()
-        {
+        public virtual void _OnPrepareForReturnToPool() {
 #if TLP_DEBUG
-            DebugLog(nameof(OnPrepareForReturnToPool));
+            _DebugLog(nameof(_OnPrepareForReturnToPool));
 #endif
         }
         #endregion
 
         #region Internal
-        protected bool IsSet(object variable, string variableName)
-        {
+        protected bool _IsSet(object variable, string variableName) {
             if (Utilities.IsValid(variable)) {
                 return true;
             }
 
-            Error($"{variableName} is not set");
+            _Error($"{variableName} is not set");
             return false;
         }
 
-        private static bool MissingLoggerLogged()
-        {
+        private static bool _MissingLoggerLogged() {
             var localPlayer = Networking.LocalPlayer;
             if (!Utilities.IsValid(localPlayer)) {
                 return false;
@@ -678,22 +637,20 @@ namespace TLP.UdonUtils.Runtime
             return localPlayer.GetPlayerTag(PlayerTagTlpLoggerMissingLogged) == "true";
         }
 
-        private void AssertExecutionOrderCorrect()
-        {
+        private void _AssertExecutionOrderCorrect() {
             const string playerTagExecOrder = "TLP/Base/ExecOrder";
             const string playerTagLastFrameStart = "TLP/Base/LastFrameStart";
             const string playerTagLastFrameBehaviour = "TLP/Base/LastFrameBehaviour";
             string lastStarted = Networking.LocalPlayer.GetPlayerTag(playerTagExecOrder);
             string lastFrameStart = Networking.LocalPlayer.GetPlayerTag(playerTagLastFrameStart);
             string lastFrameBehaviour = Networking.LocalPlayer.GetPlayerTag(playerTagLastFrameBehaviour);
-            ValidateStartOrder(lastFrameStart, lastStarted, lastFrameBehaviour);
+            _ValidateStartOrder(lastFrameStart, lastStarted, lastFrameBehaviour);
             Networking.LocalPlayer.SetPlayerTag(playerTagExecOrder, ExecutionOrderReadOnly.ToString());
             Networking.LocalPlayer.SetPlayerTag(playerTagLastFrameStart, Time.frameCount.ToString());
             Networking.LocalPlayer.SetPlayerTag(playerTagLastFrameBehaviour, GetUdonTypeName());
         }
 
-        private void ValidateStartOrder(string lastFrameStart, string lastStarted, string lastBehaviour)
-        {
+        private void _ValidateStartOrder(string lastFrameStart, string lastStarted, string lastBehaviour) {
             if (string.IsNullOrEmpty(lastFrameStart)) {
                 return;
             }
@@ -715,19 +672,18 @@ namespace TLP.UdonUtils.Runtime
             }
 
             if (lastBehaviour != GetUdonTypeName() && ExecutionOrderReadOnly <= execOrder) {
-                Warn(
+                _Warn(
                         $"Received Start() in incorrect order, previously started script '{lastBehaviour}' in this frame had " +
                         $"ExecutionOrder {execOrder} while {GetUdonTypeName()} has ExecutionOrder {ExecutionOrderReadOnly}. " +
-                        $"Please add [TlpDefaultExecutionOrder(ExecutionOrder)] to this script or the script that started before this one.");
+                        "Please add [TlpDefaultExecutionOrder(ExecutionOrder)] to this script or the script that started before this one.");
             }
         }
         #endregion
 
         #region Debugging
 #if TLP_DEBUG
-        protected void DebugLog_OnEvent(string eventName)
-        {
-            DebugLog($"{nameof(OnEvent)}: {eventName} (Instigator: {EventInstigator.GetScriptPathInScene()})");
+        protected void _DebugLog_OnEvent(string eventName) {
+            _DebugLog($"{nameof(_OnEvent)}: {eventName} (Instigator: {EventInstigator._GetScriptPathInScene()})");
         }
 
 #endif

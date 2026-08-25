@@ -32,14 +32,14 @@ namespace TLP.UdonUtils.Runtime.Sync.SyncedEvents
         /// </summary>
         /// <param name="instigator"></param>
         /// <returns></returns>
-        public override bool Raise(TlpBaseBehaviour instigator) {
-            if (!MarkNetworkDirty()) {
+        public override bool _Raise(TlpBaseBehaviour instigator) {
+            if (!_MarkNetworkDirty()) {
                 // as this is a networked event treat it as a failure when the player can not request sync
                 return false;
             }
 
-            if (!base.Raise(instigator)) {
-                DropPendingSerializations();
+            if (!base._Raise(instigator)) {
+                _DropPendingSerializations();
                 return false;
             }
 
@@ -57,14 +57,14 @@ namespace TLP.UdonUtils.Runtime.Sync.SyncedEvents
         /// </summary>
         /// <param name="instigator"></param>
         /// <returns></returns>
-        public bool RaiseRemoteOnly(TlpBaseBehaviour instigator) {
+        public bool _RaiseRemoteOnly(TlpBaseBehaviour instigator) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(RaiseRemoteOnly));
+            _DebugLog(nameof(_RaiseRemoteOnly));
 #endif
             #endregion
 
-            if (!MarkNetworkDirty()) {
+            if (!_MarkNetworkDirty()) {
                 // as this is a networked event treat it as a failure when the player can not request sync
                 return false;
             }
@@ -82,7 +82,7 @@ namespace TLP.UdonUtils.Runtime.Sync.SyncedEvents
             base.OnDeserialization(deserializationResult);
 
             // raise without requesting another serialization by using the base implementation
-            bool unused = base.Raise(this);
+            bool unused = base._Raise(this);
         }
 
         public override void OnPostSerialization(SerializationResult result) {

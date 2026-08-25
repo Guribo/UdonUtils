@@ -5,6 +5,7 @@ using TLP.UdonUtils.Runtime.Extensions;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
+using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
 using VRC.Udon.Common;
 
@@ -203,65 +204,65 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         #endregion
 
         #region U# Lifecycle
-        public void OnEnable() {
-            if (DependenciesValid()) {
-                ForceSynchronizeTime();
+        internal void OnEnable() {
+            if (_DependenciesValid()) {
+                _ForceSynchronizeTime();
             }
         }
 
-        public void Update() {
-            UpdateTime();
+        internal void Update() {
+            _UpdateTime();
         }
         #endregion
 
         #region Base Overrides
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
-            if (!DependenciesValid()) {
+            if (!_DependenciesValid()) {
                 return false;
             }
 
-            string existingInstance = Networking.LocalPlayer.GetPlayerTagSafe(nameof(TlpNetworkTime));
+            string existingInstance = Networking.LocalPlayer._GetPlayerTagSafe(nameof(TlpNetworkTime));
             string idString = GetInstanceID().ToString();
 
             if (!string.IsNullOrEmpty(existingInstance) && existingInstance != idString) {
-                ErrorAndDisableGameObject(
+                _ErrorAndDisableGameObject(
                         $"Another instance of {nameof(TlpNetworkTime)} already exists: {idString} (this) != {existingInstance} (other)");
                 return false;
             }
 
-            Networking.LocalPlayer.SetPlayerTagSafe(nameof(TlpNetworkTime), idString);
-            Delayed_RefreshReferenceTime();
+            Networking.LocalPlayer._SetPlayerTagSafe(nameof(TlpNetworkTime), idString);
+            _Delayed_RefreshReferenceTime();
             return true;
         }
 
-        public void Delayed_RefreshReferenceTime() {
+        public void _Delayed_RefreshReferenceTime() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(Delayed_RefreshReferenceTime));
+            _DebugLog(nameof(_Delayed_RefreshReferenceTime));
 #endif
             #endregion
 
             if (Networking.IsOwner(gameObject)) {
-                MarkNetworkDirty();
+                _MarkNetworkDirty();
             }
 
             if (ReferenceTimeRefreshInterval > 0) {
-                SendCustomEventDelayedSeconds(nameof(Delayed_RefreshReferenceTime), ReferenceTimeRefreshInterval);
+                SendCustomEventDelayedSeconds(nameof(_Delayed_RefreshReferenceTime), ReferenceTimeRefreshInterval);
             }
         }
 
         public override void OnPreSerialization() {
             if (Utilities.IsValid(GameTime)) {
-                WorkingReferenceTime = TimeAsDouble();
+                WorkingReferenceTime = _TimeAsDouble();
                 ReferenceTime = WorkingReferenceTime;
 
-                Info($"{nameof(OnPreSerialization)}: refreshed reference time to {WorkingReferenceTime:F6}s");
-                if (Utilities.IsValid(OnReferenceTimeUpdated) && !OnReferenceTimeUpdated.Raise(this)) {
-                    Error($"{nameof(OnDeserialization)}: Failed to raise {nameof(OnReferenceTimeUpdated)}");
+                _Info($"{nameof(OnPreSerialization)}: refreshed reference time to {WorkingReferenceTime:F6}s");
+                if (Utilities.IsValid(OnReferenceTimeUpdated) && !OnReferenceTimeUpdated._Raise(this)) {
+                    _Error($"{nameof(OnDeserialization)}: Failed to raise {nameof(OnReferenceTimeUpdated)}");
                 }
             }
 
@@ -271,9 +272,9 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         public override void OnDeserialization(DeserializationResult deserializationResult) {
             base.OnDeserialization(deserializationResult);
             WorkingReferenceTime = ReferenceTime;
-            Info($"{nameof(OnDeserialization)}: refreshed reference time to {WorkingReferenceTime:F6}s");
-            if (Utilities.IsValid(OnReferenceTimeUpdated) && !OnReferenceTimeUpdated.Raise(this)) {
-                Error($"{nameof(OnDeserialization)}: Failed to raise {nameof(OnReferenceTimeUpdated)}");
+            _Info($"{nameof(OnDeserialization)}: refreshed reference time to {WorkingReferenceTime:F6}s");
+            if (Utilities.IsValid(OnReferenceTimeUpdated) && !OnReferenceTimeUpdated._Raise(this)) {
+                _Error($"{nameof(OnDeserialization)}: Failed to raise {nameof(OnReferenceTimeUpdated)}");
             }
         }
         #endregion
@@ -281,20 +282,22 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         #region Public
         /// <returns>The <see cref="TlpNetworkTime"/> based on game
         /// time with an over multiple frames calculated offset and drift compensation</returns>
-        public override float Time() {
+        public override float _Time() {
             if (!HasStartedOk) {
                 return 0;
             }
-            return (float)GetNetworkTime();
+
+            return (float)_GetNetworkTime();
         }
 
         /// <returns>The <see cref="TlpNetworkTime"/> based on game
         /// time with an over multiple frames calculated offset and drift compensation</returns>
-        public override double TimeAsDouble() {
+        public override double _TimeAsDouble() {
             if (!HasStartedOk) {
                 return 0;
             }
-            return GetNetworkTime();
+
+            return _GetNetworkTime();
         }
 
         /// <summary>
@@ -305,8 +308,8 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         /// <param name="networkTime">Network time in seconds</param>
         /// <returns><see cref="GameTime"/> corresponding to the server time</returns>
         [PublicAPI]
-        public float NetworkTimeToGameTime(float networkTime) {
-            return networkTime - (float)GetGameTimeOffset();
+        public float _NetworkTimeToGameTime(float networkTime) {
+            return networkTime - (float)_GetGameTimeOffset();
         }
 
         /// <summary>
@@ -317,16 +320,16 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         /// <param name="networkTime">Network time in seconds</param>
         /// <returns><see cref="GameTime"/> corresponding to the server time</returns>
         [PublicAPI]
-        public double NetworkTimeToGameTimeAsDouble(double networkTime) {
-            return networkTime - GetGameTimeOffset();
+        public double _NetworkTimeToGameTimeAsDouble(double networkTime) {
+            return networkTime - _GetGameTimeOffset();
         }
 
         /// <summary>
         /// The difference between <see cref="RealNetworkTime"/> and <see cref="GameTime"/>
         /// </summary>
         /// <returns>Offset = RealNetworkTime - GameTime</returns>
-        public double GetGameTimeOffset() {
-            return _previousAverageOffset.LerpDouble(
+        public double _GetGameTimeOffset() {
+            return _previousAverageOffset._LerpDouble(
                     _averageOffset,
                     DriftCompensationRate * _offsetSampleCount / Samples
             );
@@ -343,7 +346,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
                     return 0;
                 }
 
-                double _ = GetNetworkTime(); // ensure everything is updated first if outdated
+                double _ = _GetNetworkTime(); // ensure everything is updated first if outdated
                 return _exactError;
             }
         }
@@ -359,8 +362,8 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
                 if (!HasStartedOk) {
                     return 0;
                 }
-                
-                double _ = GetNetworkTime(); // ensure everything is updated first if outdated
+
+                double _ = _GetNetworkTime(); // ensure everything is updated first if outdated
                 return _averageError;
             }
         }
@@ -374,7 +377,7 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         /// Searches for the gameobject TLP_NetworkTime in the scene in order to get its TLPNetworkTime component
         /// </summary>
         /// <returns>the found component or null if not found</returns>
-        public static TlpNetworkTime GetInstance() {
+        public static TlpNetworkTime _GetInstance() {
             var instance = GameObject.Find("TLP_NetworkTime");
             if (instance) {
                 return instance.GetComponent<TlpNetworkTime>();
@@ -387,24 +390,24 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
 
         #region Internal
         /// <returns>True if all dependencies are set</returns>
-        private bool DependenciesValid() {
+        private bool _DependenciesValid() {
             if (!Utilities.IsValid(GameTime)) {
-                Error($"{nameof(GameTime)} is not set");
+                _Error($"{nameof(GameTime)} is not set");
                 return false;
             }
 
             if (!Utilities.IsValid(RealNetworkTime)) {
-                Error($"{nameof(RealNetworkTime)} is not set");
+                _Error($"{nameof(RealNetworkTime)} is not set");
                 return false;
             }
 
             if (!Utilities.IsValid(FrameCount)) {
-                Error($"{nameof(FrameCount)} is not set");
+                _Error($"{nameof(FrameCount)} is not set");
                 return false;
             }
 
             if (!Utilities.IsValid(OnReferenceTimeUpdated)) {
-                Error($"{nameof(OnReferenceTimeUpdated)} is not set");
+                _Error($"{nameof(OnReferenceTimeUpdated)} is not set");
                 return false;
             }
 
@@ -415,61 +418,62 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         /// Ensures that the current delta between game time and network time is used and sampling is reset.
         /// Executes either instantly if there was no update in the last frame or delayed if there was one.
         /// </summary>
-        internal void ForceSynchronizeTime() {
+        internal void _ForceSynchronizeTime() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(ForceSynchronizeTime));
+            _DebugLog(nameof(_ForceSynchronizeTime));
 #endif
             #endregion
 
-            if (UpdatedThisFrame()) {
+            if (_UpdatedThisFrame()) {
                 _wantsSync = true;
                 return;
             }
 
             _wantsSync = false;
-            SampledRealServerTime = RealNetworkTime.TimeAsDouble();
-            _previousAverageOffset = GetNetworkGameTimeDelta();
+            SampledRealServerTime = RealNetworkTime._TimeAsDouble();
+            _previousAverageOffset = _GetNetworkGameTimeDelta();
             _averageOffset = _previousAverageOffset;
             _averageError = 0;
             _exactError = 0;
-            _frameLastUpdated = FrameCount.Frame();
-            ResetSampling();
+            _frameLastUpdated = FrameCount._Frame();
+            _ResetSampling();
         }
 
         /// <summary>
         /// samples the frame time deltas to calculate a running average time offset between the game and network
         /// <remarks>Do not call in FixedUpdate() if you are using dynamic sampling!</remarks>
         /// </summary>
-        internal void UpdateTime() {
+        internal void _UpdateTime() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(UpdateTime));
+            _DebugLog(nameof(_UpdateTime));
 #endif
             #endregion
 
-            if (UpdatedThisFrame()) {
+            if (_UpdatedThisFrame()) {
                 return;
             }
 
-            
-            SampledRealServerTime = RealNetworkTime.TimeAsDouble();
-            _exactError = SampledRealServerTime - (GameTime.TimeAsDouble() + GetGameTimeOffset());
+
+            SampledRealServerTime = RealNetworkTime._TimeAsDouble();
+            _exactError = SampledRealServerTime - (GameTime._TimeAsDouble() + _GetGameTimeOffset());
             if (_wantsSync || Math.Abs(_exactError) > DriftThreshold) {
-                ForceSynchronizeTime();
+                _ForceSynchronizeTime();
                 return;
             }
-            _frameLastUpdated = FrameCount.Frame(); // update after ForceSynchronizeTime as it also has a frame check
 
-            _incompleteAverageOffset += GetNetworkGameTimeDelta() / Samples;
+            _frameLastUpdated = FrameCount._Frame(); // update after ForceSynchronizeTime as it also has a frame check
+
+            _incompleteAverageOffset += _GetNetworkGameTimeDelta() / Samples;
             ++_offsetSampleCount;
 
             if (_offsetSampleCount < Samples) {
                 return;
             }
 
-            EvaluateError();
-            ResetSampling();
+            _EvaluateError();
+            _ResetSampling();
         }
 
         ///<brief>
@@ -477,15 +481,15 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         /// </brief>
         /// <returns>The network time based on game
         /// time with an over time calculated offset and drift compensation</returns>
-        private double GetNetworkTime() {
-            if (UnityEngine.Time.inFixedTimeStep || UpdatedThisFrame()) {
+        private double _GetNetworkTime() {
+            if (UnityEngine.Time.inFixedTimeStep || _UpdatedThisFrame()) {
                 // don't update in FixedUpdate as it can be called
                 // multiple times per frame and has a different delta time
-                return GameTime.TimeAsDouble() + GetGameTimeOffset();
+                return GameTime._TimeAsDouble() + _GetGameTimeOffset();
             }
 
-            UpdateTime();
-            return GameTime.TimeAsDouble() + GetGameTimeOffset();
+            _UpdateTime();
+            return GameTime._TimeAsDouble() + _GetGameTimeOffset();
         }
 
         /// <summary>
@@ -493,8 +497,8 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         /// The drift is calculated and stored to help compensate for drift in future updates.
         /// The incomplete average becomes the new running average.
         /// </summary>
-        private void EvaluateError() {
-            _previousAverageOffset = GetGameTimeOffset();
+        private void _EvaluateError() {
+            _previousAverageOffset = _GetGameTimeOffset();
             _averageError = _incompleteAverageOffset - _averageOffset;
             _averageOffset = _incompleteAverageOffset;
         }
@@ -504,17 +508,17 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         /// If enabled, it also dynamically sets the sample count based on frame rate to ensure
         /// accurate sampling over a set duration.
         /// </summary>
-        private void ResetSampling() {
+        private void _ResetSampling() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(ResetSampling));
+            _DebugLog(nameof(_ResetSampling));
 #endif
             #endregion
 
             _incompleteAverageOffset = 0;
             _offsetSampleCount = 0;
 
-            float deltaTime = GameTime.SmoothDeltaTime();
+            float deltaTime = GameTime._SmoothDeltaTime();
             if (AutoAdjustSampleCount && deltaTime > 0) {
                 Samples = Mathf.RoundToInt(
                         Mathf.Clamp(SamplingDuration / deltaTime, MinDynamicSamples, MaxDynamicSamples)
@@ -523,13 +527,13 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         }
 
         /// <returns>result of subtracting the game time from the network time</returns>
-        private double GetNetworkGameTimeDelta() {
-            return SampledRealServerTime - GameTime.TimeAsDouble();
+        private double _GetNetworkGameTimeDelta() {
+            return SampledRealServerTime - GameTime._TimeAsDouble();
         }
 
         /// <returns>true if the current frame has already been updated</returns>
-        private bool UpdatedThisFrame() {
-            return _frameLastUpdated == FrameCount.Frame();
+        private bool _UpdatedThisFrame() {
+            return _frameLastUpdated == FrameCount._Frame();
         }
         #endregion
     }

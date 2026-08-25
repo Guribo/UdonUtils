@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Tests;
 using UdonSharp;
 using UnityEngine;
 
@@ -16,26 +17,26 @@ namespace TLP.UdonUtils.Runtime.Testing
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TestSanity.ExecutionOrder + 1;
+        public new const int ExecutionOrder = TestNetworkEvents.ExecutionOrder + 1;
 
         private float _previousGameTime;
 
-        protected override void RunTest() {
+        protected override void _RunTest() {
             _previousGameTime = Time.timeSinceLevelLoad;
-            SendCustomEventDelayedFrames(nameof(EvaluateNextFrame), 1);
+            SendCustomEventDelayedFrames(nameof(_EvaluateNextFrame), 1);
         }
 
-        public void EvaluateNextFrame() {
+        public void _EvaluateNextFrame() {
             float delta = Time.timeSinceLevelLoad - _previousGameTime;
 
             if (Mathf.Abs(delta - Time.deltaTime) > 0.00001f) {
-                Error($"Delta time is {Time.deltaTime:F6}s but game time delta is {delta:F6}s!");
-                TestController.TestCompleted(false);
+                _Error($"Delta time is {Time.deltaTime:F6}s but game time delta is {delta:F6}s!");
+                TestController._TestCompleted(false);
             }
 
-            Info($"Delta time is {Time.deltaTime:F6}s and game time delta is {delta:F6}s!");
+            _Info($"Delta time is {Time.deltaTime:F6}s and game time delta is {delta:F6}s!");
 
-            TestController.TestCompleted(true);
+            TestController._TestCompleted(true);
         }
     }
 }

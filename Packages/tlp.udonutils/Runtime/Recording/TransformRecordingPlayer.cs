@@ -1,7 +1,4 @@
 ﻿using JetBrains.Annotations;
-using TLP.UdonUtils.Runtime.Common;
-using TLP.UdonUtils.Runtime.Physics;
-using TLP.UdonUtils.Runtime.Sync;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -30,7 +27,7 @@ namespace TLP.UdonUtils.Runtime.Recording
         [SerializeField]
         private Transform Target;
 
-        public void OnEnable() {
+        internal void OnEnable() {
             if (!PlayOnEnable) {
                 enabled = false;
                 return;
@@ -39,15 +36,15 @@ namespace TLP.UdonUtils.Runtime.Recording
             PlaybackStart = Time.realtimeSinceStartup;
         }
 
-        public void Update() {
+        internal void Update() {
             if (!Utilities.IsValid(Target)) {
                 return;
             }
 
             float time = Time.realtimeSinceStartup - PlaybackStart;
             Target.SetPositionAndRotation(
-                    TransformRecorder.GetPosition(time),
-                    TransformRecorder.GetRotation(time)
+                    TransformRecorder._GetPosition(time),
+                    TransformRecorder._GetRotation(time)
             );
         }
     }

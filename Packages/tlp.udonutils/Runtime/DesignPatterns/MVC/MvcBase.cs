@@ -19,19 +19,19 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 
         public string CriticalError { get; protected set; }
 
-        public static bool InitializeMvcSingleGameObject(GameObject gameObject) {
+        public static bool _InitializeMvcSingleGameObject(GameObject gameObject) {
             if (!Utilities.IsValid(gameObject)) {
-                Debug.LogError($"{nameof(InitializeMvcSingleGameObject)}: {nameof(gameObject)} invalid");
+                Debug.LogError($"{nameof(_InitializeMvcSingleGameObject)}: {nameof(gameObject)} invalid");
                 return false;
             }
 
             #region TLP_DEBUG
 #if TLP_DEBUG
-            Debug.Log($"{nameof(InitializeMvcSingleGameObject)} '{gameObject.transform.GetPathInScene()}'");
+            Debug.Log($"{nameof(_InitializeMvcSingleGameObject)} '{gameObject.transform._GetPathInScene()}'");
 #endif
             #endregion
 
-            if (InitializeMvc(
+            if (_InitializeMvc(
                         gameObject.GetComponent<Model>(),
                         gameObject.GetComponent<View>(),
                         gameObject.GetComponent<Controller>(),
@@ -39,11 +39,11 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
                 return true;
             }
 
-            Debug.LogError($"Failed to Initialize MVC on '{gameObject.transform.GetPathInScene()}'", gameObject);
+            Debug.LogError($"Failed to Initialize MVC on '{gameObject.transform._GetPathInScene()}'", gameObject);
             return false;
         }
 
-        public static bool InitializeMvc(
+        public static bool _InitializeMvc(
                 Model model,
                 View view,
                 Controller controller,
@@ -51,7 +51,7 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
         ) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            Debug.Log(nameof(InitializeMvc));
+            Debug.Log(nameof(_InitializeMvc));
 #endif
             #endregion
 
@@ -75,17 +75,17 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
                 return false;
             }
 
-            return model.Initialize(modelChangedEvent)
-                   && controller.Initialize(model, view)
-                   && view.Initialize(controller, model);
+            return model._Initialize(modelChangedEvent)
+                   && controller._Initialize(model, view)
+                   && view._Initialize(controller, model);
         }
 
         #region Hooks
-        protected virtual bool InitializeInternal() {
+        protected virtual bool _InitializeInternal() {
             return true;
         }
 
-        protected virtual bool DeInitializeInternal() {
+        protected virtual bool _DeInitializeInternal() {
             return true;
         }
         #endregion

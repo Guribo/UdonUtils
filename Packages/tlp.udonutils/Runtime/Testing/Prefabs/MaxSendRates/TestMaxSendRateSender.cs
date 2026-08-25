@@ -24,13 +24,13 @@ namespace TLP.UdonUtils.Runtime.Testing
 
         public TestMaxSendRate Test;
 
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
             if (!Utilities.IsValid(TimeSource)) {
-                Error($"{nameof(TimeSource)} is not set");
+                _Error($"{nameof(TimeSource)} is not set");
                 return false;
             }
 
@@ -42,12 +42,12 @@ namespace TLP.UdonUtils.Runtime.Testing
 
         public override void OnPreSerialization() {
             base.OnPreSerialization();
-            SendTime = TimeSource.TimeAsDouble();
+            SendTime = TimeSource._TimeAsDouble();
         }
 
         public override void OnDeserialization(DeserializationResult result) {
             base.OnDeserialization(result);
-            Test.ReceivedData(this);
+            Test._ReceivedData(this);
         }
     }
 }

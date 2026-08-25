@@ -45,8 +45,8 @@ namespace TLP.UdonUtils.Runtime.Physics
             _position[2] = RelativeTo.InverseTransformPoint(ToTrack.position);
 
             // central difference method to calculate velocity (adds 1 frame of age)
-            float fixedDeltaTime = TimeSource.FixedDeltaTime();
-            _velocityTime[2] = TimeSource.TimeAsDouble() - fixedDeltaTime;
+            float fixedDeltaTime = TimeSource._FixedDeltaTime();
+            _velocityTime[2] = TimeSource._TimeAsDouble() - fixedDeltaTime;
             _velocity[2] = (_position[2] - _position[0]) / (2 * fixedDeltaTime);
 
             // central difference method to calculate velocity (adds a second frame of age)
@@ -59,14 +59,14 @@ namespace TLP.UdonUtils.Runtime.Physics
             }
 
 #if TLP_DEBUG
-            UpdateDebugEditorValues();
+            _UpdateDebugEditorValues();
 #endif
         }
         #endregion
 
         #region Public
-        public override void SetTeleported(bool keepVelocity = true) {
-            base.SetTeleported(keepVelocity);
+        public override void _SetTeleported(bool keepVelocity = true) {
+            base._SetTeleported(keepVelocity);
             if (!keepVelocity) {
                 return;
             }
@@ -77,7 +77,7 @@ namespace TLP.UdonUtils.Runtime.Physics
             }
         }
 
-        public override double GetLatestSnapShot(
+        public override double _GetLatestSnapShot(
                 out Vector3 position,
                 out Vector3 velocity,
                 out Vector3 acceleration,
@@ -99,8 +99,8 @@ namespace TLP.UdonUtils.Runtime.Physics
             return _accelerationTime[2];
         }
 
-        public override void Clear() {
-            base.Clear();
+        public override void _Clear() {
+            base._Clear();
             var position = RelativeTo.InverseTransformPoint(ToTrack.position);
             for (int i = 0; i < _position.Length; i++) {
                 _position[i] = position;

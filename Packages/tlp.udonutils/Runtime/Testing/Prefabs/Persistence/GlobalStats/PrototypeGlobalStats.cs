@@ -31,20 +31,20 @@ namespace TLP.UdonUtils.Runtime.Testing.Persistence
         private Vector3 _playerPosition;
         private bool _grounded;
 
-        protected override bool SetupAndValidate() {
+        protected override bool _SetupAndValidate() {
             if (Networking.IsOwner(gameObject)) {
-                SendCustomEventDelayedSeconds(nameof(TrackStats), 3f);
+                SendCustomEventDelayedSeconds(nameof(_TrackStats), 3f);
                 _grounded = Networking.LocalPlayer.IsPlayerGrounded();
                 _playerPosition = Networking.LocalPlayer.GetPosition();
             }
 
-            return base.SetupAndValidate();
+            return base._SetupAndValidate();
         }
 
-        public void TrackStats() {
+        public void _TrackStats() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(TrackStats));
+            _DebugLog(nameof(_TrackStats));
 #endif
             #endregion
 
@@ -57,12 +57,12 @@ namespace TLP.UdonUtils.Runtime.Testing.Persistence
 
 
             if (grounded && _grounded) {
-                if (_playersWorking.LengthSafe() < 1) {
+                if (_playersWorking._LengthSafe() < 1) {
                     _playersWorking = new string[1];
                 }
 
-                if (_distanceWorking.LengthSafe() != _playersWorking.LengthSafe()) {
-                    _distanceWorking = _distanceWorking.ResizeOrCreate(_playersWorking.LengthSafe());
+                if (_distanceWorking._LengthSafe() != _playersWorking._LengthSafe()) {
+                    _distanceWorking = _distanceWorking._ResizeOrCreate(_playersWorking._LengthSafe());
                 }
 
                 _playersWorking[0] = Networking.LocalPlayer.displayName;
@@ -75,52 +75,52 @@ namespace TLP.UdonUtils.Runtime.Testing.Persistence
             if (Mathf.Abs(_lastDistance - _distanceWorking[0]) > 1f) {
                 _lastDistance = _distanceWorking[0];
 
-                Info(
-                        $"{nameof(TrackStats)}: {Networking.LocalPlayer.DisplayNameSafe()} " +
+                _Info(
+                        $"{nameof(_TrackStats)}: {Networking.LocalPlayer._DisplayNameSafe()} " +
                         $"has traveled {_distanceWorking[0]} meters on the ground");
-                MarkNetworkDirty();
+                _MarkNetworkDirty();
             }
 
-            SendCustomEventDelayedSeconds(nameof(TrackStats), 5f);
+            SendCustomEventDelayedSeconds(nameof(_TrackStats), 5f);
         }
 
         public override void OnPreSerialization() {
             base.OnPreSerialization();
 
-            if (_playersWorking.LengthSafe() == 0) {
+            if (_playersWorking._LengthSafe() == 0) {
                 _playersWorking = new string[0];
             }
 
-            if (_distanceWorking.LengthSafe() != _playersWorking.LengthSafe()) {
-                _distanceWorking = _distanceWorking.ResizeOrCreate(_playersWorking.LengthSafe());
+            if (_distanceWorking._LengthSafe() != _playersWorking._LengthSafe()) {
+                _distanceWorking = _distanceWorking._ResizeOrCreate(_playersWorking._LengthSafe());
             }
 
-            _playersWorking.CreateCopy(ref Players);
-            _distanceWorking.CreateCopy(ref Distance);
+            _playersWorking._CreateCopy(ref Players);
+            _distanceWorking._CreateCopy(ref Distance);
         }
 
         public override void OnDeserialization(DeserializationResult deserializationResult) {
             base.OnDeserialization(deserializationResult);
 
 
-            Players.CreateCopy(ref _playersWorking);
-            Distance.CreateCopy(ref _distanceWorking);
+            Players._CreateCopy(ref _playersWorking);
+            Distance._CreateCopy(ref _distanceWorking);
 
-            if (_playersWorking.LengthSafe() == 0) {
+            if (_playersWorking._LengthSafe() == 0) {
                 _playersWorking = new string[0];
             }
 
-            if (_distanceWorking.LengthSafe() != _playersWorking.LengthSafe()) {
-                _distanceWorking = _distanceWorking.ResizeOrCreate(_playersWorking.LengthSafe());
+            if (_distanceWorking._LengthSafe() != _playersWorking._LengthSafe()) {
+                _distanceWorking = _distanceWorking._ResizeOrCreate(_playersWorking._LengthSafe());
             }
 
-            if (!Networking.IsOwner(gameObject) || _playersWorking.LengthSafe() < 1) {
+            if (!Networking.IsOwner(gameObject) || _playersWorking._LengthSafe() < 1) {
                 return;
             }
 
             // merge received state with local player state
             if (Utilities.IsValid(_localPlayerInstance)) {
-                _localPlayerInstance.UpdatePlayer(_playersWorking[0], _distanceWorking[0]);
+                _localPlayerInstance._UpdatePlayer(_playersWorking[0], _distanceWorking[0]);
             } else {
                 // find local player object
                 var localPlayersObjects = Networking.GetPlayerObjects(Networking.LocalPlayer);
@@ -130,32 +130,32 @@ namespace TLP.UdonUtils.Runtime.Testing.Persistence
                 }
 
                 if (!Utilities.IsValid(_localPlayerInstance)) {
-                    Error($"Local player has no {nameof(PrototypeGlobalStats)} yet");
+                    _Error($"Local player has no {nameof(PrototypeGlobalStats)} yet");
                     return;
                 }
 
-                Info(
+                _Info(
                         $"Merging stats from {Networking.GetOwner(gameObject).displayName}" +
                         $"with local player {Networking.LocalPlayer.displayName}");
-                _localPlayerInstance.Merge(_playersWorking, _distanceWorking);
+                _localPlayerInstance._Merge(_playersWorking, _distanceWorking);
             }
         }
 
-        private void Merge(string[] players, float[] distances) {
-            for (int i = 0; i < players.LengthSafe() && i < distances.LengthSafe(); i++) {
-                UpdatePlayer(players[i], distances[i]);
+        private void _Merge(string[] players, float[] distances) {
+            for (int i = 0; i < players._LengthSafe() && i < distances._LengthSafe(); i++) {
+                _UpdatePlayer(players[i], distances[i]);
             }
         }
 
-        private void UpdatePlayer(string playerName, float distance) {
-            Info($"{nameof(UpdatePlayer)}: {playerName} has traveled {distance} meters on the ground");
+        private void _UpdatePlayer(string playerName, float distance) {
+            _Info($"{nameof(_UpdatePlayer)}: {playerName} has traveled {distance} meters on the ground");
 
 
-            if (_playersWorking.LengthSafe() != _distanceWorking.LengthSafe()) {
-                _distanceWorking = _distanceWorking.ResizeOrCreate(_playersWorking.LengthSafe());
+            if (_playersWorking._LengthSafe() != _distanceWorking._LengthSafe()) {
+                _distanceWorking = _distanceWorking._ResizeOrCreate(_playersWorking._LengthSafe());
             }
 
-            for (int i = 0; i < _playersWorking.LengthSafe(); i++) {
+            for (int i = 0; i < _playersWorking._LengthSafe(); i++) {
                 if (_playersWorking[i] != playerName) {
                     continue;
                 }
@@ -164,10 +164,10 @@ namespace TLP.UdonUtils.Runtime.Testing.Persistence
                 return;
             }
 
-            _playersWorking = _playersWorking.ResizeOrCreate(_playersWorking.LengthSafe() + 1);
-            _distanceWorking = _distanceWorking.ResizeOrCreate(_playersWorking.LengthSafe());
-            _playersWorking[_playersWorking.LengthSafe() - 1] = playerName;
-            _distanceWorking[_distanceWorking.LengthSafe() - 1] = distance;
+            _playersWorking = _playersWorking._ResizeOrCreate(_playersWorking._LengthSafe() + 1);
+            _distanceWorking = _distanceWorking._ResizeOrCreate(_playersWorking._LengthSafe());
+            _playersWorking[_playersWorking._LengthSafe() - 1] = playerName;
+            _distanceWorking[_distanceWorking._LengthSafe() - 1] = distance;
         }
     }
 }

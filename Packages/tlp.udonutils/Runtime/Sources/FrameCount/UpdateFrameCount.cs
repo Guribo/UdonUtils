@@ -19,7 +19,7 @@ namespace TLP.UdonUtils.Runtime.Sources.FrameCount
         public new const int ExecutionOrder = ConstantFrameCount.ExecutionOrder + 1;
 
         /// <returns><see cref="Time.frameCount"/></returns>
-        public override int Frame() {
+        public override int _Frame() {
             return UnityEngine.Time.frameCount;
         }
     }

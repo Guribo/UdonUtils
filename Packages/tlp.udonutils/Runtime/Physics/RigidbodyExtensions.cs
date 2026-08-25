@@ -11,7 +11,7 @@ namespace TLP.UdonUtils.Runtime.Physics
         /// <param name="rigidbody">must be valid</param>
         /// <param name="position"></param>
         /// <param name="fixedDeltaTime"> must be > 0, if it is 0 then no movement occurs</param>
-        public static void MoveToUsingVelocity(this Rigidbody rigidbody, Vector3 position, float fixedDeltaTime)
+        public static void _MoveToUsingVelocity(this Rigidbody rigidbody, Vector3 position, float fixedDeltaTime)
         {
             if (fixedDeltaTime <= 0) {
                 // no movement possible with non-positive fixedDeltaTime
@@ -36,7 +36,7 @@ namespace TLP.UdonUtils.Runtime.Physics
         /// <param name="fixedDeltaTime">The time step to reach the target rotation in</param>
         /// <returns>Angular velocity vector in radians per second</returns>
         /// TODO FIXME
-        public static Vector3 CalculateAngularVelocityToRotation(
+        public static Vector3 _CalculateAngularVelocityToRotation(
                 this Rigidbody rigidbody,
                 Quaternion targetRotation,
                 float fixedDeltaTime)
@@ -57,7 +57,7 @@ namespace TLP.UdonUtils.Runtime.Physics
                         -adjustedTargetRotation.w);
             }
 
-            var deltaRotation = currentRotation.GetDeltaToB(adjustedTargetRotation);
+            var deltaRotation = currentRotation._GetDeltaToB(adjustedTargetRotation);
 
             deltaRotation.ToAngleAxis(out float angleDegrees, out var axis);
 

@@ -38,69 +38,69 @@ namespace TLP.UdonUtils.Runtime.Testing
 
         protected internal TestCaseStatus Status = TestCaseStatus.Ready;
 
-        public void Initialize() {
+        public void _Initialize() {
             if (!TestController) {
-                Error(
+                _Error(
                         "[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Test.Initialize: invalid test controller"
                 );
                 return;
             }
 
-            Info("[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Test.Initialize");
-            InitializeTest();
+            _Info("[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Test.Initialize");
+            _InitializeTest();
         }
 
-        public void Run() {
+        public void _Run() {
             if (!TestController) {
-                Error(
+                _Error(
                         "[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Test.Run: invalid test controller"
                 );
                 return;
             }
 
-            Info("[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Test.Run");
-            RunTest();
+            _Info("[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Test.Run");
+            _RunTest();
         }
 
-        public void CleanUp() {
+        public void _CleanUp() {
             if (!TestController) {
-                Error(
+                _Error(
                         "[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Test.CleanUp: invalid test controller"
                 );
                 return;
             }
 
-            Info("[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Test.CleanUp");
-            CleanUpTest();
+            _Info("[<color=#000000>UdonUtils</color>] [<color=#804500>Testing</color>] Test.CleanUp");
+            _CleanUpTest();
         }
 
 
         #region Hooks
-        protected virtual void InitializeTest() {
+        protected virtual void _InitializeTest() {
             // TODO your init behaviour here
             // ...
 
             // whenever the test is ready to be started call TestController.TestInitialized,
             // can be later in update or whenever but MUST be called at some point
-            TestController.TestInitialized(true);
+            TestController._TestInitialized(true);
         }
 
-        protected virtual void RunTest() {
+        protected virtual void _RunTest() {
             // TODO your test behaviour here
             // ...
 
             // whenever the test is completed call TestController.TestCompleted,
             // can be later in update or whenever but MUST be called at some point
-            TestController.TestCompleted(true);
+            TestController._TestCompleted(true);
         }
 
-        protected virtual void CleanUpTest() {
+        protected virtual void _CleanUpTest() {
             // TODO your clean up behaviour here
             // ...
 
             // whenever the test is cleaned up call TestController.TestCleanedUp,
             // can be later in update or whenever but MUST be called at some point
-            TestController.TestCleanedUp(true);
+            TestController._TestCleanedUp(true);
         }
         #endregion
     }

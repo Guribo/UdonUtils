@@ -12,7 +12,7 @@ namespace TLP.UdonUtils.Runtime.Tests
         [PublicAPI]
         public new const int ExecutionOrder = FactoryWithPool.ExecutionOrder + 1;
 
-        protected override GameObject ProduceInstance() {
+        protected override GameObject _ProduceInstance() {
             var instance = Instantiate(gameObject);
             DestroyImmediate(instance.gameObject.GetComponent<TestFactory>());
             instance.name = "TestInstance";

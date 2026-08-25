@@ -1,6 +1,4 @@
-﻿using System;
-using JetBrains.Annotations;
-using UdonSharp;
+﻿using JetBrains.Annotations;
 using UnityEngine;
 using VRC.SDKBase;
 
@@ -22,7 +20,7 @@ namespace TLP.UdonUtils.Runtime.Sync
         public void FixedUpdate() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(FixedUpdate));
+            _DebugLog(nameof(FixedUpdate));
 #endif
             #endregion
 
@@ -30,13 +28,13 @@ namespace TLP.UdonUtils.Runtime.Sync
                 return;
             }
 
-            float predictionReduction = GetTotalPredictionReduction();
-            double networkTime = NetworkTime.TimeAsDouble();
-            PredictMovement(networkTime, 
+            float predictionReduction = _GetTotalPredictionReduction();
+            double networkTime = NetworkTime._TimeAsDouble();
+            _PredictMovement(networkTime, 
                             networkTime - predictionReduction, 
                             networkTime - WorkingSendTime - predictionReduction, 
                             predictionReduction,
-                            NetworkTime.FixedDeltaTime());
+                            NetworkTime._FixedDeltaTime());
         }
         #endregion
     }

@@ -16,31 +16,31 @@ namespace TLP.UdonUtils.Runtime.Events
         [SerializeField]
         private UdonEvent UdonEvent;
 
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
-            if (UdonEvent.AddListenerVerified(this, nameof(UdonEventFunctionName))) {
+            if (UdonEvent._AddListenerVerified(this, nameof(_UdonEventFunctionName))) {
                 return true;
             }
 
-            Error($"Failed to listen to {nameof(UdonEvent)}");
+            _Error($"Failed to listen to {nameof(UdonEvent)}");
             return false;
         }
 
-        public override void OnEvent(string eventName) {
+        public override void _OnEvent(string eventName) {
             switch (eventName) {
-                case nameof(UdonEventFunctionName):
-                    UdonEventFunctionName();
+                case nameof(_UdonEventFunctionName):
+                    _UdonEventFunctionName();
                     break;
                 default:
-                    base.OnEvent(eventName);
+                    base._OnEvent(eventName);
                     break;
             }
         }
 
-        private void UdonEventFunctionName() {
+        private void _UdonEventFunctionName() {
             // your code here, will be called whenever UdonEvent fires
         }
     }

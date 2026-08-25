@@ -19,12 +19,12 @@ namespace TLP.UdonUtils.Runtime.Sources.Time
         public new const int ExecutionOrder = TimeSinceLevelLoad.ExecutionOrder + 1;
 
         /// <returns><see cref="UnityEngine.Time.unscaledTime"/></returns>
-        public override float Time() {
+        public override float _Time() {
             return UnityEngine.Time.unscaledTime;
         }
 
         /// <returns><see cref="UnityEngine.Time.unscaledTimeAsDouble"/></returns>
-        public override double TimeAsDouble() {
+        public override double _TimeAsDouble() {
             return UnityEngine.Time.unscaledTimeAsDouble;
         }
     }

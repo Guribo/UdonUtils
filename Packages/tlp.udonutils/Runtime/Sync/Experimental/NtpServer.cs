@@ -78,7 +78,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
         #endregion
 
         #region Public
-        public bool GetLatestClientRequest(NtpClient client, out double requestTime, out double receiveTime) {
+        public bool _GetLatestClientRequest(NtpClient client, out double requestTime, out double receiveTime) {
             if (!ClientsRequestTimes.ContainsKey(client)) {
                 requestTime = 0f;
                 receiveTime = 0f;
@@ -90,7 +90,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
             return true;
         }
 
-        public bool AddRequest(NtpClient client, double receiveTime) {
+        public bool _AddRequest(NtpClient client, double receiveTime) {
             int clientIndex;
             if (!Utilities.IsValid(client)) {
                 return false;
@@ -104,10 +104,10 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
                 clientIndex = clients - 1;
                 ClientIndices.Add(client, clientIndex);
 
-                WorkingRequestReceiveTimes = WorkingRequestReceiveTimes.ResizeOrCreate(clients);
-                WorkingClientOwners = WorkingClientOwners.ResizeOrCreate(clients);
+                WorkingRequestReceiveTimes = WorkingRequestReceiveTimes._ResizeOrCreate(clients);
+                WorkingClientOwners = WorkingClientOwners._ResizeOrCreate(clients);
 
-                WorkingClientOwners[clientIndex] = Networking.GetOwner(client.gameObject).PlayerIdSafe();
+                WorkingClientOwners[clientIndex] = Networking.GetOwner(client.gameObject)._PlayerIdSafe();
                 WorkingRequestReceiveTimes[clientIndex] = receiveTime;
                 return true;
             }
@@ -115,17 +115,17 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
             ClientsRequestTimes[client] = client.RequestSendTime;
             clientIndex = ClientIndices[client].Int;
             if (clientIndex < 0 || clientIndex >= WorkingClientOwners.Length) {
-                Error(
+                _Error(
                         $"Index {clientIndex} is out of range of " +
                         $"{WorkingClientOwners}({WorkingClientOwners.Length} entries)");
                 return false;
             }
 
-            WorkingClientOwners[clientIndex] = Networking.GetOwner(client.gameObject).PlayerIdSafe();
+            WorkingClientOwners[clientIndex] = Networking.GetOwner(client.gameObject)._PlayerIdSafe();
 
             WorkingRequestReceiveTimes[clientIndex] = receiveTime;
             if (clientIndex >= WorkingRequestReceiveTimes.Length) {
-                Error(
+                _Error(
                         $"Index {clientIndex} is out of range of " +
                         $"{WorkingRequestReceiveTimes}({WorkingRequestReceiveTimes.Length} entries)");
                 return false;
@@ -149,9 +149,9 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
             WorkingResponseSentTime = 0;
         }
 
-        public void Update() {
+        internal void Update() {
             var localPlayer = Networking.LocalPlayer;
-            if (!localPlayer.IsMasterSafe()) {
+            if (!localPlayer._IsMasterSafe()) {
                 return;
             }
 
@@ -163,13 +163,13 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
                 Networking.SetOwner(localPlayer, gameObject);
             }
 
-            if (OwnNtpClient.GetRawTime() < _nextRequestTime) {
+            if (OwnNtpClient._GetRawTime() < _nextRequestTime) {
                 return;
             }
 
-            MarkNetworkDirty();
+            _MarkNetworkDirty();
             RequestSerialization();
-            _nextRequestTime = OwnNtpClient.GetRawTime() + OwnNtpClient.RequestInterval;
+            _nextRequestTime = OwnNtpClient._GetRawTime() + OwnNtpClient.RequestInterval;
         }
         #endregion
 
@@ -180,11 +180,11 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
                 return;
             }
 
-            RequestReceiveTimes = RequestReceiveTimes.ResizeOrCreate(WorkingRequestReceiveTimes.Length);
-            ClientOwners = ClientOwners.ResizeOrCreate(WorkingClientOwners.Length);
+            RequestReceiveTimes = RequestReceiveTimes._ResizeOrCreate(WorkingRequestReceiveTimes.Length);
+            ClientOwners = ClientOwners._ResizeOrCreate(WorkingClientOwners.Length);
             Array.Copy(WorkingRequestReceiveTimes, RequestReceiveTimes, WorkingRequestReceiveTimes.Length);
             Array.Copy(WorkingClientOwners, ClientOwners, WorkingClientOwners.Length);
-            ResponseSendTime = OwnNtpClient.GetAdjustedLocalTime();
+            ResponseSendTime = OwnNtpClient._GetAdjustedLocalTime();
             WorkingResponseSentTime = ResponseSendTime;
 
             #region TLP_DEBUG
@@ -194,15 +194,15 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
                 log += $"{receiveTime:F4}, ";
             }
 
-            DebugLog($"Response send time: {WorkingResponseSentTime:F9}");
-            DebugLog($"Sending: {nameof(RequestReceiveTimes)}: {RequestReceiveTimes.LengthSafe()} elements; [{log}]");
+            _DebugLog($"Response send time: {WorkingResponseSentTime:F9}");
+            _DebugLog($"Sending: {nameof(RequestReceiveTimes)}: {RequestReceiveTimes._LengthSafe()} elements; [{log}]");
 
             log = "";
             foreach (int clientId in ClientOwners) {
                 log += $"{clientId}, ";
             }
 
-            DebugLog($"Sending: {nameof(ClientOwners)}: {ClientOwners.LengthSafe()} elements; [{log}]");
+            _DebugLog($"Sending: {nameof(ClientOwners)}: {ClientOwners._LengthSafe()} elements; [{log}]");
 #endif
             #endregion
         }
@@ -222,7 +222,7 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
                 return;
             }
 
-            double responseReceiveTime = OwnNtpClient.GetRawTime();
+            double responseReceiveTime = OwnNtpClient._GetRawTime();
 
             #region TLP_DEBUG
 #if TLP_DEBUG
@@ -231,45 +231,46 @@ namespace TLP.UdonUtils.Runtime.Sync.Experimental
                 log += $"{receiveTime:F4}, ";
             }
 
-            DebugLog($"Response receive time: {responseReceiveTime:F9}");
-            DebugLog($"Received: {nameof(RequestReceiveTimes)}: {RequestReceiveTimes.LengthSafe()} elements; [{log}]");
+            _DebugLog($"Response receive time: {responseReceiveTime:F9}");
+            _DebugLog(
+                    $"Received: {nameof(RequestReceiveTimes)}: {RequestReceiveTimes._LengthSafe()} elements; [{log}]");
 
             log = "";
             foreach (int clientId in ClientOwners) {
                 log += $"{clientId}, ";
             }
 
-            DebugLog($"Received: {nameof(ClientOwners)}: {ClientOwners.LengthSafe()} elements; [{log}]");
+            _DebugLog($"Received: {nameof(ClientOwners)}: {ClientOwners._LengthSafe()} elements; [{log}]");
 #endif
             #endregion
 
-            int index = RetrieveLocalPlayerResponseData(out double requestReceiveTime);
+            int index = _RetrieveLocalPlayerResponseData(out double requestReceiveTime);
             if (!Networking.IsOwner(Networking.LocalPlayer, OwnNtpClient.gameObject)) {
-                Error($"Not owning {nameof(OwnNtpClient)}");
+                _Error($"Not owning {nameof(OwnNtpClient)}");
                 return;
             }
 
             if (index == -1) {
-                Warn("Player has not requested yet");
-                OwnNtpClient.AdjustRequestTiming();
+                _Warn("Player has not requested yet");
+                OwnNtpClient._AdjustRequestTiming();
                 return;
             }
 
-            if (!OwnNtpClient.UpdateOffset(
+            if (!OwnNtpClient._UpdateOffset(
                         requestReceiveTime,
                         ResponseSendTime,
                         responseReceiveTime)) {
-                Warn($"Failed to update clock offset of own client '{OwnNtpClient.GetScriptPathInScene()}'");
+                _Warn($"Failed to update clock offset of own client '{OwnNtpClient._GetScriptPathInScene()}'");
             }
         }
         #endregion
 
         #region Internal
-        private int RetrieveLocalPlayerResponseData(out double requestReceiveTime) {
-            int lengthSafe = ClientOwners.LengthSafe();
-            int playerId = Networking.LocalPlayer.PlayerIdSafe();
+        private int _RetrieveLocalPlayerResponseData(out double requestReceiveTime) {
+            int lengthSafe = ClientOwners._LengthSafe();
+            int playerId = Networking.LocalPlayer._PlayerIdSafe();
             int index = -1;
-            int requestTimes = RequestReceiveTimes.LengthSafe();
+            int requestTimes = RequestReceiveTimes._LengthSafe();
             requestReceiveTime = 0f;
             for (int i = 0; i < lengthSafe && i < requestTimes; i++) {
                 if (ClientOwners[i] == playerId) {

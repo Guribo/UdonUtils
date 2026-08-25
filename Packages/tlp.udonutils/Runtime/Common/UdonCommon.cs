@@ -23,7 +23,7 @@ namespace TLP.UdonUtils.Runtime.Common
         /// <param name="type"></param>
         /// <param name="start"></param>
         /// <returns>the found component or null if none was found</returns>
-        public static Component FindTopComponent(Type type, Transform start) {
+        public static Component _FindTopComponent(Type type, Transform start) {
             if (!Utilities.IsValid(start)) {
                 return null;
             }
@@ -46,7 +46,7 @@ namespace TLP.UdonUtils.Runtime.Common
         /**
          * O(n) - scales linearly with number of players present, don't use in Update()!
          */
-        public static VRCPlayerApi GetClosestPlayer(ref VRCPlayerApi[] players, Vector3 location) {
+        public static VRCPlayerApi _GetClosestPlayer(ref VRCPlayerApi[] players, Vector3 location) {
             int playerCount = VRCPlayerApi.GetPlayerCount();
             if (players == null || players.Length < playerCount) {
                 players = new VRCPlayerApi[playerCount * 2];
@@ -76,7 +76,7 @@ namespace TLP.UdonUtils.Runtime.Common
             return closestPlayer;
         }
 
-        public static VRCPlayerApi GetClosestNonLocalPlayer(ref VRCPlayerApi[] players, Vector3 location) {
+        public static VRCPlayerApi _GetClosestNonLocalPlayer(ref VRCPlayerApi[] players, Vector3 location) {
             int playerCount = VRCPlayerApi.GetPlayerCount();
             if (players == null || players.Length < playerCount) {
                 players = new VRCPlayerApi[playerCount * 2];
@@ -110,7 +110,7 @@ namespace TLP.UdonUtils.Runtime.Common
             return closestPlayer;
         }
 
-        public static int GetPlayersInRangeNoAlloc(
+        public static int _GetPlayersInRangeNoAlloc(
                 ref VRCPlayerApi[] players,
                 Vector3 position,
                 float radius,
@@ -146,7 +146,7 @@ namespace TLP.UdonUtils.Runtime.Common
             return playersFound;
         }
 
-        public static string UdonTypeNameShort(string udonTypeName) {
+        public static string _UdonTypeNameShort(string udonTypeName) {
             if (string.IsNullOrEmpty(udonTypeName)) {
                 return "";
             }
@@ -161,7 +161,7 @@ namespace TLP.UdonUtils.Runtime.Common
         /// <param name="start"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static T[] GetBehavioursInChildren<T>(this Transform start) where T : UdonSharpBehaviour {
+        public static T[] _GetBehavioursInChildren<T>(this Transform start) where T : UdonSharpBehaviour {
             var toProcess = new DataList();
             toProcess.Add(start);
             var result = new DataList();
@@ -194,7 +194,7 @@ namespace TLP.UdonUtils.Runtime.Common
         /// <param name="transform"></param>
         /// <returns>The path from the scene root to the transform provided,
         /// returns an empty string if the provided transform is invalid</returns>
-        public static string GetPathInScene(this Transform transform) {
+        public static string _GetPathInScene(this Transform transform) {
             if (!Utilities.IsValid(transform)) {
                 return "";
             }
@@ -211,33 +211,33 @@ namespace TLP.UdonUtils.Runtime.Common
         /// <param name="transform"></param>
         /// <returns>The path from the scene root to the component provided,
         /// returns an empty string if the provided component is invalid</returns>
-        public static string GetComponentPathInScene(this Component component) {
+        public static string _GetComponentPathInScene(this Component component) {
             if (!Utilities.IsValid(component)) {
                 return "";
             }
 
-            return component.transform.GetPathInScene() + "/" + component.GetType().Name;
+            return component.transform._GetPathInScene() + "/" + component.GetType().Name;
         }
 
         /// <param name="transform"></param>
         /// <returns>The path from the scene root to the script provided,
         /// returns an empty string if the provided component is invalid</returns>
-        public static string GetScriptPathInScene(this UdonSharpBehaviour component) {
+        public static string _GetScriptPathInScene(this UdonSharpBehaviour component) {
             if (!Utilities.IsValid(component)) {
                 return "";
             }
 
-            return $"{component.transform.GetPathInScene()}/{UdonTypeNameShort(component.GetUdonTypeName())}";
+            return $"{component.transform._GetPathInScene()}/{_UdonTypeNameShort(component.GetUdonTypeName())}";
         }
 
         /// <param name="t"></param>
         /// <param name="elementsPerLine">if 0 then there is no linebreaks '\n', if > 0 then there will be a linebreak after the given number of elements</param>
         /// <typeparam name="T"></typeparam>
         /// <returns>string in format '[a, b,...,\nc, d]'</returns>
-        public static string ToReadableString<T>(this T[] t, int elementsPerLine = 0) {
+        public static string _ToReadableString<T>(this T[] t, int elementsPerLine = 0) {
             var sb = new StringBuilder("[");
 
-            int length = t.LengthSafe();
+            int length = t._LengthSafe();
             for (int i = 0; i < length; i++) {
                 sb.Append(t[i]);
                 if (i >= length - 1) {
@@ -256,15 +256,15 @@ namespace TLP.UdonUtils.Runtime.Common
         }
 
         /// <summary>
-        /// <see cref="ToReadableString{T}"/>
+        /// <see cref="_ToReadableString{T}"/>
         /// </summary>
         /// <param name="t"></param>
         /// <param name="elementsPerLine"></param>
         /// <returns>[keyA: stateA, keyB: stateB,...,\nkeyC: stateC, ...]</returns>
-        public static string PlayerDataInfosToReadableString(this PlayerData.Info[] t, int elementsPerLine = 0) {
+        public static string _PlayerDataInfosToReadableString(this PlayerData.Info[] t, int elementsPerLine = 0) {
             var sb = new StringBuilder("[");
 
-            int length = t.LengthSafe();
+            int length = t._LengthSafe();
             for (int i = 0; i < length; i++) {
                 var info = t[i];
                 sb.Append(info.Key).Append(": ").Append(info.State);
@@ -284,7 +284,7 @@ namespace TLP.UdonUtils.Runtime.Common
         }
 
         [PublicAPI]
-        public static DateTimeOffset SecondsToLocalTime(double lastSeenUnixTimeStampInSeconds) {
+        public static DateTimeOffset _SecondsToLocalTime(double lastSeenUnixTimeStampInSeconds) {
             var dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds((long)lastSeenUnixTimeStampInSeconds);
             return TimeZoneInfo.ConvertTime(dateTimeOffset, TimeZoneInfo.Local);
         }
@@ -301,11 +301,11 @@ namespace TLP.UdonUtils.Runtime.Common
         /// <param name="component">the first it finds or null if not found</param>
         /// <typeparam name="T">Class-type of the component</typeparam>
         /// <returns>true if a component was found</returns>
-        public static bool TryGetPlayerDataComponent<T>(this VRCPlayerApi player, out T component) where T : Component {
+        public static bool _TryGetPlayerDataComponent<T>(this VRCPlayerApi player, out T component) where T : Component {
             var objects = Networking.GetPlayerObjects(player);
-            if (objects.LengthSafe() == 0) {
+            if (objects._LengthSafe() == 0) {
                 TlpLogger.StaticError(
-                        $"{nameof(TryGetPlayerDataComponent)}: {player.DisplayNameSafe()} is missing PlayerData objects (not yet created?)",
+                        $"{nameof(_TryGetPlayerDataComponent)}: {player._DisplayNameSafe()} is missing PlayerData objects (not yet created?)",
                         null);
                 component = null;
                 return false;
@@ -322,7 +322,7 @@ namespace TLP.UdonUtils.Runtime.Common
             }
 
             TlpLogger.StaticError(
-                    $"{nameof(TryGetPlayerDataComponent)}: {player.DisplayNameSafe()} is missing PlayerData components!",
+                    $"{nameof(_TryGetPlayerDataComponent)}: {player._DisplayNameSafe()} is missing PlayerData components!",
                     null);
             // player was not fully initialized
             // because each player should have AT LEAST one of the component
@@ -342,12 +342,12 @@ namespace TLP.UdonUtils.Runtime.Common
         /// <param name="inOutComponents">in-out appends any found component to that list, but will not be modified on error</param>
         /// <typeparam name="T">Class-type of the components</typeparam>
         /// <returns>true if at least component was found, false otherwise</returns>
-        public static bool TryGetAllPlayerDataComponents<T>(this VRCPlayerApi player, DataList inOutComponents)
+        public static bool _TryGetAllPlayerDataComponents<T>(this VRCPlayerApi player, DataList inOutComponents)
                 where T : Component {
             var objects = Networking.GetPlayerObjects(player);
-            if (objects.LengthSafe() == 0) {
+            if (objects._LengthSafe() == 0) {
                 TlpLogger.StaticError(
-                        $"{nameof(TryGetAllPlayerDataComponents)}<{typeof(T).Name}>: {player.DisplayNameSafe()} is missing PlayerData objects (not yet created?)",
+                        $"{nameof(_TryGetAllPlayerDataComponents)}<{typeof(T).Name}>: {player._DisplayNameSafe()} is missing PlayerData objects (not yet created?)",
                         null);
                 return false;
             }
@@ -355,7 +355,7 @@ namespace TLP.UdonUtils.Runtime.Common
             int size = inOutComponents.Count;
             foreach (var gameObject in objects) {
                 var found = gameObject.GetComponentsInChildren<T>(true);
-                if (found.LengthSafe() == 0) {
+                if (found._LengthSafe() == 0) {
                     continue;
                 }
 
@@ -368,7 +368,7 @@ namespace TLP.UdonUtils.Runtime.Common
 
             if (size == inOutComponents.Count) {
                 TlpLogger.StaticError(
-                        $"{nameof(TryGetAllPlayerDataComponents)}<{typeof(T).Name}>: {player.DisplayNameUniqueSafe()} is missing PlayerData components!",
+                        $"{nameof(_TryGetAllPlayerDataComponents)}<{typeof(T).Name}>: {player._DisplayNameUniqueSafe()} is missing PlayerData components!",
                         null);
                 return false; // a player was not fully initialized
                 // because each player should have AT LEAST one of the components
@@ -388,12 +388,12 @@ namespace TLP.UdonUtils.Runtime.Common
         /// <param name="components">all components found or null if not found</param>
         /// <typeparam name="T">Class-type of the components</typeparam>
         /// <returns>true if at least one component was for each player, false otherwise</returns>
-        public static bool TryGetPlayerDataComponentsOfAllPlayers<T>(DataList components)
+        public static bool _TryGetPlayerDataComponentsOfAllPlayers<T>(DataList components)
                 where T : Component {
             var players = VRCPlayerApi.GetPlayers(new VRCPlayerApi[VRCPlayerApi.GetPlayerCount()]);
             var newComponents = new DataList();
             foreach (var player in players) {
-                if (!player.TryGetAllPlayerDataComponents<T>(newComponents)) {
+                if (!player._TryGetAllPlayerDataComponents<T>(newComponents)) {
                     return false;
                 }
             }
@@ -410,7 +410,7 @@ namespace TLP.UdonUtils.Runtime.Common
         /// <param name="cached">A reference to the cached component, if available, to avoid redundant lookups.</param>
         /// <typeparam name="T">The type of the component to retrieve.</typeparam>
         /// <returns>The player-specific component of type <typeparamref name="T"/> if found, or null if the component is not restored or unavailable.</returns>
-        public static T GetPlayerComponent<T>(this VRCPlayerApi player, TlpBaseBehaviour instigator, ref T cached)
+        public static T _GetPlayerComponent<T>(this VRCPlayerApi player, TlpBaseBehaviour instigator, ref T cached)
                 where T : Component {
             if (Utilities.IsValid(cached)) {
                 return cached;
@@ -419,32 +419,32 @@ namespace TLP.UdonUtils.Runtime.Common
             #region TLP_DEBUG
 #if TLP_DEBUG
             TlpLogger.StaticDebugLog(
-                    $"{nameof(GetPlayerComponent)} for {instigator.GetScriptPathInScene()}: {player.DisplayNameUniqueSafe()}",
+                    $"{nameof(_GetPlayerComponent)} for {instigator._GetScriptPathInScene()}: {player._DisplayNameUniqueSafe()}",
                     null,
                     instigator);
 #endif
             #endregion
 
-            if (!PlayerDataRestoredEvent.IsPlayerDataRestored(player)) {
+            if (!PlayerDataRestoredEvent._IsPlayerDataRestored(player)) {
                 TlpLogger.StaticWarning(
-                        $"{nameof(GetPlayerComponent)} for {instigator.GetScriptPathInScene()}: {player.DisplayNameUniqueSafe()} not yet restored",
+                        $"{nameof(_GetPlayerComponent)} for {instigator._GetScriptPathInScene()}: {player._DisplayNameUniqueSafe()} not yet restored",
                         null,
                         instigator);
                 return null;
             }
 
-            if (TryGetPlayerDataComponent(player, out cached)) {
+            if (_TryGetPlayerDataComponent(player, out cached)) {
                 return cached;
             }
 
             TlpLogger.StaticError(
-                    $"{nameof(GetPlayerComponent)} for {instigator.GetScriptPathInScene()}: Component not found for {player.DisplayNameUniqueSafe()}",
+                    $"{nameof(_GetPlayerComponent)} for {instigator._GetScriptPathInScene()}: Component not found for {player._DisplayNameUniqueSafe()}",
                     null,
                     instigator);
             return null;
         }
 
-        public static VRCPlayerApi.TrackingDataType ToHandTrackingDataType(this VRC_Pickup.PickupHand hand) {
+        public static VRCPlayerApi.TrackingDataType _ToHandTrackingDataType(this VRC_Pickup.PickupHand hand) {
             return hand == VRC_Pickup.PickupHand.Left
                     ? VRCPlayerApi.TrackingDataType.LeftHand
                     : VRCPlayerApi.TrackingDataType.RightHand;

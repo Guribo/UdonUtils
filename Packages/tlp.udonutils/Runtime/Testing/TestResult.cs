@@ -1,6 +1,4 @@
 ﻿using JetBrains.Annotations;
-using TLP.UdonUtils.Runtime;
-using TLP.UdonUtils.Runtime.Testing;
 using TMPro;
 using UdonSharp;
 using UnityEngine;
@@ -33,10 +31,10 @@ namespace TLP.UdonUtils.Runtime.Testing
         [SerializeField]
         private Image Background;
 
-        public void Initialize(TestCase testCase) {
+        public void _Initialize(TestCase testCase) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(Initialize));
+            _DebugLog(nameof(_Initialize));
 #endif
             #endregion
 

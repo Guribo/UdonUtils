@@ -11,8 +11,8 @@ namespace TLP.UdonUtils.Runtime.Physics
         /// <param name="velocity"></param>
         /// <param name="deltaTime"></param>
         /// <returns>position vector</returns>
-        public static Vector3 Position(Vector3 position, Vector3 velocity, float deltaTime) {
-            return Distance(velocity, deltaTime) + position;
+        public static Vector3 _Position(Vector3 position, Vector3 velocity, float deltaTime) {
+            return _Distance(velocity, deltaTime) + position;
         }
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace TLP.UdonUtils.Runtime.Physics
         /// <param name="velocity"></param>
         /// <param name="deltaTime"></param>
         /// <returns>position vector</returns>
-        public static float DeltaTime(Vector3 start, Vector3 end, Vector3 velocity) {
+        public static float _DeltaTime(Vector3 start, Vector3 end, Vector3 velocity) {
             float sign;
             if (!Mathf.Approximately(velocity.x, 0)) {
                 sign = Mathf.Sign((end.x - start.x) / velocity.x);
@@ -42,7 +42,7 @@ namespace TLP.UdonUtils.Runtime.Physics
         /// <param name="velocity"></param>
         /// <param name="deltaTime"></param>
         /// <returns>distance vector</returns>
-        public static Vector3 Distance(Vector3 velocity, float deltaTime) {
+        public static Vector3 _Distance(Vector3 velocity, float deltaTime) {
             return velocity * deltaTime;
         }
 
@@ -55,8 +55,8 @@ namespace TLP.UdonUtils.Runtime.Physics
         /// <param name="target"></param>
         /// <param name="deltaTime"></param>
         /// <returns></returns>
-        public static Vector3 Velocity(Vector3 start, Vector3 end, float deltaTime) {
-            return VelocityFromDistance(end - start, deltaTime);
+        public static Vector3 _Velocity(Vector3 start, Vector3 end, float deltaTime) {
+            return _VelocityFromDistance(end - start, deltaTime);
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace TLP.UdonUtils.Runtime.Physics
         /// <param name="target"></param>
         /// <param name="deltaTime"></param>
         /// <returns></returns>
-        public static Vector3 VelocityFromDistance(Vector3 distance, float deltaTime) {
+        public static Vector3 _VelocityFromDistance(Vector3 distance, float deltaTime) {
             if (deltaTime == 0) return Vector3.zero;
             return distance / deltaTime;
         }
@@ -79,8 +79,8 @@ namespace TLP.UdonUtils.Runtime.Physics
         /// <param name="velocity"></param>
         /// <param name="elapsed"></param>
         /// <returns></returns>
-        public static Vector3 StartPosition(Vector3 position, Vector3 velocity, float elapsed) {
-            return Position(position, velocity, -elapsed);
+        public static Vector3 _StartPosition(Vector3 position, Vector3 velocity, float elapsed) {
+            return _Position(position, velocity, -elapsed);
         }
     }
 }

@@ -21,12 +21,12 @@ namespace TLP.UdonUtils.Runtime.Common
 
         #region Public API
         [PublicAPI]
-        public bool Compare(UdonSharpBehaviour first, UdonSharpBehaviour second, out int comparisonResult) {
+        public bool _Compare(UdonSharpBehaviour first, UdonSharpBehaviour second, out int comparisonResult) {
 #if TLP_DEBUG
-            DebugLog(nameof(Compare));
+            _DebugLog(nameof(_Compare));
 #endif
 
-            if (!ComparisonImplementation(first, second, out comparisonResult)) {
+            if (!_ComparisonImplementation(first, second, out comparisonResult)) {
                 return false;
             }
 
@@ -36,12 +36,12 @@ namespace TLP.UdonUtils.Runtime.Common
             }
 
             if (Utilities.IsValid(optionalFallback)) {
-                return optionalFallback.Compare(first, second, out comparisonResult);
+                return optionalFallback._Compare(first, second, out comparisonResult);
             }
 
 #if TLP_DEBUG
-            DebugLog(
-                    $"Entries '{first.GetScriptPathInScene()}' and '{second.GetScriptPathInScene()}' are equal and no fallback is available that could say otherwise");
+            _DebugLog(
+                    $"Entries '{first._GetScriptPathInScene()}' and '{second._GetScriptPathInScene()}' are equal and no fallback is available that could say otherwise");
 #endif
             return true;
         }
@@ -49,22 +49,11 @@ namespace TLP.UdonUtils.Runtime.Common
 
 
         #region internal
-        protected abstract bool ComparisonImplementation(
+        protected abstract bool _ComparisonImplementation(
                 UdonSharpBehaviour first,
                 UdonSharpBehaviour second,
                 out int comparisonResult
         );
-        #endregion
-
-        #region Pool
-        public bool ReturnToPool() {
-            if (PoolableInUse && Utilities.IsValid((Pool.Pool)Pool)) {
-                ((Pool.Pool)Pool).Return(gameObject);
-                return true;
-            }
-
-            return false;
-        }
         #endregion
     }
 }

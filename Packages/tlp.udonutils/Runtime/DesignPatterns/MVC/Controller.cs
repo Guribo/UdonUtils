@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
-using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
@@ -27,47 +27,47 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
 
         #region PublicAPI
         [PublicAPI]
-        public bool Initialize(Model model, View view) {
+        public bool _Initialize(Model model, View view) {
 #if TLP_DEBUG
-            DebugLog(nameof(Initialize));
+            _DebugLog(nameof(_Initialize));
 #endif
             if (!string.IsNullOrEmpty(CriticalError)) {
-                Error($"Can not initialize again due to previous critical error: '{CriticalError}'");
+                _Error($"Can not initialize again due to previous critical error: '{CriticalError}'");
                 return false;
             }
 
             if (IsControllerInitialized) {
-                Warn("Already initialized");
+                _Warn("Already initialized");
                 return false;
             }
 
             if (!Utilities.IsValid(view)) {
-                Error($"{nameof(view)} invalid");
+                _Error($"{nameof(view)} invalid");
                 return false;
             }
 
             if (!Utilities.IsValid(model)) {
-                Error($"{nameof(model)} invalid");
+                _Error($"{nameof(model)} invalid");
                 return false;
             }
 
             if (!string.IsNullOrEmpty(view.CriticalError)) {
-                Error($"{nameof(view)} has critical error: '{view.CriticalError}'");
+                _Error($"{nameof(view)} has critical error: '{view.CriticalError}'");
                 return false;
             }
 
             if (view.IsViewInitialized) {
-                Error($"{nameof(view)} is already initialized");
+                _Error($"{nameof(view)} is already initialized");
                 return false;
             }
 
             if (!string.IsNullOrEmpty(model.CriticalError)) {
-                Error($"{nameof(model)} has critical error: '{model.CriticalError}'");
+                _Error($"{nameof(model)} has critical error: '{model.CriticalError}'");
                 return false;
             }
 
             if (!model.IsModelInitialized) {
-                Error($"{nameof(model)} is not initialized");
+                _Error($"{nameof(model)} is not initialized");
                 return false;
             }
 
@@ -78,50 +78,50 @@ namespace TLP.UdonUtils.Runtime.DesignPatterns.MVC
             // failed to initialize and are in need of cleanup
             IsControllerInitialized = true;
 
-            if (InitializeInternal()) {
+            if (_InitializeInternal()) {
                 return true;
             }
 
-            Error($"Initialization failed. Using {nameof(DeInitialize)} to cleanup.");
-            DeInitialize();
+            _Error($"Initialization failed. Using {nameof(_DeInitialize)} to cleanup.");
+            _DeInitialize();
             return false;
         }
 
         protected virtual void OnDestroy() {
 #if TLP_DEBUG
-            DebugLog(nameof(OnDestroy));
+            _DebugLog(nameof(OnDestroy));
 #endif
-            DeInitialize();
+            _DeInitialize();
         }
 
-        public bool DeInitialize() {
+        public bool _DeInitialize() {
 #if TLP_DEBUG
-            DebugLog(nameof(DeInitialize));
+            _DebugLog(nameof(_DeInitialize));
 #endif
             if (!IsControllerInitialized) {
                 return false;
             }
 
             if (Utilities.IsValid(View)) {
-                View.DeInitialize();
+                View._DeInitialize();
             }
 
             View = null;
 
             if (Utilities.IsValid(Model)) {
-                Model.DeInitialize();
+                Model._DeInitialize();
             }
 
             Model = null;
 
-            if (DeInitializeInternal()) {
+            if (_DeInitializeInternal()) {
                 IsControllerInitialized = false;
                 CriticalError = null;
                 return true;
             }
 
             CriticalError = $"De-Initialization failed.";
-            Error(CriticalError);
+            _Error(CriticalError);
             return false;
         }
         #endregion

@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using TLP.UdonUtils.Runtime.Player;
 using UdonSharp;
 using UnityEngine;
 
@@ -12,6 +13,6 @@ namespace TLP.UdonUtils.Runtime.Events
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TlpExecutionOrder.WeaponsStart + 1;
+        public new const int ExecutionOrder = HorizontalLookAt.ExecutionOrder + 1;
     }
 }

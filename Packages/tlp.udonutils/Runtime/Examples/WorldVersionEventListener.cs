@@ -43,93 +43,93 @@ namespace TLP.UdonUtils.Runtime.Examples
         #endregion
 
         #region Overrides
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
             if (!Utilities.IsValid(Canvas)) {
-                ErrorAndDisableGameObject($"{nameof(Canvas)} not set");
+                _ErrorAndDisableGameObject($"{nameof(Canvas)} not set");
                 return false;
             }
 
             if (!Utilities.IsValid(UpdateAvailableText)) {
-                ErrorAndDisableGameObject($"{nameof(UpdateAvailableText)} not set");
+                _ErrorAndDisableGameObject($"{nameof(UpdateAvailableText)} not set");
                 return false;
             }
 
             if (!Utilities.IsValid(VersionConflictText)) {
-                ErrorAndDisableGameObject($"{nameof(VersionConflictText)} not set");
+                _ErrorAndDisableGameObject($"{nameof(VersionConflictText)} not set");
                 return false;
             }
 
             if (!Utilities.IsValid(UpdateAvailableEvent)) {
-                ErrorAndDisableGameObject($"{nameof(UpdateAvailableEvent)} not set");
+                _ErrorAndDisableGameObject($"{nameof(UpdateAvailableEvent)} not set");
                 return false;
             }
 
             if (!Utilities.IsValid(VersionConflictOccurredEvent)) {
-                ErrorAndDisableGameObject($"{nameof(VersionConflictOccurredEvent)} not set");
+                _ErrorAndDisableGameObject($"{nameof(VersionConflictOccurredEvent)} not set");
                 return false;
             }
 
-            if (!UpdateAvailableEvent.AddListenerVerified(this, nameof(WorldUpdateAvailable))) {
-                ErrorAndDisableGameObject($"Failed to listen to {nameof(UpdateAvailableEvent)}");
+            if (!UpdateAvailableEvent._AddListenerVerified(this, nameof(_WorldUpdateAvailable))) {
+                _ErrorAndDisableGameObject($"Failed to listen to {nameof(UpdateAvailableEvent)}");
                 return false;
             }
 
-            if (!VersionConflictOccurredEvent.AddListenerVerified(this, nameof(VersionConflictOccurred))) {
-                ErrorAndDisableGameObject($"Failed to listen to {nameof(VersionConflictOccurredEvent)}");
+            if (!VersionConflictOccurredEvent._AddListenerVerified(this, nameof(_VersionConflictOccurred))) {
+                _ErrorAndDisableGameObject($"Failed to listen to {nameof(VersionConflictOccurredEvent)}");
                 return false;
             }
 
             if (NotificationTimeout <= 0) {
-                Warn(
+                _Warn(
                         $"{nameof(NotificationTimeout)} <= 0; World version conflict notifications will be shown indefinitely");
             }
 
             return true;
         }
 
-        public override void OnEvent(string eventName) {
+        public override void _OnEvent(string eventName) {
             switch (eventName) {
-                case nameof(WorldUpdateAvailable):
-                    WorldUpdateAvailable();
+                case nameof(_WorldUpdateAvailable):
+                    _WorldUpdateAvailable();
                     return;
-                case nameof(VersionConflictOccurred):
-                    VersionConflictOccurred();
+                case nameof(_VersionConflictOccurred):
+                    _VersionConflictOccurred();
                     return;
                 default:
-                    base.OnEvent(eventName);
+                    base._OnEvent(eventName);
                     break;
             }
         }
         #endregion
 
         [PublicAPI]
-        public void WorldUpdateAvailable() {
-            Warn("World update available!");
+        public void _WorldUpdateAvailable() {
+            _Warn("World update available!");
             Canvas.gameObject.SetActive(true);
 
             UpdateAvailableText.gameObject.SetActive(true);
 
-            ScheduleNotificationTimeout();
+            _ScheduleNotificationTimeout();
         }
 
         [PublicAPI]
-        public void VersionConflictOccurred() {
-            Warn("World versions differ. Udon Networking might break now.");
+        public void _VersionConflictOccurred() {
+            _Warn("World versions differ. Udon Networking might break now.");
             Canvas.gameObject.SetActive(true);
             VersionConflictText.gameObject.SetActive(true);
 
             if (NotificationTimeout > 0) {
-                ScheduleNotificationTimeout();
+                _ScheduleNotificationTimeout();
             }
         }
 
 
         [PublicAPI]
-        public void HideNotifications() {
+        public void _HideNotifications() {
             if (NextUiHidingTime - Time.timeSinceLevelLoad > 0.1f * NotificationTimeout) {
                 return;
             }
@@ -140,9 +140,9 @@ namespace TLP.UdonUtils.Runtime.Examples
         }
 
         #region Internal
-        private void ScheduleNotificationTimeout() {
+        private void _ScheduleNotificationTimeout() {
             NextUiHidingTime = Time.timeSinceLevelLoad + NotificationTimeout;
-            SendCustomEventDelayedSeconds(nameof(HideNotifications), NotificationTimeout);
+            SendCustomEventDelayedSeconds(nameof(_HideNotifications), NotificationTimeout);
         }
         #endregion
     }

@@ -77,7 +77,7 @@ namespace TLP.UdonUtils.Runtime.Logger
         private float _lastLog;
         #endregion
 
-        public void OnEnable() {
+        internal void OnEnable() {
             #region TLP_DEBUG
 #if TLP_DEBUG
             Debug.Log(nameof(OnEnable), this);
@@ -87,7 +87,7 @@ namespace TLP.UdonUtils.Runtime.Logger
             Start();
         }
 
-        public void Update() {
+        internal void Update() {
             _frameTimeStopwatch.Restart();
         }
 
@@ -105,7 +105,7 @@ namespace TLP.UdonUtils.Runtime.Logger
                 return "";
             }
 
-            float delta = TimeSource.Time() - _lastLog;
+            float delta = TimeSource._Time() - _lastLog;
             _lastLog += delta;
 
 
@@ -133,7 +133,7 @@ namespace TLP.UdonUtils.Runtime.Logger
             double elapsedAccurate = _performanceStopwatch.Elapsed.TotalMilliseconds;
             _performanceStopwatch.Restart();
             return
-                    $"[<color=#008080>f={FrameCount.Frame()}({_frameTimeStopwatch.Elapsed.TotalMilliseconds:F3}ms) elapsed={TimeSource.Time() - _startTime:F4}s time={TimeSource.Time():F4}s dt(real)={elapsedAccurate:F3}ms </color>][<color=#804040>{(isLocal ? "Local" : "Remote")} owner {playerName}({ownerId}) {(master ? " is Master" : "")}</color>]";
+                    $"[<color=#008080>f={FrameCount._Frame()}({_frameTimeStopwatch.Elapsed.TotalMilliseconds:F3}ms) elapsed={TimeSource._Time() - _startTime:F4}s time={TimeSource._Time():F4}s dt(real)={elapsedAccurate:F3}ms </color>][<color=#804040>{(isLocal ? "Local" : "Remote")} owner {playerName}({ownerId}) {(master ? " is Master" : "")}</color>]";
         }
 
         public virtual void DebugLog(string logPrefix, string message, int executionOrder, Object context) {
@@ -161,10 +161,10 @@ namespace TLP.UdonUtils.Runtime.Logger
                 return;
             }
 
-            if (FrameCount.Frame() == _lastFrame) {
+            if (FrameCount._Frame() == _lastFrame) {
                 DebugLogOfFrame += $"{completeMessage}\n";
             } else {
-                _lastFrame = FrameCount.Frame();
+                _lastFrame = FrameCount._Frame();
                 DebugLogOfFrame = $"{completeMessage}\n";
             }
         }
@@ -227,50 +227,50 @@ namespace TLP.UdonUtils.Runtime.Logger
             return $"TLP_Logger";
         }
 
-        protected override bool SetupAndValidate() {
+        protected override bool _SetupAndValidate() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            Debug.Log(nameof(SetupAndValidate), this);
+            Debug.Log(nameof(_SetupAndValidate), this);
 #endif
             #endregion
 
             if (!Utilities.IsValid(TimeSource)) {
-                Debug.LogError($"{nameof(SetupAndValidate)}: {nameof(TimeSource)} not set", this);
+                Debug.LogError($"{nameof(_SetupAndValidate)}: {nameof(TimeSource)} not set", this);
                 return false;
             }
 
             if (!Utilities.IsValid(FrameCount)) {
-                Debug.LogError($"{nameof(SetupAndValidate)}: {nameof(FrameCount)} not set", this);
+                Debug.LogError($"{nameof(_SetupAndValidate)}: {nameof(FrameCount)} not set", this);
                 return false;
             }
 
             string expectedName = ExpectedGameObjectName();
             if (gameObject.name != expectedName) {
-                Warn(Prefix, $"Changing name of GameObject '{transform.GetPathInScene()}' to '{expectedName}'", this);
+                Warn(Prefix, $"Changing name of GameObject '{transform._GetPathInScene()}' to '{expectedName}'", this);
                 gameObject.name = expectedName;
             }
 
-            if (!base.SetupAndValidate()) {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
             UpdateBlackAndWhiteListLookup();
 
-            _startTime = TimeSource.Time();
-            Info($"Starting at time {_startTime}s.");
+            _startTime = TimeSource._Time();
+            _Info($"Starting at time {_startTime}s.");
             return true;
         }
         #endregion
 
         #region Internal
         private void UpdateBlackAndWhiteListLookup() {
-            if (WhiteList.LengthSafe() > RuntimeWhiteList.Count) {
+            if (WhiteList._LengthSafe() > RuntimeWhiteList.Count) {
                 foreach (var udonSharpBehaviour in WhiteList) {
                     RuntimeWhiteList[udonSharpBehaviour] = true;
                 }
             }
 
-            if (BlackList.LengthSafe() > RuntimeBlackList.Count) {
+            if (BlackList._LengthSafe() > RuntimeBlackList.Count) {
                 foreach (var udonSharpBehaviour in BlackList) {
                     RuntimeBlackList[udonSharpBehaviour] = true;
                 }

@@ -2,7 +2,6 @@
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
-using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Player
 {

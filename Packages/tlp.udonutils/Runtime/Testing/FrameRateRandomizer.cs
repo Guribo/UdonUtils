@@ -28,8 +28,8 @@ namespace TLP.UdonUtils.Runtime.Testing
         private readonly Stopwatch _stopWatch = new Stopwatch();
         #endregion
 
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
@@ -39,7 +39,7 @@ namespace TLP.UdonUtils.Runtime.Testing
             return true;
         }
 
-        public void Update() {
+        internal void Update() {
             // artificially make framerate fluctuate
             int targetRate = Random.Range(LowerFpsLimit, UpperFpsLimit);
             double elapsed = _stopWatch.Elapsed.TotalSeconds;

@@ -40,14 +40,14 @@ namespace TLP.UdonUtils.Runtime.Physics
         protected internal Vector3[] _angularAcceleration = new Vector3[3];
 
         private void OnEnable() {
-            Clear();
+            _Clear();
         }
 
         private void OnDisable() {
-            Clear();
+            _Clear();
         }
 
-        public virtual void Clear() {
+        public virtual void _Clear() {
             for (int i = 0; i < _velocity.Length; i++) {
                 _velocity[i] = Vector3.zero;
             }
@@ -65,9 +65,9 @@ namespace TLP.UdonUtils.Runtime.Physics
             }
         }
 
-        public virtual void SetTeleported(bool keepVelocity = true) {
+        public virtual void _SetTeleported(bool keepVelocity = true) {
             if (!keepVelocity) {
-                Clear();
+                _Clear();
             }
         }
 
@@ -91,8 +91,8 @@ namespace TLP.UdonUtils.Runtime.Physics
         [SerializeField]
         private float DebugAgeAcceleration;
 
-        protected void UpdateDebugEditorValues() {
-            double time = GetLatestSnapShot(
+        protected void _UpdateDebugEditorValues() {
+            double time = _GetLatestSnapShot(
                     out var position,
                     out var velocity,
                     out var acceleration,
@@ -108,7 +108,7 @@ namespace TLP.UdonUtils.Runtime.Physics
             DebugAccelerationInGs3x = AccelerationAvg3.magnitude / 9.81f;
         }
 #endif
-        public abstract double GetLatestSnapShot(
+        public abstract double _GetLatestSnapShot(
                 out Vector3 position,
                 out Vector3 velocity,
                 out Vector3 acceleration,
@@ -120,13 +120,13 @@ namespace TLP.UdonUtils.Runtime.Physics
         );
 
         #region Overrides
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
             if (!Utilities.IsValid(RelativeTo)) {
-                Error($"{nameof(RelativeTo)} not set");
+                _Error($"{nameof(RelativeTo)} not set");
                 return false;
             }
 

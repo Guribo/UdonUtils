@@ -66,8 +66,8 @@ namespace TLP.UdonUtils.Runtime.Pool
         #endregion
 
         #region Monobehaviour
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
@@ -80,8 +80,8 @@ namespace TLP.UdonUtils.Runtime.Pool
             } else {
                 _initiallyCreatedIndex = 0;
 
-                if (!TaskScheduler.AddTaskToDefaultScheduler(this, this)) {
-                    Error("Failed to add task to default scheduler");
+                if (!TaskScheduler._AddTaskToDefaultScheduler(this, this)) {
+                    _Error("Failed to add task to default scheduler");
                     return false;
                 }
             }
@@ -117,21 +117,21 @@ namespace TLP.UdonUtils.Runtime.Pool
         /// <returns>null if no more instances can be created (no instance prefab provided),
         /// the unpooled/created instance otherwise</returns>
         [PublicAPI]
-        public GameObject Get() {
+        public GameObject _Get() {
 #if TLP_DEBUG
-            DebugLog(nameof(Get));
+            _DebugLog(nameof(_Get));
 #endif
             int pooledCount = transform.childCount;
 
             if (pooledCount > 0) {
-                return ReUseExistingEntry(pooledCount);
+                return _ReUseExistingEntry(pooledCount);
             }
 
             if (Utilities.IsValid(PoolInstancePrefab)) {
-                return CreateNewEntry();
+                return _CreateNewEntry();
             }
 
-            Warn("Pool is empty and no more instances can be created");
+            _Warn("Pool is empty and no more instances can be created");
             return null;
         }
 
@@ -143,12 +143,12 @@ namespace TLP.UdonUtils.Runtime.Pool
         /// </summary>
         /// <param name="toReturn"></param>
         [PublicAPI]
-        public void Return(GameObject toReturn) {
+        public void _Return(GameObject toReturn) {
 #if TLP_DEBUG
-            DebugLog(nameof(Return));
+            _DebugLog(nameof(_Return));
 #endif
             if (!Utilities.IsValid(toReturn)) {
-                Error("Received invalid object to be returned to the pool");
+                _Error("Received invalid object to be returned to the pool");
                 return;
             }
 
@@ -163,10 +163,10 @@ namespace TLP.UdonUtils.Runtime.Pool
 #endif
 
             if (!Utilities.IsValid(instance)) {
-                Warn(
-                        $"{toReturn.transform.GetPathInScene()} has no UdonSharpBehaviour attached and will thus not be de-initialized");
+                _Warn(
+                        $"{toReturn.transform._GetPathInScene()} has no UdonSharpBehaviour attached and will thus not be de-initialized");
             } else {
-                instance.SendCustomEvent(nameof(OnPrepareForReturnToPool));
+                instance.SendCustomEvent(nameof(_OnPrepareForReturnToPool));
             }
 
             if (UsesRectTransform) {
@@ -184,22 +184,22 @@ namespace TLP.UdonUtils.Runtime.Pool
 
 
         [PublicAPI]
-        public bool IsEmpty() {
+        public bool _IsEmpty() {
 #if TLP_DEBUG
-            DebugLog(nameof(IsEmpty));
+            _DebugLog(nameof(_IsEmpty));
 #endif
             return transform.childCount == 0;
         }
         #endregion
 
         #region Internal
-        public TaskResult CreateNextInitialInstance() {
+        public TaskResult _CreateNextInitialInstance() {
 #if TLP_DEBUG
-            DebugLog($"{nameof(CreateNextInitialInstance)} {_initiallyCreatedIndex}");
+            _DebugLog($"{nameof(_CreateNextInitialInstance)} {_initiallyCreatedIndex}");
 #endif
 
             if (!Utilities.IsValid(PoolInstancePrefab)) {
-                Error("Pool can not be prefilled: invalid prefab");
+                _Error("Pool can not be prefilled: invalid prefab");
                 return TaskResult.Failed;
             }
 
@@ -209,17 +209,18 @@ namespace TLP.UdonUtils.Runtime.Pool
                  ++i) {
                 var newInstance = Instantiate(PoolInstancePrefab);
                 if (!Utilities.IsValid(newInstance)) {
-                    Error("Failed to create a new instance");
+                    _Error("Failed to create a new instance");
                     return TaskResult.Failed;
                 }
 
                 var instances = newInstance.gameObject.GetComponents<TlpBaseBehaviour>();
                 foreach (var instance in instances) {
                     if (!Utilities.IsValid(instance)) {
-                        Warn($"{newInstance.name} has no UdonSharpBehaviour attached and will thus not be initialized");
+                        _Warn(
+                                $"{newInstance.name} has no UdonSharpBehaviour attached and will thus not be initialized");
                     } else {
                         instance.SetProgramVariable(nameof(Pool), this);
-                        instance.SendCustomEvent(nameof(OnCreated));
+                        instance.SendCustomEvent(nameof(_OnCreated));
                     }
                 }
 
@@ -240,12 +241,12 @@ namespace TLP.UdonUtils.Runtime.Pool
 
             if (_initiallyCreatedIndex < InitialInstancesPrePooled && TotalCreated < InitialInstancesPrePooled) {
                 if (InitialInstancesPrePooled > 0)
-                    SetProgress((float)_initiallyCreatedIndex / InitialInstancesPrePooled);
+                    _SetProgress((float)_initiallyCreatedIndex / InitialInstancesPrePooled);
                 return TaskResult.Unknown;
             }
 
 
-            DebugLog($"Initialized with {InitialInstancesPrePooled} instances");
+            _DebugLog($"Initialized with {InitialInstancesPrePooled} instances");
 
             if (LimitToInitiallyCreated) {
                 PoolInstancePrefab = null;
@@ -255,10 +256,10 @@ namespace TLP.UdonUtils.Runtime.Pool
         }
 
 
-        private GameObject CreateNewEntry() {
+        private GameObject _CreateNewEntry() {
             var newInstance = Instantiate(PoolInstancePrefab, AttachToParent ? transform.parent : null, false);
             if (!Utilities.IsValid(newInstance)) {
-                Error("Failed to create a new instance");
+                _Error("Failed to create a new instance");
                 return null;
             }
 
@@ -267,9 +268,9 @@ namespace TLP.UdonUtils.Runtime.Pool
             var instances = result.GetComponents<TlpBaseBehaviour>();
             foreach (var instance in instances) {
                 if (!Utilities.IsValid(instance)) {
-                    Warn($"{newInstance.name} has no UdonSharpBehaviour attached and will thus not be initialized");
+                    _Warn($"{newInstance.name} has no UdonSharpBehaviour attached and will thus not be initialized");
                 } else {
-                    InitializeOnCreation(instance);
+                    _InitializeOnCreation(instance);
                 }
             }
 
@@ -282,10 +283,10 @@ namespace TLP.UdonUtils.Runtime.Pool
         }
 
 
-        private GameObject ReUseExistingEntry(int pooledCount) {
+        private GameObject _ReUseExistingEntry(int pooledCount) {
             var toUnPool = transform.GetChild(pooledCount - 1);
             if (!Utilities.IsValid(toUnPool)) {
-                Error("Failed to get an instance from the pool");
+                _Error("Failed to get an instance from the pool");
                 return null;
             }
 
@@ -308,11 +309,11 @@ namespace TLP.UdonUtils.Runtime.Pool
             var instances = toUnPool.gameObject.GetComponents<TlpBaseBehaviour>();
             foreach (var instance in instances) {
                 if (!Utilities.IsValid(instance)) {
-                    Warn(
+                    _Warn(
                             $"{toUnPool.name} has no {nameof(TlpBaseBehaviour)} attached and will thus not be initialized"
                     );
                 } else {
-                    InitializeOnReUse(instance);
+                    _InitializeOnReUse(instance);
                 }
             }
 
@@ -324,51 +325,52 @@ namespace TLP.UdonUtils.Runtime.Pool
             return toUnPool.gameObject;
         }
 
-        private void InitializeOnCreation(TlpBaseBehaviour behaviour) {
+        private void _InitializeOnCreation(TlpBaseBehaviour behaviour) {
             behaviour.Pool = this;
             behaviour.PoolableInUse = true;
-            behaviour.OnCreated();
-            behaviour.OnReadyForUse();
+            behaviour._OnCreated();
+            behaviour._OnReadyForUse();
         }
 
-        private void InitializeOnReUse(TlpBaseBehaviour behaviour) {
+        private void _InitializeOnReUse(TlpBaseBehaviour behaviour) {
             behaviour.Pool = this;
             behaviour.PoolableInUse = true;
-            behaviour.OnReadyForUse();
+            behaviour._OnReadyForUse();
         }
         #endregion
 
         #region Event Handling
-        public override void OnEvent(string eventName) {
+        public override void _OnEvent(string eventName) {
             switch (eventName) {
                 case "OnTaskFinished":
 #if TLP_DEBUG
-                    DebugLog_OnEvent(eventName);
+                    _DebugLog_OnEvent(eventName);
 #endif
-                    Info("Pool pre-filling completed");
+                    _Info("Pool pre-filling completed");
                     break;
                 default:
-                    base.OnEvent(eventName);
+                    base._OnEvent(eventName);
                     break;
             }
         }
         #endregion
 
         #region Task Implementation
-        protected override TaskResult DoTask(float stepDeltaTime) {
+        protected override TaskResult _DoTask(float stepDeltaTime) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-        DebugLog($"{nameof(DoTask)}: {nameof(stepDeltaTime)}={stepDeltaTime}");
+            _DebugLog($"{nameof(_DoTask)}: {nameof(stepDeltaTime)}={stepDeltaTime}");
 #endif
             #endregion
-            return CreateNextInitialInstance();
+
+            return _CreateNextInitialInstance();
         }
 
-        public override int GetNeededSteps() {
+        public override int _GetNeededSteps() {
             return InitialInstancesPrePooled / Mathf.Max(1, InitializationsPerFrame);
         }
 
-        protected override bool InitTask() {
+        protected override bool _InitTask() {
             return true;
         }
         #endregion

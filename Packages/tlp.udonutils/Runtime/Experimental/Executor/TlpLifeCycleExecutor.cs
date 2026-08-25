@@ -3,7 +3,6 @@ using JetBrains.Annotations;
 using TLP.UdonUtils.Runtime;
 using TLP.UdonUtils.Runtime.Common;
 using TLP.UdonUtils.Runtime.Experimental.Tasks;
-using TLP.UdonUtils.Runtime.Sources.Time;
 using UdonSharp;
 using UnityEngine;
 using VRC.SDK3.Data;
@@ -61,8 +60,8 @@ namespace Tlp.UdonUtils.Editor.Tests.Experimental.Executor
         #endregion
 
         #region Overrides
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
@@ -76,12 +75,12 @@ namespace Tlp.UdonUtils.Editor.Tests.Experimental.Executor
 
                 if (behaviour.enabled) {
                     _executionOrderProcessing = behaviour.ExecutionOrderReadOnly;
-                    behaviour.TlpWakeUp();
+                    behaviour._TlpWakeUp();
                 }
             }
 
             _lifeCycleState = LifeCycleState.Enable;
-            RefreshGrowingOrder();
+            _RefreshGrowingOrder();
 
             for (int i = 0; i < _growingOnlyOrder.Count; ++i) {
                 var behaviour = (TlpLifeCycleBehaviour)_growingOnlyOrder[i].Reference;
@@ -91,12 +90,12 @@ namespace Tlp.UdonUtils.Editor.Tests.Experimental.Executor
 
                 if (behaviour.enabled) {
                     _executionOrderProcessing = behaviour.ExecutionOrderReadOnly;
-                    behaviour.TlpEnable();
+                    behaviour._TlpEnable();
                 }
             }
 
             _lifeCycleState = LifeCycleState.Start;
-            RefreshGrowingOrder();
+            _RefreshGrowingOrder();
             for (int i = 0; i < _growingOnlyOrder.Count; ++i) {
                 var behaviour = (TlpLifeCycleBehaviour)_growingOnlyOrder[i].Reference;
                 if (!Utilities.IsValid(behaviour)) {
@@ -105,7 +104,7 @@ namespace Tlp.UdonUtils.Editor.Tests.Experimental.Executor
 
                 if (behaviour.TlpIsEnabled) {
                     _executionOrderProcessing = behaviour.ExecutionOrderReadOnly;
-                    behaviour.TlpInit();
+                    behaviour._TlpInit();
                 }
             }
 
@@ -130,7 +129,7 @@ namespace Tlp.UdonUtils.Editor.Tests.Experimental.Executor
 
                 if (behaviour.TlpIsEnabled) {
                     _executionOrderProcessing = behaviour.ExecutionOrderReadOnly;
-                    behaviour.TlpRunFixedUpdate();
+                    behaviour._TlpRunFixedUpdate();
                 }
             }
         }
@@ -146,7 +145,7 @@ namespace Tlp.UdonUtils.Editor.Tests.Experimental.Executor
 
                 if (behaviour.TlpIsEnabled) {
                     _executionOrderProcessing = behaviour.ExecutionOrderReadOnly;
-                    behaviour.TlpRunUpdate();
+                    behaviour._TlpRunUpdate();
                 }
             }
         }
@@ -161,7 +160,7 @@ namespace Tlp.UdonUtils.Editor.Tests.Experimental.Executor
 
                 if (behaviour.TlpIsEnabled) {
                     _executionOrderProcessing = behaviour.ExecutionOrderReadOnly;
-                    behaviour.TlpRunLateUpdate();
+                    behaviour._TlpRunLateUpdate();
                 }
             }
         }
@@ -177,23 +176,23 @@ namespace Tlp.UdonUtils.Editor.Tests.Experimental.Executor
 
                 if (behaviour.TlpIsEnabled) {
                     _executionOrderProcessing = behaviour.ExecutionOrderReadOnly;
-                    behaviour.TlpRunPostLateUpdate();
+                    behaviour._TlpRunPostLateUpdate();
                 }
             }
         }
         #endregion
 
         #region Internal
-        internal void Register(TlpLifeCycleBehaviour tlpLifeCycleBehaviour) {
+        internal void _Register(TlpLifeCycleBehaviour tlpLifeCycleBehaviour) {
             if (!Utilities.IsValid(tlpLifeCycleBehaviour)) {
-                Error($"{nameof(Register)}: Invalid {nameof(tlpLifeCycleBehaviour)}");
+                _Error($"{nameof(_Register)}: Invalid {nameof(tlpLifeCycleBehaviour)}");
                 return;
             }
 
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(
-                    $"{nameof(Register)}: {tlpLifeCycleBehaviour.GetScriptPathInScene()} {tlpLifeCycleBehaviour.ExecutionOrderReadOnly}");
+            _DebugLog(
+                    $"{nameof(_Register)}: {tlpLifeCycleBehaviour._GetScriptPathInScene()} {tlpLifeCycleBehaviour.ExecutionOrderReadOnly}");
 #endif
             #endregion
 
@@ -208,8 +207,8 @@ namespace Tlp.UdonUtils.Editor.Tests.Experimental.Executor
                                 reference.GetUdonTypeName(),
                                 tlpLifeCycleBehaviour.GetUdonTypeName(),
                                 StringComparison.Ordinal) <= 0 && string.Compare(
-                                reference.GetScriptPathInScene(),
-                                tlpLifeCycleBehaviour.GetScriptPathInScene(),
+                                reference._GetScriptPathInScene(),
+                                tlpLifeCycleBehaviour._GetScriptPathInScene(),
                                 StringComparison.Ordinal) <= 0) {
                         continue;
                     }
@@ -224,20 +223,20 @@ namespace Tlp.UdonUtils.Editor.Tests.Experimental.Executor
                 _executionOrderLookupTable.Add(tlpLifeCycleBehaviour.ExecutionOrderReadOnly, behaviours);
             }
 
-            RegenerateExecutionOrder();
-            InitRegisteredBehaviour(tlpLifeCycleBehaviour);
+            _RegenerateExecutionOrder();
+            _InitRegisteredBehaviour(tlpLifeCycleBehaviour);
         }
 
-        internal void Unregister(TlpLifeCycleBehaviour tlpLifeCycleBehaviour) {
+        internal void _Unregister(TlpLifeCycleBehaviour tlpLifeCycleBehaviour) {
             if (!Utilities.IsValid(tlpLifeCycleBehaviour)) {
-                Error($"{nameof(Unregister)}: Invalid {nameof(tlpLifeCycleBehaviour)}");
+                _Error($"{nameof(_Unregister)}: Invalid {nameof(tlpLifeCycleBehaviour)}");
                 return;
             }
 
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(
-                    $"{nameof(Unregister)}: {tlpLifeCycleBehaviour.GetScriptPathInScene()} {tlpLifeCycleBehaviour.ExecutionOrderReadOnly}");
+            _DebugLog(
+                    $"{nameof(_Unregister)}: {tlpLifeCycleBehaviour._GetScriptPathInScene()} {tlpLifeCycleBehaviour.ExecutionOrderReadOnly}");
 #endif
             #endregion
 
@@ -259,14 +258,14 @@ namespace Tlp.UdonUtils.Editor.Tests.Experimental.Executor
         #endregion
 
         #region Private
-        private void InitRegisteredBehaviour(TlpLifeCycleBehaviour tlpLifeCycleBehaviour) {
+        private void _InitRegisteredBehaviour(TlpLifeCycleBehaviour tlpLifeCycleBehaviour) {
             switch (_lifeCycleState) {
                 case LifeCycleState.None:
                     break;
                 case LifeCycleState.Awake:
                     if (tlpLifeCycleBehaviour.ExecutionOrderReadOnly <= _executionOrderProcessing) {
                         if (!tlpLifeCycleBehaviour.TlpIsAwake) {
-                            tlpLifeCycleBehaviour.TlpWakeUp();
+                            tlpLifeCycleBehaviour._TlpWakeUp();
                         }
                     }
 
@@ -274,12 +273,12 @@ namespace Tlp.UdonUtils.Editor.Tests.Experimental.Executor
                     break;
                 case LifeCycleState.Enable:
                     if (!tlpLifeCycleBehaviour.TlpIsAwake) {
-                        tlpLifeCycleBehaviour.TlpWakeUp();
+                        tlpLifeCycleBehaviour._TlpWakeUp();
                     }
 
                     if (tlpLifeCycleBehaviour.ExecutionOrderReadOnly <= _executionOrderProcessing) {
                         if (!tlpLifeCycleBehaviour.TlpIsEnabled) {
-                            tlpLifeCycleBehaviour.TlpEnable();
+                            tlpLifeCycleBehaviour._TlpEnable();
                         }
                     }
 
@@ -288,16 +287,16 @@ namespace Tlp.UdonUtils.Editor.Tests.Experimental.Executor
                     break;
                 case LifeCycleState.Start:
                     if (!tlpLifeCycleBehaviour.TlpIsAwake) {
-                        tlpLifeCycleBehaviour.TlpWakeUp();
+                        tlpLifeCycleBehaviour._TlpWakeUp();
                     }
 
                     if (!tlpLifeCycleBehaviour.TlpIsEnabled) {
-                        tlpLifeCycleBehaviour.TlpEnable();
+                        tlpLifeCycleBehaviour._TlpEnable();
                     }
 
                     if (tlpLifeCycleBehaviour.ExecutionOrderReadOnly <= _executionOrderProcessing) {
                         if (!tlpLifeCycleBehaviour.TlpIsStarted) {
-                            tlpLifeCycleBehaviour.TlpInit();
+                            tlpLifeCycleBehaviour._TlpInit();
                         }
                     }
 
@@ -308,15 +307,15 @@ namespace Tlp.UdonUtils.Editor.Tests.Experimental.Executor
                 case LifeCycleState.LateUpdate:
                 case LifeCycleState.PostLateUpdate:
                     if (!tlpLifeCycleBehaviour.TlpIsAwake) {
-                        tlpLifeCycleBehaviour.TlpWakeUp();
+                        tlpLifeCycleBehaviour._TlpWakeUp();
                     }
 
                     if (!tlpLifeCycleBehaviour.TlpIsEnabled) {
-                        tlpLifeCycleBehaviour.TlpEnable();
+                        tlpLifeCycleBehaviour._TlpEnable();
                     }
 
                     if (!tlpLifeCycleBehaviour.TlpIsStarted) {
-                        tlpLifeCycleBehaviour.TlpInit();
+                        tlpLifeCycleBehaviour._TlpInit();
                     }
 
                     _growingOnlyOutdatedOnNewFrame = true;
@@ -331,22 +330,22 @@ namespace Tlp.UdonUtils.Editor.Tests.Experimental.Executor
             }
         }
 
-        private void RegenerateExecutionOrder() {
+        private void _RegenerateExecutionOrder() {
             var keys = _executionOrderLookupTable.GetKeys();
             keys.Sort();
             for (int i = 0; i < keys.Count; i++) {
                 _executionOrderProcessing = keys[i].Int;
-                DebugLog($"ExecutionOrder: {_executionOrderProcessing}");
+                _DebugLog($"ExecutionOrder: {_executionOrderProcessing}");
                 var behaviours = _executionOrderLookupTable[_executionOrderProcessing].DataList;
                 for (int j = 0; j < behaviours.Count; j++) {
                     if (!Utilities.IsValid(behaviours[j].Reference)) continue;
-                    DebugLog($"{((TlpLifeCycleBehaviour)behaviours[j].Reference).GetScriptPathInScene()}");
+                    _DebugLog($"{((TlpLifeCycleBehaviour)behaviours[j].Reference)._GetScriptPathInScene()}");
                     _executionOrder.Add(behaviours[j]);
                 }
             }
         }
 
-        private void RefreshGrowingOrder() {
+        private void _RefreshGrowingOrder() {
             if (!_growingOnlyOutdated) {
                 return;
             }

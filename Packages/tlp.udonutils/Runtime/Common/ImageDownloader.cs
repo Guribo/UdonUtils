@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using VRC.SDK3.Data;
 using VRC.SDK3.Image;
+using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
 using VRC.Udon;
 
@@ -71,41 +72,41 @@ namespace TLP.UdonUtils.Runtime.Common
         #endregion
 
         #region Udon Lifecycle
-        private void OnEnable() {
+        internal void OnEnable() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnEnable));
+            _DebugLog(nameof(OnEnable));
 #endif
             #endregion
 
             if (string.IsNullOrWhiteSpace(ImageUrls.ToString())) {
-                Warn($"{nameof(ImageUrls)} is empty, no image will be loaded");
+                _Warn($"{nameof(ImageUrls)} is empty, no image will be loaded");
                 return;
             }
 
             if (Settings == null) {
-                Error($"{nameof(Settings)} invalid");
+                _Error($"{nameof(Settings)} invalid");
                 return;
             }
 
             if (ImageMaterial == null) {
-                Error($"{nameof(ImageMaterial)} invalid");
+                _Error($"{nameof(ImageMaterial)} invalid");
                 return;
             }
 
             if (!PreviousButton) {
-                Error($"{nameof(PreviousButton)} not set");
+                _Error($"{nameof(PreviousButton)} not set");
                 return;
             }
 
             if (!NextButton) {
-                Error($"{nameof(NextButton)} not set");
+                _Error($"{nameof(NextButton)} not set");
                 return;
             }
 
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"Starting download of image: {ImageUrls}");
+            _DebugLog($"Starting download of image: {ImageUrls}");
 #endif
             #endregion
 
@@ -114,18 +115,17 @@ namespace TLP.UdonUtils.Runtime.Common
             }
 
             _imageDownloader = new VRCImageDownloader();
-            StartDownload();
-            SetFallbackTexture();
+            _StartDownload();
+            _SetFallbackTexture();
 
             PreviousButton.gameObject.SetActive(_currentImageIndex != 0);
             NextButton.gameObject.SetActive(_currentImageIndex < ImageUrls.Length - 1);
         }
-
-
-        private void OnDisable() {
+        
+        internal void OnDisable() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnDisable));
+            _DebugLog(nameof(OnDisable));
 #endif
             #endregion
 
@@ -142,7 +142,7 @@ namespace TLP.UdonUtils.Runtime.Common
         protected override void OnDestroy() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnDestroy));
+            _DebugLog(nameof(OnDestroy));
 #endif
             #endregion
 
@@ -155,21 +155,21 @@ namespace TLP.UdonUtils.Runtime.Common
         /// Call from Unity UI Button
         /// </summary>
         [PublicAPI]
-        public void ShowNext() {
+        public void _ShowNext() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(ShowNext));
+            _DebugLog(nameof(_ShowNext));
 #endif
             #endregion
 
-            if (ImageUrls.LengthSafe() < 1) {
-                Error("No URLs defined");
+            if (ImageUrls._LengthSafe() < 1) {
+                _Error("No URLs defined");
                 return;
             }
 
             _currentImageIndex = Mathf.Clamp(_currentImageIndex + 1, 0, ImageUrls.Length - 1);
 
-            DownloadOrDisplayImageForIndex();
+            _DownloadOrDisplayImageForIndex();
             PreviousButton.gameObject.SetActive(_currentImageIndex != 0);
             NextButton.gameObject.SetActive(_currentImageIndex < ImageUrls.Length - 1);
         }
@@ -178,54 +178,54 @@ namespace TLP.UdonUtils.Runtime.Common
         /// Call from Unity UI Button
         /// </summary>
         [PublicAPI]
-        public void ShowPrevious() {
+        public void _ShowPrevious() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(ShowPrevious));
+            _DebugLog(nameof(_ShowPrevious));
 #endif
             #endregion
 
-            if (ImageUrls.LengthSafe() < 1) {
-                Error("No URLs defined");
+            if (ImageUrls._LengthSafe() < 1) {
+                _Error("No URLs defined");
                 return;
             }
 
             _currentImageIndex = Mathf.Clamp(_currentImageIndex - 1, 0, ImageUrls.Length - 1);
 
-            DownloadOrDisplayImageForIndex();
+            _DownloadOrDisplayImageForIndex();
             PreviousButton.gameObject.SetActive(_currentImageIndex != 0);
             NextButton.gameObject.SetActive(_currentImageIndex < ImageUrls.Length - 1);
         }
 
-        private void DownloadOrDisplayImageForIndex() {
-            UpdateDisplayedImage(RendererFallback);
+        private void _DownloadOrDisplayImageForIndex() {
+            _UpdateDisplayedImage(RendererFallback);
             var imageUrl = ImageUrls[_currentImageIndex];
             if (imageUrl == null) {
-                Error($"Invalid URL at position {_currentImageIndex}");
+                _Error($"Invalid URL at position {_currentImageIndex}");
                 return;
             }
 
             var downloadedImage = _downloadedImages[imageUrl.ToString()];
             if (downloadedImage.Error != DataError.None
                 || downloadedImage.TokenType != TokenType.Reference) {
-                StartDownload();
+                _StartDownload();
                 return;
             }
 
             var texture = (Texture2D)downloadedImage.Reference;
             if (!texture) {
-                Error($"Invalid texture stored for URL: {imageUrl}");
+                _Error($"Invalid texture stored for URL: {imageUrl}");
                 return;
             }
 
-            UpdateDisplayedImage(texture);
+            _UpdateDisplayedImage(texture);
         }
 
 
         public override void OnImageLoadSuccess(IVRCImageDownload result) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(OnImageLoadSuccess)} {result.Url} ({result.SizeInMemoryBytes / 1024:F3} Kb)");
+            _DebugLog($"{nameof(OnImageLoadSuccess)} {result.Url} ({result.SizeInMemoryBytes / 1024:F3} Kb)");
 #endif
             #endregion
 
@@ -236,24 +236,24 @@ namespace TLP.UdonUtils.Runtime.Common
                 return;
             }
 
-            SetDownloadedTexture(result);
+            _SetDownloadedTexture(result);
         }
 
-        private void SetDownloadedTexture(IVRCImageDownload result) {
+        private void _SetDownloadedTexture(IVRCImageDownload result) {
             if (!Renderer) {
-                Warn($"{nameof(Renderer)} not set, skipping property block setting");
+                _Warn($"{nameof(Renderer)} not set, skipping property block setting");
                 return;
             }
 
             var downloadedImage = result.Result;
             _downloadedImages[result.Url.ToString()] = downloadedImage;
-            UpdateDisplayedImage(downloadedImage);
+            _UpdateDisplayedImage(downloadedImage);
         }
 
         public override void OnImageLoadError(IVRCImageDownload result) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(OnImageLoadError)} {result.Url} ({result.ErrorMessage})");
+            _DebugLog($"{nameof(OnImageLoadError)} {result.Url} ({result.ErrorMessage})");
 #endif
             #endregion
 
@@ -262,19 +262,19 @@ namespace TLP.UdonUtils.Runtime.Common
             if (result.Url.ToString() == ImageUrls.ToString()
                 && !string.IsNullOrEmpty(ImageUrls.ToString())
                 && _imageDownload != null) {
-                SendCustomEventDelayedSeconds(nameof(Retry), 5f);
+                SendCustomEventDelayedSeconds(nameof(_Retry), 5f);
             }
 
             _downloadedImages[result.Url.ToString()] = (Texture2D)null;
-            SetFallbackTexture();
+            _SetFallbackTexture();
         }
         #endregion
 
         #region Delayed Events
-        public void UpdateProgress() {
+        public void _UpdateProgress() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(UpdateProgress)} of {ImageUrls}");
+            _DebugLog($"{nameof(_UpdateProgress)} of {ImageUrls}");
 #endif
             #endregion
 
@@ -283,7 +283,7 @@ namespace TLP.UdonUtils.Runtime.Common
                 || _imageDownload.Progress >= 1f) {
                 #region TLP_DEBUG
 #if TLP_DEBUG
-                DebugLog($"Download of {ImageUrls} ended");
+                _DebugLog($"Download of {ImageUrls} ended");
 #endif
                 #endregion
 
@@ -292,20 +292,20 @@ namespace TLP.UdonUtils.Runtime.Common
 
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"Download progress of {ImageUrls}: {_imageDownload.Progress * 100f:F3}%");
+            _DebugLog($"Download progress of {ImageUrls}: {_imageDownload.Progress * 100f:F3}%");
 #endif
             #endregion
 
-            SendCustomEventDelayedSeconds(nameof(UpdateProgress), 3f);
+            SendCustomEventDelayedSeconds(nameof(_UpdateProgress), 3f);
         }
 
 
-        public void Retry() {
+        public void _Retry() {
             if (_imageDownloader == null
                 || _imageDownload == null) {
                 #region TLP_DEBUG
 #if TLP_DEBUG
-                DebugLog($"{nameof(Retry)} cancelled");
+                _DebugLog($"{nameof(_Retry)} cancelled");
 #endif
                 #endregion
 
@@ -314,24 +314,24 @@ namespace TLP.UdonUtils.Runtime.Common
 
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog($"{nameof(Retry)} downloading {ImageUrls}");
+            _DebugLog($"{nameof(_Retry)} downloading {ImageUrls}");
 #endif
             #endregion
 
-            StartDownload();
+            _StartDownload();
         }
         #endregion
 
         #region Internal
-        private void StartDownload() {
+        private void _StartDownload() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(StartDownload));
+            _DebugLog(nameof(_StartDownload));
 #endif
             #endregion
 
             if (!Utilities.IsValid(_imageDownloader)) {
-                Error($"{nameof(_imageDownloader)} invalid");
+                _Error($"{nameof(_imageDownloader)} invalid");
                 return;
             }
 
@@ -341,33 +341,33 @@ namespace TLP.UdonUtils.Runtime.Common
                     GetComponent<UdonBehaviour>(),
                     Settings
             );
-            SendCustomEventDelayedSeconds(nameof(UpdateProgress), 10f);
+            SendCustomEventDelayedSeconds(nameof(_UpdateProgress), 10f);
         }
 
-        private void UpdateDisplayedImage(Texture2D texture) {
+        private void _UpdateDisplayedImage(Texture2D texture) {
             var materialPropertyBlock = new MaterialPropertyBlock();
             materialPropertyBlock.SetTexture(RendererMaterialProperty, texture);
             Renderer.SetPropertyBlock(materialPropertyBlock);
 
-            UpdateAspectRatio(texture);
+            _UpdateAspectRatio(texture);
         }
 
-        private void SetFallbackTexture() {
+        private void _SetFallbackTexture() {
             if (!Renderer) {
-                Warn($"{nameof(Renderer)} not set, skipping property block setting");
+                _Warn($"{nameof(Renderer)} not set, skipping property block setting");
                 return;
             }
 
             if (RendererFallback == null) {
-                Warn($"{nameof(RendererFallback)} texture not set");
+                _Warn($"{nameof(RendererFallback)} texture not set");
                 return;
             }
 
-            UpdateDisplayedImage(RendererFallback);
+            _UpdateDisplayedImage(RendererFallback);
         }
 
 
-        private void UpdateAspectRatio(Texture2D texture) {
+        private void _UpdateAspectRatio(Texture2D texture) {
             if (!RendererAutoAspectRatio || texture == null) {
                 return;
             }

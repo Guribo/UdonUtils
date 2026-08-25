@@ -43,7 +43,7 @@ namespace TLP.UdonUtils.Runtime.Physics
         #endregion
 
         #region Overrides
-        public bool Initialize(int size)
+        public bool _Initialize(int size)
         {
             if (size < 1) return false;
             Capacity = size;
@@ -63,7 +63,7 @@ namespace TLP.UdonUtils.Runtime.Physics
 
         #region Public API
         [PublicAPI]
-        public override bool AddFromSnapshot(Snapshot snapshot)
+        public override bool _AddFromSnapshot(Snapshot snapshot)
         {
             if (Capacity <= 0) {
                 return false;
@@ -76,7 +76,7 @@ namespace TLP.UdonUtils.Runtime.Physics
 
             if (Size > 0 && snapshot.Time < Time[LastWriteIndex]) return false;
 
-            LastWriteIndex = LastWriteIndex.AddLooping(Capacity);
+            LastWriteIndex = LastWriteIndex._AddLooping(Capacity);
             Size = Mathf.Min(Size + 1, Capacity);
 
             Time[LastWriteIndex] = physicsState.Time;
@@ -98,31 +98,31 @@ namespace TLP.UdonUtils.Runtime.Physics
         /// </summary>
         /// <param name="timestamp">The timestamp in seconds to test.</param>
         /// <returns><c>true</c> if the timestamp lies within the stored range.</returns>
-        public bool Interpolatable(double timestamp)
+        public bool _Interpolatable(double timestamp)
         {
             return Size > 1 &&
                    Time[LastWriteIndex] >= timestamp &&
-                   Time[GetOldestIndex()] <= timestamp;
+                   Time[_GetOldestIndex()] <= timestamp;
         }
 
-        private int GetOldestIndex()
+        private int _GetOldestIndex()
         {
-            return LastWriteIndex.AddLooping(Capacity, Capacity - Size + 1);
+            return LastWriteIndex._AddLooping(Capacity, Capacity - Size + 1);
         }
 
-        public bool Interpolate(double time, RigidBodyPhysicsState resultPhysicsState)
+        public bool _Interpolate(double time, RigidBodyPhysicsState resultPhysicsState)
         {
-            if (!Interpolatable(time)) return false;
+            if (!_Interpolatable(time)) return false;
 
-            int left = GetOldestIndex();
+            int left = _GetOldestIndex();
             int right = Capacity - 1;
             if (LastWriteIndex < left) {
                 // oldest sample is in second half of the buffer
                 if (time < Time[right]) {
                     // value is between oldest index and end of buffer
-                    left = BinarySearch(left, right, time);
+                    left = _BinarySearch(left, right, time);
                     right = left + 1;
-                    InterpolateInternal(time, left, right, resultPhysicsState);
+                    _InterpolateInternal(time, left, right, resultPhysicsState);
                     return true;
                 }
 
@@ -131,28 +131,28 @@ namespace TLP.UdonUtils.Runtime.Physics
                     right = LastWriteIndex;
 
                     // value is between start of buffer and newest index
-                    left = BinarySearch(left, right, time);
+                    left = _BinarySearch(left, right, time);
                     right = left + 1;
-                    InterpolateInternal(time, left, right, resultPhysicsState);
+                    _InterpolateInternal(time, left, right, resultPhysicsState);
                     return true;
                 }
 
                 left = right;
                 right = 0;
                 // value is between wrapping indices
-                InterpolateInternal(time, left, right, resultPhysicsState);
+                _InterpolateInternal(time, left, right, resultPhysicsState);
                 return true;
             }
 
             right = LastWriteIndex;
             // value is just between oldest and newest index
-            left = BinarySearch(left, right, time);
+            left = _BinarySearch(left, right, time);
             right = left + 1;
-            InterpolateInternal(time, left, right, resultPhysicsState);
+            _InterpolateInternal(time, left, right, resultPhysicsState);
             return true;
         }
 
-        private void InterpolateInternal(double time, int left, int right, RigidBodyPhysicsState resultPhysicsState)
+        private void _InterpolateInternal(double time, int left, int right, RigidBodyPhysicsState resultPhysicsState)
         {
             float t = Mathf.InverseLerp(
                     0f,
@@ -198,7 +198,7 @@ namespace TLP.UdonUtils.Runtime.Physics
                     t);
         }
 
-        private int BinarySearch(int left, int right, double time)
+        private int _BinarySearch(int left, int right, double time)
         {
             int mid = (left + right) / 2;
             while (right - left > 1) {
@@ -219,7 +219,7 @@ namespace TLP.UdonUtils.Runtime.Physics
             if (Size > 1)
                 Debug.DrawLine(
                         Position[LastWriteIndex],
-                        Position[LastWriteIndex.SubtractLooping(Capacity)],
+                        Position[LastWriteIndex._SubtractLooping(Capacity)],
                         Color.red,
                         3f);
         }

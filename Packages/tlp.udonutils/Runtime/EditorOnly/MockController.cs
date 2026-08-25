@@ -20,15 +20,15 @@ namespace TLP.UdonUtils.Runtime.EditorOnly
         public bool DeInitResult = true;
 
 
-        protected override bool InitializeInternal() {
+        protected override bool _InitializeInternal() {
             return InitResult;
         }
 
-        protected override bool DeInitializeInternal() {
+        protected override bool _DeInitializeInternal() {
             return DeInitResult;
         }
 
-        public void SetMockHasError(bool error) {
+        public void _SetMockHasError(bool error) {
             CriticalError = error.ToString();
         }
     }

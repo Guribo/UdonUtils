@@ -36,8 +36,8 @@ namespace TLP.UdonUtils.Runtime.Player
         #endregion
 
         #region TLP Base Hooks
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
@@ -45,7 +45,7 @@ namespace TLP.UdonUtils.Runtime.Player
                 return true;
             }
 
-            Error($"{nameof(AudioSource)} not set");
+            _Error($"{nameof(AudioSource)} not set");
             return false;
         }
         #endregion
@@ -53,12 +53,12 @@ namespace TLP.UdonUtils.Runtime.Player
         #region Lifecycle
         public override void PostLateUpdate() {
             base.PostLateUpdate();
-            UpdateVolume(Networking.LocalPlayer);
+            _UpdateVolume(Networking.LocalPlayer);
         }
         #endregion
 
         #region Internal
-        internal void UpdateVolume(VRCPlayerApi player) {
+        internal void _UpdateVolume(VRCPlayerApi player) {
             if (!Utilities.IsValid(player)) {
                 return;
             }

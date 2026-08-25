@@ -19,17 +19,17 @@ namespace TLP.UdonUtils.Runtime.StateMachine.Example
         public StateMachineState Next;
         public float Delay = 3f;
 
-        protected override void OnStateEntered() {
-            base.OnStateEntered();
+        protected override void _OnStateEntered() {
+            base._OnStateEntered();
             if (Networking.IsOwner(StateMachine.gameObject)) {
-                SendCustomEventDelayedSeconds(nameof(Delayed_TransitionToNext), Delay);
+                SendCustomEventDelayedSeconds(nameof(_Delayed_TransitionToNext), Delay);
             }
         }
 
-        public void Delayed_TransitionToNext() {
+        public void _Delayed_TransitionToNext() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(Delayed_TransitionToNext));
+            _DebugLog(nameof(_Delayed_TransitionToNext));
 #endif
             #endregion
 
@@ -37,18 +37,18 @@ namespace TLP.UdonUtils.Runtime.StateMachine.Example
                 return;
             }
 
-            if (!TransitionTo(Next)) {
-                Error($"Failed to transition to {Next.transform.GetPathInScene()}");
+            if (!_TransitionTo(Next)) {
+                _Error($"Failed to transition to {Next.transform._GetPathInScene()}");
             }
         }
 
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) {
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
                 return false;
             }
 
             if (!Utilities.IsValid(Next)) {
-                Error($"{nameof(Next)} not set");
+                _Error($"{nameof(Next)} not set");
                 return false;
             }
 

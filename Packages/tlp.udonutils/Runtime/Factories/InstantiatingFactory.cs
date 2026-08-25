@@ -26,9 +26,9 @@ namespace TLP.UdonUtils.Runtime.Factories
         /// <returns>Type name of the product to be created.
         /// If the <see cref="FactoryKey"/> is set it is returned instead.
         /// Returns null if the prototype is not set</returns>
-        protected override string GetProductTypeName() {
+        protected override string _GetProductTypeName() {
             if (!string.IsNullOrWhiteSpace(FactoryKey)) {
-                return base.GetProductTypeName();
+                return base._GetProductTypeName();
             }
 
             if (!Utilities.IsValid(Prototype)) {
@@ -37,26 +37,26 @@ namespace TLP.UdonUtils.Runtime.Factories
 
             string udonTypeName = Prototype.GetUdonTypeName();
             FactoryKey = "";
-            return UdonCommon.UdonTypeNameShort(udonTypeName);
+            return UdonCommon._UdonTypeNameShort(udonTypeName);
         }
 
         /// <returns>a completely new instance, returns null if <see cref="Prototype"/> is not set</returns>
-        protected override GameObject ProduceInstance() {
+        protected override GameObject _ProduceInstance() {
             if (Utilities.IsValid(Prototype)) {
                 return Instantiate(Prototype.gameObject);
             }
 
-            Error($"{nameof(Prototype)} not set");
+            _Error($"{nameof(Prototype)} not set");
             return null;
         }
 
 
-        protected override bool SetupAndValidate() {
+        protected override bool _SetupAndValidate() {
             if (Utilities.IsValid(Prototype)) {
-                return base.SetupAndValidate();
+                return base._SetupAndValidate();
             }
 
-            Error($"{nameof(Prototype)} is not set");
+            _Error($"{nameof(Prototype)} is not set");
             return false;
         }
         #endregion

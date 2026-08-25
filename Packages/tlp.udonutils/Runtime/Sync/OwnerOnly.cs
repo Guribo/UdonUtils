@@ -47,21 +47,21 @@ namespace TLP.UdonUtils.Runtime.Sync
         public UdonSharpBehaviour[] UdonSharpBehaviours;
         // public Behaviour[] Behaviours;
 
-        public void OnEnable() {
-            ToggleEnabled(Networking.IsOwner(gameObject));
+        internal void OnEnable() {
+            _ToggleEnabled(Networking.IsOwner(gameObject));
         }
 
         public override void OnOwnershipTransferred(VRCPlayerApi player) {
-            ToggleEnabled(Networking.IsOwner(gameObject));
+            _ToggleEnabled(Networking.IsOwner(gameObject));
         }
 
-        private void ToggleEnabled(bool enable) {
-            ToggleGameObjectsActiveState(enable);
-            ToggleUdonSharpBehaviours(enable);
-            ToggleComponentsEnabled(enable);
+        private void _ToggleEnabled(bool enable) {
+            _ToggleGameObjectsActiveState(enable);
+            _ToggleUdonSharpBehaviours(enable);
+            _ToggleComponentsEnabled(enable);
         }
 
-        private void ToggleComponentsEnabled(bool enable) {
+        private void _ToggleComponentsEnabled(bool enable) {
             // if (Behaviours != null) {
             //     foreach (var component in Behaviours) {
             //         if (!Utilities.IsValid(component)) {
@@ -72,7 +72,7 @@ namespace TLP.UdonUtils.Runtime.Sync
             // }
         }
 
-        private void ToggleUdonSharpBehaviours(bool enable) {
+        private void _ToggleUdonSharpBehaviours(bool enable) {
             if (UdonSharpBehaviours != null) {
                 foreach (var udonSharpBehaviour in UdonSharpBehaviours) {
                     if (!Utilities.IsValid(udonSharpBehaviour)) {
@@ -84,7 +84,7 @@ namespace TLP.UdonUtils.Runtime.Sync
             }
         }
 
-        private void ToggleGameObjectsActiveState(bool enable) {
+        private void _ToggleGameObjectsActiveState(bool enable) {
             if (GameObjects != null) {
                 foreach (var go in GameObjects) {
                     if (!Utilities.IsValid(go)) {

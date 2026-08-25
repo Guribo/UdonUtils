@@ -14,9 +14,9 @@ namespace TLP.UdonUtils.Runtime.StateMachine
     ///
     /// Is initialized by the state machine when the state machine is initialized
     /// 
-    /// Can be extended to implement <see cref="OnBeginEnterState"/>,
-    /// <see cref="OnStateEntered"/>, <see cref="OnBeginExitState"/>
-    /// and <see cref="OnStateExited"/>.
+    /// Can be extended to implement <see cref="_OnBeginEnterState"/>,
+    /// <see cref="_OnStateEntered"/>, <see cref="_OnBeginExitState"/>
+    /// and <see cref="_OnStateExited"/>.
     ///
     /// Should be extended to implement conditions for transitioning to other states.
     /// Alternatively transition logic can be implemented in dedicated <see cref="StateMachineBehaviour"/>s.
@@ -51,34 +51,34 @@ namespace TLP.UdonUtils.Runtime.StateMachine
         #endregion
 
         #region Lifecycle
-        public virtual void OnEnable() {
+        protected internal virtual void OnEnable() {
 #if TLP_DEBUG
-            DebugLog(nameof(OnEnable));
+            _DebugLog(nameof(OnEnable));
 #endif
             if (StateMachineIndex == -1) {
-                DisableBehaviours();
+                _DisableBehaviours();
                 enabled = false;
                 return;
             }
 
-            OnBeginEnterState();
-            EnableBehaviours();
-            OnStateEntered();
+            _OnBeginEnterState();
+            _EnableBehaviours();
+            _OnStateEntered();
         }
 
 
-        public virtual void OnDisable() {
+        protected internal virtual void OnDisable() {
 #if TLP_DEBUG
-            DebugLog(nameof(OnDisable));
+            _DebugLog(nameof(OnDisable));
 #endif
 
             if (StateMachineIndex == -1) {
                 return;
             }
 
-            OnBeginExitState();
-            DisableBehaviours();
-            OnStateExited();
+            _OnBeginExitState();
+            _DisableBehaviours();
+            _OnStateExited();
         }
         #endregion
 
@@ -87,36 +87,36 @@ namespace TLP.UdonUtils.Runtime.StateMachine
         /// <summary>
         /// Called before the StateMachineBehaviours are enabled
         /// </summary>
-        protected virtual void OnBeginEnterState() {
+        protected virtual void _OnBeginEnterState() {
 #if TLP_DEBUG
-            DebugLog(nameof(OnBeginEnterState));
+            _DebugLog(nameof(_OnBeginEnterState));
 #endif
         }
 
         /// <summary>
         /// Called after the StateMachineBehaviours are enabled
         /// </summary>
-        protected virtual void OnStateEntered() {
+        protected virtual void _OnStateEntered() {
 #if TLP_DEBUG
-            DebugLog(nameof(OnStateEntered));
+            _DebugLog(nameof(_OnStateEntered));
 #endif
         }
 
         /// <summary>
         /// Called before the StateMachineBehaviours are disabled
         /// </summary>
-        protected virtual void OnBeginExitState() {
+        protected virtual void _OnBeginExitState() {
 #if TLP_DEBUG
-            DebugLog(nameof(OnBeginExitState));
+            _DebugLog(nameof(_OnBeginExitState));
 #endif
         }
 
         /// <summary>
         /// Called after the StateMachineBehaviours are disabled
         /// </summary>
-        protected virtual void OnStateExited() {
+        protected virtual void _OnStateExited() {
 #if TLP_DEBUG
-            DebugLog(nameof(OnStateExited));
+            _DebugLog(nameof(_OnStateExited));
 #endif
         }
         #endregion
@@ -129,43 +129,43 @@ namespace TLP.UdonUtils.Runtime.StateMachine
         /// <param name="nextStateMachineState"></param>
         /// <returns></returns>
         [PublicAPI]
-        public bool TransitionTo(StateMachineState nextStateMachineState) {
+        public bool _TransitionTo(StateMachineState nextStateMachineState) {
             if (!Utilities.IsValid(nextStateMachineState)) {
 #if TLP_DEBUG
-                Error($"{nameof(TransitionTo)}: nextState invalid");
+                _Error($"{nameof(_TransitionTo)}: nextState invalid");
 #endif
                 return false;
             }
 
 #if TLP_DEBUG
-            DebugLog(
-                    $"{nameof(TransitionTo)} {nextStateMachineState.GetUdonTypeName()} (index = {nextStateMachineState.StateMachineIndex})"
+            _DebugLog(
+                    $"{nameof(_TransitionTo)} {nextStateMachineState.GetUdonTypeName()} (index = {nextStateMachineState.StateMachineIndex})"
             );
 #endif
 
             int nextStateIndex = nextStateMachineState.StateMachineIndex;
             if (nextStateIndex == StateMachineIndex) {
 #if TLP_DEBUG
-                Warn("transition to self is not supported");
+                _Warn("transition to self is not supported");
 #endif
                 return false;
             }
 
             if (!Utilities.IsValid(StateMachine)) {
-                Error(
+                _Error(
                         "state machine invalid, make sure this state is assigned to it and the state machine has started successfully"
                 );
                 return false;
             }
 
-            return StateMachine.OwnerSetNewState(nextStateIndex)
-                   || StateMachine.LocalOnlySetNewState(nextStateIndex);
+            return StateMachine._OwnerSetNewState(nextStateIndex)
+                   || StateMachine._LocalOnlySetNewState(nextStateIndex);
         }
         #endregion
 
 
         #region Internal
-        private void EnableBehaviours() {
+        private void _EnableBehaviours() {
             if (StateMachineBehaviours == null) {
                 return;
             }
@@ -184,19 +184,19 @@ namespace TLP.UdonUtils.Runtime.StateMachine
                     continue;
                 }
 
-                entry.OnStateEntered();
+                entry._OnStateEntered();
             }
         }
 
-        private void DisableBehaviours() {
-            int lengthSafe = StateMachineBehaviours.LengthSafe();
+        private void _DisableBehaviours() {
+            int lengthSafe = StateMachineBehaviours._LengthSafe();
             for (int i = lengthSafe - 1; i >= 0; i--) {
                 var entry = StateMachineBehaviours[i];
                 if (!Utilities.IsValid(entry)) {
                     continue;
                 }
 
-                entry.OnStateExited();
+                entry._OnStateExited();
             }
 
             for (int i = lengthSafe - 1; i >= 0; i--) {

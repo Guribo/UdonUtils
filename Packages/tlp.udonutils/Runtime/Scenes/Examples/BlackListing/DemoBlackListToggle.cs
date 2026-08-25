@@ -6,6 +6,7 @@ using TLP.UdonUtils.Runtime.Player;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
+using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Scenes.Examples.BlackListing
@@ -25,48 +26,49 @@ namespace TLP.UdonUtils.Runtime.Scenes.Examples.BlackListing
 
         public PlayerBlackList PlayerBlackList;
 
-        public void OnEnable() {
+        internal void OnEnable() {
+
             if (!Utilities.IsValid(WhiteListButton)) {
-                ErrorAndDisableGameObject($"{nameof(WhiteListButton)} is not set");
+                _ErrorAndDisableGameObject($"{nameof(WhiteListButton)} is not set");
                 return;
             }
 
             if (!Utilities.IsValid(BlackListButton)) {
-                ErrorAndDisableGameObject($"{nameof(BlackListButton)} is not set");
+                _ErrorAndDisableGameObject($"{nameof(BlackListButton)} is not set");
                 return;
             }
 
             WhiteListButton.gameObject.SetActive(
-                    PlayerBlackList.IsBlackListed(Networking.LocalPlayer.DisplayNameSafe()));
+                    PlayerBlackList._IsBlackListed(Networking.LocalPlayer._DisplayNameSafe()));
             BlackListButton.gameObject.SetActive(
-                    PlayerBlackList.IsWhiteListed(Networking.LocalPlayer.DisplayNameSafe()));
+                    PlayerBlackList._IsWhiteListed(Networking.LocalPlayer._DisplayNameSafe()));
         }
 
         [PublicAPI]
-        public void AddLocalPlayerToBlackList() {
+        public void _AddLocalPlayerToBlackList() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(AddLocalPlayerToBlackList));
+            _DebugLog(nameof(_AddLocalPlayerToBlackList));
 #endif
             #endregion
 
-            if (!PlayerBlackList.AddToBlackList(Networking.LocalPlayer.DisplayNameSafe())) {
-                Warn($"Failed to add '{Networking.LocalPlayer.DisplayNameSafe()}' to blacklist");
+            if (!PlayerBlackList._AddToBlackList(Networking.LocalPlayer._DisplayNameSafe())) {
+                _Warn($"Failed to add '{Networking.LocalPlayer._DisplayNameSafe()}' to blacklist");
             }
 
             OnEnable();
         }
 
         [PublicAPI]
-        public void AddLocalPlayerToWhiteList() {
+        public void _AddLocalPlayerToWhiteList() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(AddLocalPlayerToWhiteList));
+            _DebugLog(nameof(_AddLocalPlayerToWhiteList));
 #endif
             #endregion
 
-            if (!PlayerBlackList.AddToWhiteList(Networking.LocalPlayer.DisplayNameSafe())) {
-                Warn($"Failed to add '{Networking.LocalPlayer.DisplayNameSafe()}' to whitelist");
+            if (!PlayerBlackList._AddToWhiteList(Networking.LocalPlayer._DisplayNameSafe())) {
+                _Warn($"Failed to add '{Networking.LocalPlayer._DisplayNameSafe()}' to whitelist");
             }
 
             OnEnable();

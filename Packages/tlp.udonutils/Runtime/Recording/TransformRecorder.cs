@@ -2,6 +2,7 @@
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
+using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Recording
@@ -46,26 +47,26 @@ namespace TLP.UdonUtils.Runtime.Recording
         [SerializeField]
         internal Transform Target;
 
-        public void OnEnable() {
+        internal void OnEnable() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnEnable));
+            _DebugLog(nameof(OnEnable));
 #endif
             #endregion
 
             if (!Utilities.IsValid(Target)) {
-                ErrorAndDisableComponent($"{nameof(Target)} is not set");
+                _ErrorAndDisableComponent($"{nameof(Target)} is not set");
                 return;
             }
 
-            StartRecording();
+            _StartRecording();
         }
 
-        public void OnDisable() {
-            StopRecording();
+        internal void OnDisable() {
+            _StopRecording();
         }
 
-        internal void Record(float gameTime, float startTime, Transform t) {
+        internal void _Record(float gameTime, float startTime, Transform t) {
             float time = gameTime - startTime;
 
             var position = t.position;
@@ -73,8 +74,8 @@ namespace TLP.UdonUtils.Runtime.Recording
 
             var newDelta = position - PreviousPosition;
             var newVelocity = newDelta / Time.deltaTime;
-            if (!IsCloseToDirection(PreviousDelta, newDelta, DirectionThresholdAngle)
-                || !SameLength(PreviousVelocity, newVelocity, SpeedDifferenceThreshold)) {
+            if (!_IsCloseToDirection(PreviousDelta, newDelta, DirectionThresholdAngle) ||
+                !_SameLength(PreviousVelocity, newVelocity, SpeedDifferenceThreshold)) {
                 PositionHistoryX.AddKey(PreviousTime, PreviousPosition.x);
                 PositionHistoryY.AddKey(PreviousTime, PreviousPosition.y);
                 PositionHistoryZ.AddKey(PreviousTime, PreviousPosition.z);
@@ -96,9 +97,9 @@ namespace TLP.UdonUtils.Runtime.Recording
             PreviousTime = time;
         }
 
-        internal void StartRecording() {
+        internal void _StartRecording() {
             if (!Utilities.IsValid(Target)) {
-                ErrorAndDisableComponent($"{nameof(Target)} is not set");
+                _ErrorAndDisableComponent($"{nameof(Target)} is not set");
                 return;
             }
 
@@ -122,7 +123,7 @@ namespace TLP.UdonUtils.Runtime.Recording
             PreviousAngle = 0f;
         }
 
-        public Vector3 GetPosition(float time) {
+        public Vector3 _GetPosition(float time) {
             return new Vector3(
                     PositionHistoryX.Evaluate(time),
                     PositionHistoryY.Evaluate(time),
@@ -130,7 +131,7 @@ namespace TLP.UdonUtils.Runtime.Recording
             );
         }
 
-        public Quaternion GetRotation(float time) {
+        public Quaternion _GetRotation(float time) {
             return Quaternion.AngleAxis(
                     RotationAngle.Evaluate(time),
                     new Vector3(
@@ -143,7 +144,7 @@ namespace TLP.UdonUtils.Runtime.Recording
 
         public override void PostLateUpdate() {
             if (Utilities.IsValid(Target)) {
-                Record(Time.timeSinceLevelLoad, StartTime, Target);
+                _Record(Time.timeSinceLevelLoad, StartTime, Target);
             }
         }
 
@@ -155,11 +156,11 @@ namespace TLP.UdonUtils.Runtime.Recording
         /// <param name="newDelta"></param>
         /// <param name="threshold">threshold angle in degree beyond which the new direction is not considered close</param>
         /// <returns></returns>
-        internal bool IsCloseToDirection(Vector3 oldDelta, Vector3 newDelta, float threshold) {
+        internal bool _IsCloseToDirection(Vector3 oldDelta, Vector3 newDelta, float threshold) {
             return Vector3.Angle(oldDelta, newDelta) <= threshold;
         }
 
-        internal bool SameLength(Vector3 oldDelta, Vector3 newDelta, float threshold) {
+        internal bool _SameLength(Vector3 oldDelta, Vector3 newDelta, float threshold) {
             float length = oldDelta.magnitude;
             if (length == 0f) {
                 return newDelta == oldDelta;
@@ -169,7 +170,7 @@ namespace TLP.UdonUtils.Runtime.Recording
             return lengthDelta / length <= threshold;
         }
 
-        internal void StopRecording() {
+        internal void _StopRecording() {
             PositionHistoryX.AddKey(PreviousTime, PreviousPosition.x);
             PositionHistoryY.AddKey(PreviousTime, PreviousPosition.y);
             PositionHistoryZ.AddKey(PreviousTime, PreviousPosition.z);

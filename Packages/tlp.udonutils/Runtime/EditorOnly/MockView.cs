@@ -19,19 +19,19 @@ namespace TLP.UdonUtils.Runtime.EditorOnly
         public bool DeInitResult = true;
         public int ModelChangedInvocations;
 
-        protected override bool InitializeInternal() {
+        protected override bool _InitializeInternal() {
             return InitResult;
         }
 
-        protected override bool DeInitializeInternal() {
+        protected override bool _DeInitializeInternal() {
             return DeInitResult;
         }
 
-        public override void OnModelChanged() {
+        public override void _OnModelChanged() {
             ++ModelChangedInvocations;
         }
 
-        public void SetMockHasError(bool error) {
+        public void _SetMockHasError(bool error) {
             CriticalError = error.ToString();
         }
     }

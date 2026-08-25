@@ -5,12 +5,12 @@ namespace TLP.UdonUtils.Sync
     public static class CompressionUtils
     {
         /// <summary>
-        /// Decompresses the first 30 bits back into a quaternion. See also <see cref="CompressToUint32"/>.
+        /// Decompresses the first 30 bits back into a quaternion. See also <see cref="_CompressToUint32"/>.
         /// </summary>
         /// <param name="compressedRotation">Expects an euler representation encoded in the first 10 bit being z,
         /// 11-20 being y and 21-30 being x.</param>
         /// <returns></returns>
-        public static Quaternion DecompressToQuaternion(
+        public static Quaternion _DecompressToQuaternion(
                 this uint compressedRotation
         ) {
             uint x10Dec = (compressedRotation & (0b11_11111111 << 20)) >> 20;
@@ -32,13 +32,13 @@ namespace TLP.UdonUtils.Sync
         /// <summary>
         /// Compresses the euler representation of the quaternion into the first 30 bits of a uint32 variable,
         /// with the first 10 bit being z, 11-20 being y and 21-30 being x.
-        /// See also <see cref="DecompressToQuaternion"/>.
+        /// See also <see cref="_DecompressToQuaternion"/>.
         /// TODO: investigate alternative solution: https://gist.github.com/gafferongames/bb7e593ba1b05da35ab6#file-delta_compression-cpp-L1004
         /// <remarks>The compression introduces a loss of accuracy, up to around 0.3 degrees per axis</remarks>
         /// </summary>
         /// <param name="rotation">Must be normalizable, as in ideally just local/world rotations</param>
         /// <returns></returns>
-        public static uint CompressToUint32(this Quaternion rotation) {
+        public static uint _CompressToUint32(this Quaternion rotation) {
 #if TLP_UNIT_TESTING
             Debug.Log($"Original rotation: {rotation.eulerAngles}");
             Debug.Log($"Normalized rotation: {rotation.normalized.eulerAngles}");

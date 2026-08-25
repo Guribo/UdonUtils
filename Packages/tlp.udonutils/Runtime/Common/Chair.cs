@@ -5,6 +5,7 @@ using TLP.UdonUtils.Runtime.Sync;
 using UdonSharp;
 using UnityEngine;
 using UnityEngine.Serialization;
+using VRC.SDK3.UdonNetworkCalling;
 using VRC.SDKBase;
 
 namespace TLP.UdonUtils.Runtime.Common
@@ -41,10 +42,10 @@ namespace TLP.UdonUtils.Runtime.Common
         public UdonEvent OnRemotePlayerExited;
 
         #region UdonSharp Lifecycle
-        public void OnDisable() {
+        internal void OnDisable() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnDisable));
+            _DebugLog(nameof(OnDisable));
 #endif
             #endregion
 
@@ -54,7 +55,7 @@ namespace TLP.UdonUtils.Runtime.Common
             }
         }
 
-        public void Update() {
+        internal void Update() {
             if (!_localPlayerSitting || !Utilities.IsValid(_station)) {
                 return;
             }
@@ -73,15 +74,21 @@ namespace TLP.UdonUtils.Runtime.Common
         #region Interaction Events
         public override void Interact() {
 #if TLP_DEBUG
-            DebugLog(nameof(Interact));
+            _DebugLog(nameof(Interact));
 #endif
+
+            if (NetworkCalling.InNetworkCall) {
+                _Warn($"{nameof(Interact)}: called during network call, skipping");
+                return;
+            }
+            
             if (!enabled) {
-                Warn("Not enabled");
+                _Warn("Not enabled");
                 return;
             }
 
             var go = gameObject;
-            OwnershipTransfer.TransferOwnershipFrom(
+            OwnershipTransfer._TransferOwnershipFrom(
                     go,
                     go,
                     Networking.LocalPlayer,
@@ -95,137 +102,139 @@ namespace TLP.UdonUtils.Runtime.Common
         #region VRC Station Events
         public override void OnStationEntered(VRCPlayerApi player) {
 #if TLP_DEBUG
-            DebugLog(nameof(OnStationEntered));
+            _DebugLog(nameof(OnStationEntered));
 #endif
             if (!enabled) {
-                Warn("Not enabled");
+                _Warn("Not enabled");
                 return;
             }
 
             if (!Utilities.IsValid(player)) {
-                Error("Invalid player entered station");
+                _Error("Invalid player entered station");
                 return;
             }
 
-            DebugLog($"{player.ToStringSafe()} entered Chair");
+            _DebugLog($"{player._ToStringSafe()} entered Chair");
 
             if (player.isLocal) {
                 _localPlayerSitting = true;
-                NotifyLocalPlayerEntered();
+                _NotifyLocalPlayerEntered();
                 return;
             }
 
             _remotePlayerSitting = true;
-            NotifyRemotePlayerEntered(player);
+            _NotifyRemotePlayerEntered(player);
         }
 
         public override void OnStationExited(VRCPlayerApi player) {
 #if TLP_DEBUG
-            DebugLog(nameof(OnStationExited));
+            _DebugLog(nameof(OnStationExited));
 #endif
             if (!enabled) {
-                Warn("Not enabled");
+                _Warn("Not enabled");
                 return;
             }
 
             if (!Utilities.IsValid(player)) {
-                Error($"{nameof(player)} invalid");
+                _Error($"{nameof(player)} invalid");
                 return;
             }
 
-            DebugLog($"{nameof(OnStationExited)}:{player.displayName}({player.playerId}) exited Chair");
+            _DebugLog($"{nameof(OnStationExited)}:{player.displayName}({player.playerId}) exited Chair");
 
             if (player.isLocal) {
                 _localPlayerSitting = false;
-                NotifyLocalPlayerExited();
+                _NotifyLocalPlayerExited();
 
                 return;
             }
 
             _remotePlayerSitting = false;
-            NotifyRemotePlayerExited(player);
+            _NotifyRemotePlayerExited(player);
         }
         #endregion
 
         #region Public API
-        public VRCPlayerApi GetSeatedPlayer() {
+        public VRCPlayerApi _GetSeatedPlayer() {
             return _localPlayerSitting || _remotePlayerSitting ? Networking.GetOwner(gameObject) : null;
         }
         #endregion
 
         #region Local Player Events
-        private void NotifyLocalPlayerEntered() {
+        private void _NotifyLocalPlayerEntered() {
 #if TLP_DEBUG
-            DebugLog(nameof(NotifyLocalPlayerEntered));
+            _DebugLog(nameof(_NotifyLocalPlayerEntered));
 #endif
 
-            if (Utilities.IsValid(ChairProxy) && !ChairProxy.OnLocalPlayerEntered()) {
-                Warn($"Chair proxy could not process {nameof(ChairProxy.OnLocalPlayerEntered)}");
+            if (Utilities.IsValid(ChairProxy) && !ChairProxy._OnLocalPlayerEntered()) {
+                _Warn($"Chair proxy could not process {nameof(ChairProxy._OnLocalPlayerEntered)}");
             }
 
             if (!Utilities.IsValid(OnLocalPlayerEntered)) {
-                Warn($"{nameof(OnLocalPlayerEntered)} not set, event will not be raised");
+                _Warn($"{nameof(OnLocalPlayerEntered)} not set, event will not be raised");
             } else {
-                OnLocalPlayerEntered.Raise(this);
+                OnLocalPlayerEntered._Raise(this);
             }
         }
 
-        private void NotifyLocalPlayerExited() {
+        private void _NotifyLocalPlayerExited() {
 #if TLP_DEBUG
-            DebugLog(nameof(NotifyLocalPlayerExited));
+            _DebugLog(nameof(_NotifyLocalPlayerExited));
 #endif
-            if (Utilities.IsValid(ChairProxy) && !ChairProxy.OnLocalPlayerExited()) {
-                Warn($"Chair proxy could not process {nameof(ChairProxy.OnLocalPlayerExited)}");
+            if (Utilities.IsValid(ChairProxy) && !ChairProxy._OnLocalPlayerExited()) {
+                _Warn($"Chair proxy could not process {nameof(ChairProxy._OnLocalPlayerExited)}");
             }
 
             if (!Utilities.IsValid(OnLocalPlayerExited)) {
-                Warn($"{nameof(OnLocalPlayerExited)} not set, event will not be raised");
+                _Warn($"{nameof(OnLocalPlayerExited)} not set, event will not be raised");
             } else {
-                OnLocalPlayerExited.Raise(this);
+                OnLocalPlayerExited._Raise(this);
             }
         }
         #endregion
 
         #region Remote Player Events
-        private void NotifyRemotePlayerEntered(VRCPlayerApi player) {
+        private void _NotifyRemotePlayerEntered(VRCPlayerApi player) {
 #if TLP_DEBUG
-            DebugLog(nameof(NotifyRemotePlayerEntered));
+            _DebugLog(nameof(_NotifyRemotePlayerEntered));
 #endif
 
-            if (Utilities.IsValid(ChairProxy) && !ChairProxy.OnRemotePlayerEntered(player)) {
-                Warn($"Chair proxy could not process {nameof(ChairProxy.OnRemotePlayerEntered)}");
+            if (Utilities.IsValid(ChairProxy) && !ChairProxy._OnRemotePlayerEntered(player)) {
+                _Warn($"Chair proxy could not process {nameof(ChairProxy._OnRemotePlayerEntered)}");
             }
 
             if (!Utilities.IsValid(OnRemotePlayerEntered)) {
-                Warn($"{nameof(OnRemotePlayerEntered)} not set, event will not be raised");
+                _Warn($"{nameof(OnRemotePlayerEntered)} not set, event will not be raised");
             } else {
-                OnRemotePlayerEntered.Raise(this);
+                OnRemotePlayerEntered._Raise(this);
             }
         }
 
-        private void NotifyRemotePlayerExited(VRCPlayerApi player) {
+        private void _NotifyRemotePlayerExited(VRCPlayerApi player) {
 #if TLP_DEBUG
-            DebugLog(nameof(NotifyRemotePlayerExited));
+            _DebugLog(nameof(_NotifyRemotePlayerExited));
 #endif
-            if (Utilities.IsValid(ChairProxy) && !ChairProxy.OnRemotePlayerExited(player)) {
-                Warn($"Chair proxy could not process {nameof(ChairProxy.OnRemotePlayerExited)}");
+            if (Utilities.IsValid(ChairProxy) && !ChairProxy._OnRemotePlayerExited(player)) {
+                _Warn($"Chair proxy could not process {nameof(ChairProxy._OnRemotePlayerExited)}");
             }
 
             if (!Utilities.IsValid(OnRemotePlayerExited)) {
-                Warn($"{nameof(OnRemotePlayerExited)} not set, event will not be raised");
+                _Warn($"{nameof(OnRemotePlayerExited)} not set, event will not be raised");
             } else {
-                OnRemotePlayerExited.Raise(this);
+                OnRemotePlayerExited._Raise(this);
             }
         }
         #endregion
 
         #region Hook Implementations
-        protected override bool SetupAndValidate() {
-            if (!base.SetupAndValidate()) return false;
+        protected override bool _SetupAndValidate() {
+            if (!base._SetupAndValidate()) {
+                return false;
+            }
 
             _station = (VRCStation)gameObject.GetComponent(typeof(VRCStation));
             if (!Utilities.IsValid(_station)) {
-                Error($"{name} is missing a {nameof(VRCStation)} component");
+                _Error($"{name} is missing a {nameof(VRCStation)} component");
                 return false;
             }
 

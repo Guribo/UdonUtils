@@ -21,19 +21,19 @@ namespace TLP.UdonUtils.Runtime.Sources
         /// Current time of this source.
         /// </summary>
         /// <returns>Time in seconds</returns>
-        public abstract float Time();
+        public abstract float _Time();
 
         /// <summary>
-        /// Same as <see cref="Time"/> with higher accuracy if available.
+        /// Same as <see cref="_Time"/> with higher accuracy if available.
         /// </summary>
         /// <returns>Time in seconds</returns>
-        public abstract double TimeAsDouble();
+        public abstract double _TimeAsDouble();
 
         /// <summary>
         /// Fixed delta time of this source for physics calculation.
         /// </summary>
         /// <returns>Time in seconds</returns>
-        public virtual float FixedDeltaTime() {
+        public virtual float _FixedDeltaTime() {
             return UnityEngine.Time.fixedDeltaTime;
         }
 
@@ -41,7 +41,7 @@ namespace TLP.UdonUtils.Runtime.Sources
         /// Smooth delta time of this source.
         /// </summary>
         /// <returns>Time in seconds</returns>
-        public virtual float SmoothDeltaTime() {
+        public virtual float _SmoothDeltaTime() {
             return UnityEngine.Time.smoothDeltaTime;
         }
 
@@ -49,7 +49,7 @@ namespace TLP.UdonUtils.Runtime.Sources
         /// Delta time of this source.
         /// </summary>
         /// <returns>Time in seconds</returns>
-        public virtual float DeltaTime() {
+        public virtual float _DeltaTime() {
             return UnityEngine.Time.deltaTime;
         }
 
@@ -57,7 +57,7 @@ namespace TLP.UdonUtils.Runtime.Sources
         /// Delta time of this source, not clamped or scaled.
         /// </summary>
         /// <returns>Time in seconds</returns>
-        public virtual float UnscaledDeltaTime() {
+        public virtual float _UnscaledDeltaTime() {
             return UnityEngine.Time.unscaledDeltaTime;
         }
     }

@@ -27,111 +27,111 @@ namespace Tlp.UdonUtils.Editor.Tests.Experimental.Executor
                 if (Utilities.IsValid(lifeCycleExecutor)) {
                     _lifeCycleExecutor = lifeCycleExecutor.GetComponent<TlpLifeCycleExecutor>();
                 } else {
-                    ErrorAndDisableGameObject(
+                    _ErrorAndDisableGameObject(
                             $"{nameof(GameObject)} {TlpLifeCycleExecutor.GlobalGameObjectName} not found");
                 }
             }
 
             if (!Utilities.IsValid(_lifeCycleExecutor)) {
-                ErrorAndDisableGameObject(
+                _ErrorAndDisableGameObject(
                         $"{nameof(GameObject)} {TlpLifeCycleExecutor.GlobalGameObjectName} with {GetUdonTypeName<TlpLifeCycleExecutor>()} not found");
                 return;
             }
 
-            _lifeCycleExecutor.Register(this);
+            _lifeCycleExecutor._Register(this);
         }
 
         internal void OnDisable() {
             if (!Utilities.IsValid(_lifeCycleExecutor)) return;
-            _lifeCycleExecutor.Unregister(this);
+            _lifeCycleExecutor._Unregister(this);
         }
 
-        public bool TlpIsAwake { get; internal set; }
-        public bool TlpIsEnabled { get; internal set; }
-        public bool TlpIsStarted { get; internal set; }
+        public bool TlpIsAwake { get; private set; }
+        public bool TlpIsEnabled { get; private set; }
+        public bool TlpIsStarted { get; private set; }
 
-        internal void TlpWakeUp() {
+        internal void _TlpWakeUp() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(TlpAwake));
+            _DebugLog(nameof(_TlpAwake));
 #endif
             #endregion
 
-            TlpAwake();
+            _TlpAwake();
             TlpIsAwake = true;
         }
 
-        internal void TlpInit() {
+        internal void _TlpInit() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(TlpInit));
+            _DebugLog(nameof(_TlpInit));
 #endif
             #endregion
 
-            TlpStart();
+            _TlpStart();
             TlpIsStarted = true;
         }
 
-        internal void TlpRunFixedUpdate() {
-            TlpFixedUpdate();
+        internal void _TlpRunFixedUpdate() {
+            _TlpFixedUpdate();
         }
 
-        internal void TlpRunUpdate() {
-            TlpUpdate();
+        internal void _TlpRunUpdate() {
+            _TlpUpdate();
         }
 
-        internal void TlpRunLateUpdate() {
-            TlpLateUpdate();
+        internal void _TlpRunLateUpdate() {
+            _TlpLateUpdate();
         }
 
-        internal void TlpRunPostLateUpdate() {
-            TlpPostLateUpdate();
+        internal void _TlpRunPostLateUpdate() {
+            _TlpPostLateUpdate();
         }
 
-        protected virtual void TlpAwake() {
+        protected virtual void _TlpAwake() {
         }
 
-        protected virtual void TlpStart() {
+        protected virtual void _TlpStart() {
         }
 
-        protected virtual void TlpFixedUpdate() {
+        protected virtual void _TlpFixedUpdate() {
         }
 
-        protected virtual void TlpUpdate() {
+        protected virtual void _TlpUpdate() {
         }
 
-        protected virtual void TlpLateUpdate() {
+        protected virtual void _TlpLateUpdate() {
         }
 
-        protected virtual void TlpPostLateUpdate() {
+        protected virtual void _TlpPostLateUpdate() {
         }
 
-        internal void TlpEnable() {
+        internal void _TlpEnable() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(TlpEnable));
+            _DebugLog(nameof(_TlpEnable));
 #endif
             #endregion
 
-            TlpOnEnabled();
+            _TlpOnEnabled();
             TlpIsEnabled = true;
         }
 
-        internal void TlpDisable() {
+        internal void _TlpDisable() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(TlpDisable));
+            _DebugLog(nameof(_TlpDisable));
 #endif
             #endregion
 
             TlpIsEnabled = false;
-            TlpOnDisabled();
+            _TlpOnDisabled();
         }
 
-        protected virtual void TlpOnEnabled() {
+        protected virtual void _TlpOnEnabled() {
         }
 
-        protected virtual void TlpOnDisabled() {
+        protected virtual void _TlpOnDisabled() {
         }
     }
 }

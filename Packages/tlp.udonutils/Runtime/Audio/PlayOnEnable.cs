@@ -2,6 +2,7 @@
 using TLP.UdonUtils.Runtime.Events;
 using UdonSharp;
 using UnityEngine;
+using VRC.SDK3.UdonNetworkCalling;
 
 #if UNITY_EDITOR
 using TLP.UdonUtils.Runtime.Audio;
@@ -44,15 +45,15 @@ namespace TLP.UdonUtils.Runtime.Audio
         [SerializeField]
         private AudioSource AudioSource;
 
-        private void OnEnable() {
+        internal void OnEnable() {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            DebugLog(nameof(OnEnable));
+            _DebugLog(nameof(OnEnable));
 #endif
             #endregion
 
             if (!AudioSource) {
-                Error($"{nameof(AudioSource)} is not set");
+                _Error($"{nameof(AudioSource)} is not set");
                 return;
             }
 

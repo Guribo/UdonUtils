@@ -30,32 +30,32 @@ namespace TLP.UdonUtils.Runtime.Testing
         private int _restoredValue;
         #endregion
 
-        protected override void InitializeTest() {
-            if (!PlayerDataRestoredEvent.IsPlayerDataRestored(Networking.LocalPlayer)) {
-                Error($"{nameof(InitializeTest)}: Player data was not restored yet");
-                TestController.TestInitialized(false);
+        protected override void _InitializeTest() {
+            if (!PlayerDataRestoredEvent._IsPlayerDataRestored(Networking.LocalPlayer)) {
+                _Error($"{nameof(_InitializeTest)}: Player data was not restored yet");
+                TestController._TestInitialized(false);
                 return;
             }
 
-            TestController.TestInitialized(true);
+            TestController._TestInitialized(true);
         }
 
-        protected override void RunTest() {
-            Info($"{nameof(RunTest)}: Restored value for key '{_dataKey}' is {_restoredValue}");
+        protected override void _RunTest() {
+            _Info($"{nameof(_RunTest)}: Restored value for key '{_dataKey}' is {_restoredValue}");
             if (_restoredValue <= 0) {
-                Error(
+                _Error(
                         "Expected to recover a value > 0 to be stored in the world (please rejoin the world and rerun the test, if it fails again file a bug report please)");
-                TestController.TestCompleted(false);
+                TestController._TestCompleted(false);
                 return;
             }
 
-            TestController.TestCompleted(true);
+            TestController._TestCompleted(true);
         }
 
         public override void OnPlayerRestored(VRCPlayerApi player) {
-            Info($"{nameof(OnPlayerRestored)}: {player.DisplayNameSafe()}({player.PlayerIdSafe()})");
+            _Info($"{nameof(OnPlayerRestored)}: {player._DisplayNameSafe()}({player._PlayerIdSafe()})");
             base.OnPlayerRestored(player);
-            if (!player.IsLocalSafe()) return;
+            if (!player._IsLocalSafe()) return;
 
             bool readSucceeded = PlayerData.TryGetInt(Networking.LocalPlayer, _dataKey, out _restoredValue);
             PlayerData.SetInt(_dataKey, Mathf.Max(1, _restoredValue + 1));
@@ -64,12 +64,12 @@ namespace TLP.UdonUtils.Runtime.Testing
             }
 
             if (!readSucceeded || _restoredValue <= 0) {
-                Error($"Failed to retrieve persistent player data for key '{_dataKey}'");
+                _Error($"Failed to retrieve persistent player data for key '{_dataKey}'");
             } else {
-                Info($"{nameof(OnPlayerRestored)}: Restored value for for key '{_dataKey}' is {_restoredValue}");
+                _Info($"{nameof(OnPlayerRestored)}: Restored value for for key '{_dataKey}' is {_restoredValue}");
             }
 
-            TestController.TestCompleted(readSucceeded && _restoredValue > 0);
+            TestController._TestCompleted(readSucceeded && _restoredValue > 0);
         }
     }
 }

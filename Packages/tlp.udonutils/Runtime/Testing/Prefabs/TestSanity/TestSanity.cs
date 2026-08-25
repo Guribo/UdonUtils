@@ -15,6 +15,6 @@ namespace TLP.UdonUtils.Runtime.Testing
         public override int ExecutionOrderReadOnly => ExecutionOrder;
 
         [PublicAPI]
-        public new const int ExecutionOrder = TestCase.ExecutionOrder + 2;
+        public new const int ExecutionOrder = TestCase.ExecutionOrder + 1;
     }
 }
