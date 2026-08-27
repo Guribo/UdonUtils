@@ -105,6 +105,11 @@ This is a **breaking change** (major version bump to 15.0.0). All callers and su
 
 **Why:** UdonSharp allows any public, zero-argument method to be invoked remotely via `SendCustomNetworkEvent`. Without the `_` prefix, legacy methods were exploitable by malicious clients. The underscore prefix blocks network dispatch while preserving the existing API contract.
 
+### [15.0.1] - 2026-08-26
+
+#### 🚜 Refactor
+
+- *(UdonUtils)* Update execution order dependencies, improve task handling
 ### [15.0.0] - 2026-08-25
 
 #### 🚀 Features

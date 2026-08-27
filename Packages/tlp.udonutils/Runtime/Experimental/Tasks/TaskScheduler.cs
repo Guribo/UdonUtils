@@ -24,7 +24,7 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
 
         #region Constants
         public const string FinishedTaskVariableName = "FinishedTask";
-        public const string FinishedTaskCallbackName = "OnTaskFinished";
+        public const string FinishedTaskCallbackName = Task.FinishedTaskCallbackName;
         public const string GameObjectName = "TLP_TaskScheduler";
 
         private const int MinPlayerIdleFrames = 50;

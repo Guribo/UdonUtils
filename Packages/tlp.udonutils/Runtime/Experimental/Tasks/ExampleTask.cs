@@ -64,7 +64,7 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             }
         }
 
-        private void _OnTaskFinished() {
+        protected override void _OnTaskFinished() {
             TaskScheduler._AddTaskToDefaultScheduler(this, this);
         }
     }

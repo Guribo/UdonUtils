@@ -32,6 +32,10 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         public new const int ExecutionOrder = Runtime.Pool.Pool.ExecutionOrder + 50;
         #endregion
 
+        #region Constants
+        public const string FinishedTaskCallbackName = nameof(_OnTaskFinished);
+        #endregion
+
         #region Dependencies
         [Header("Task")]
         [Tooltip("Optional, when empty the scene is searched for a 'TLP_TaskScheduler' GameObject")]
@@ -202,6 +206,9 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
 
             return true;
         }
+
+        protected virtual void _OnTaskFinished() {
+        }
         #endregion
 
         #region Public API
@@ -294,6 +301,19 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
 
         public virtual int _GetNeededSteps() {
             return 1;
+        }
+        #endregion
+
+        #region Overrides
+        public override void _OnEvent(string eventName) {
+            switch (eventName) {
+                case nameof(_OnTaskFinished):
+                    _OnTaskFinished();
+                    break;
+                default:
+                    base._OnEvent(eventName);
+                    break;
+            }
         }
         #endregion
     }

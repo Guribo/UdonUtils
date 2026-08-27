@@ -339,22 +339,6 @@ namespace TLP.UdonUtils.Runtime.Pool
         }
         #endregion
 
-        #region Event Handling
-        public override void _OnEvent(string eventName) {
-            switch (eventName) {
-                case "OnTaskFinished":
-#if TLP_DEBUG
-                    _DebugLog_OnEvent(eventName);
-#endif
-                    _Info("Pool pre-filling completed");
-                    break;
-                default:
-                    base._OnEvent(eventName);
-                    break;
-            }
-        }
-        #endregion
-
         #region Task Implementation
         protected override TaskResult _DoTask(float stepDeltaTime) {
             #region TLP_DEBUG
@@ -372,6 +356,13 @@ namespace TLP.UdonUtils.Runtime.Pool
 
         protected override bool _InitTask() {
             return true;
+        }
+        
+        protected override void _OnTaskFinished() {
+#if TLP_DEBUG
+            _DebugLog_OnEvent(nameof(_OnTaskFinished));
+#endif
+            _Info("Pool pre-filling completed");
         }
         #endregion
     }
