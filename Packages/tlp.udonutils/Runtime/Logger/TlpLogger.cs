@@ -136,7 +136,7 @@ namespace TLP.UdonUtils.Runtime.Logger
                     $"[<color=#008080>f={FrameCount._Frame()}({_frameTimeStopwatch.Elapsed.TotalMilliseconds:F3}ms) elapsed={TimeSource._Time() - _startTime:F4}s time={TimeSource._Time():F4}s dt(real)={elapsedAccurate:F3}ms </color>][<color=#804040>{(isLocal ? "Local" : "Remote")} owner {playerName}({ownerId}) {(master ? " is Master" : "")}</color>]";
         }
 
-        public virtual void DebugLog(string logPrefix, string message, int executionOrder, Object context) {
+        public virtual void _DebugLog(string logPrefix, string message, int executionOrder, Object context) {
             if ((int)Severity < (int)ELogLevel.Debug) {
                 return;
             }
@@ -169,7 +169,7 @@ namespace TLP.UdonUtils.Runtime.Logger
             }
         }
 
-        public virtual void Info(string logPrefix, string message, Object context) {
+        public virtual void _Info(string logPrefix, string message, Object context) {
             if ((int)Severity < (int)ELogLevel.Info) {
                 return;
             }
@@ -186,7 +186,7 @@ namespace TLP.UdonUtils.Runtime.Logger
                     context);
         }
 
-        public virtual void Warn(string logPrefix, string message, Object context) {
+        public virtual void _Warn(string logPrefix, string message, Object context) {
             if ((int)Severity < (int)ELogLevel.Warning) {
                 return;
             }
@@ -204,7 +204,7 @@ namespace TLP.UdonUtils.Runtime.Logger
             );
         }
 
-        public virtual void Error(string logPrefix, string message, Object context) {
+        public virtual void _Error(string logPrefix, string message, Object context) {
             if ((int)Severity < (int)ELogLevel.Assertion) {
                 return;
             }
@@ -246,7 +246,7 @@ namespace TLP.UdonUtils.Runtime.Logger
 
             string expectedName = ExpectedGameObjectName();
             if (gameObject.name != expectedName) {
-                Warn(Prefix, $"Changing name of GameObject '{transform._GetPathInScene()}' to '{expectedName}'", this);
+                _Warn(Prefix, $"Changing name of GameObject '{transform._GetPathInScene()}' to '{expectedName}'", this);
                 gameObject.name = expectedName;
             }
 

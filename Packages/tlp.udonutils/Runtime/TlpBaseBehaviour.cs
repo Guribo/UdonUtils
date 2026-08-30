@@ -453,7 +453,7 @@ namespace TLP.UdonUtils.Runtime
             }
 
             if (_GetLogger()) {
-                Logger.DebugLog(LOGPrefix, message, ExecutionOrder, this);
+                Logger._DebugLog(LOGPrefix, message, ExecutionOrder, this);
             } else {
                 Debug.Log(LOGPrefix + message, this);
             }
@@ -466,7 +466,7 @@ namespace TLP.UdonUtils.Runtime
             }
 
             if (_GetLogger()) {
-                Logger.Info(LOGPrefix, message, this);
+                Logger._Info(LOGPrefix, message, this);
             } else {
                 Debug.Log(LOGPrefix + message, this);
             }
@@ -478,7 +478,7 @@ namespace TLP.UdonUtils.Runtime
             }
 
             if (_GetLogger()) {
-                Logger.Warn(LOGPrefix, message, this);
+                Logger._Warn(LOGPrefix, message, this);
             } else {
                 Debug.LogWarning(LOGPrefix + message, this);
             }
@@ -506,7 +506,7 @@ namespace TLP.UdonUtils.Runtime
             }
 
             if (_GetLogger()) {
-                Logger.Error(LOGPrefix, message, this);
+                Logger._Error(LOGPrefix, message, this);
             } else {
                 Debug.LogError(LOGPrefix + message, this);
             }
