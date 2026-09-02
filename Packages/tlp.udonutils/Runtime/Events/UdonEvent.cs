@@ -47,7 +47,7 @@ namespace TLP.UdonUtils.Runtime.Events
 
         [Tooltip("Name of the method to be called on each listener")]
         [PublicAPI]
-        public string ListenerMethod = "OnRaised";
+        public string ListenerMethod = "_OnRaised";
 
         public TlpBaseBehaviour[] ListenersReadOnly => Listeners == null
                 ? new TlpBaseBehaviour[0]

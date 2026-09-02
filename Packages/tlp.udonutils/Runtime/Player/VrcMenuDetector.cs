@@ -57,17 +57,10 @@ namespace TLP.UdonUtils.Runtime
 
         #region Dependencies
         [Header("Dependencies")]
-        [SerializeField]
-        private UdonEvent OnMainMenuOpened;
-
-        [SerializeField]
-        private UdonEvent OnMainMenuClosed;
-
-        [SerializeField]
-        private UdonEvent OnQuickMenuOpened;
-
-        [SerializeField]
-        private UdonEvent OnQuickMenuClosed;
+        public UdonEvent OnMainMenuOpened;
+        public UdonEvent OnMainMenuClosed;
+        public UdonEvent OnQuickMenuOpened;
+        public UdonEvent OnQuickMenuClosed;
         #endregion
 
         #region SyncedState
@@ -109,10 +102,10 @@ namespace TLP.UdonUtils.Runtime
                 return false;
             }
 
-            OnMainMenuOpened.ListenerMethod = nameof(OnMainMenuOpened);
-            OnMainMenuClosed.ListenerMethod = nameof(OnMainMenuClosed);
-            OnQuickMenuOpened.ListenerMethod = nameof(OnQuickMenuOpened);
-            OnQuickMenuClosed.ListenerMethod = nameof(OnQuickMenuClosed);
+            OnMainMenuOpened.ListenerMethod = $"_{nameof(OnMainMenuOpened)}";
+            OnMainMenuClosed.ListenerMethod = $"_{nameof(OnMainMenuClosed)}";
+            OnQuickMenuOpened.ListenerMethod = $"_{nameof(OnQuickMenuOpened)}";
+            OnQuickMenuClosed.ListenerMethod = $"_{nameof(OnQuickMenuClosed)}";
 
             _detectionLayerMask = LayerMask.GetMask("InternalUI");
 
@@ -120,7 +113,7 @@ namespace TLP.UdonUtils.Runtime
                 // only the owner checks for menu state
                 enabled = false;
             }
-            
+
             return true;
         }
 

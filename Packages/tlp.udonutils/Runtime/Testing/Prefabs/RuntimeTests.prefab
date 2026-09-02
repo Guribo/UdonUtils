@@ -497,7 +497,7 @@ PrefabInstance:
     - target: {fileID: 2518306520423424678, guid: d706b8f578d80d04a9c7a47d440e0780,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.00039700745
+      value: 0.000042252635
       objectReference: {fileID: 0}
     - target: {fileID: 2899761474043010495, guid: d706b8f578d80d04a9c7a47d440e0780,
         type: 3}
@@ -527,7 +527,7 @@ PrefabInstance:
     - target: {fileID: 2899761474043010495, guid: d706b8f578d80d04a9c7a47d440e0780,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_StringArgument
-      value: StartTestRun
+      value: _StartTestRun
       objectReference: {fileID: 0}
     - target: {fileID: 2899761474043010495, guid: d706b8f578d80d04a9c7a47d440e0780,
         type: 3}
@@ -568,7 +568,7 @@ PrefabInstance:
     - target: {fileID: 4322088892186426121, guid: d706b8f578d80d04a9c7a47d440e0780,
         type: 3}
       propertyPath: m_Size
-      value: 0.99999684
+      value: 0.9999942
       objectReference: {fileID: 0}
     - target: {fileID: 5577596366510141859, guid: d706b8f578d80d04a9c7a47d440e0780,
         type: 3}

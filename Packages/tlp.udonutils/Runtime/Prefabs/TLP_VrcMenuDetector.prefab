@@ -68,7 +68,7 @@ MonoBehaviour:
   RaiseOnStart: 0
   NotifyAsync: 0
   UseAsyncEventQueue: 0
-  ListenerMethod: OnMainMenuOpened
+  ListenerMethod: _OnMainMenuOpened
 --- !u!114 &5426903354545425873
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -163,7 +163,7 @@ MonoBehaviour:
   RaiseOnStart: 0
   NotifyAsync: 0
   UseAsyncEventQueue: 0
-  ListenerMethod: OnMainMenuClosed
+  ListenerMethod: _OnMainMenuClosed
 --- !u!114 &3208612425578571908
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -258,7 +258,7 @@ MonoBehaviour:
   RaiseOnStart: 0
   NotifyAsync: 0
   UseAsyncEventQueue: 0
-  ListenerMethod: OnQuickMenuClosed
+  ListenerMethod: _OnQuickMenuClosed
 --- !u!114 &1199247224045782936
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -353,7 +353,7 @@ MonoBehaviour:
   RaiseOnStart: 0
   NotifyAsync: 0
   UseAsyncEventQueue: 0
-  ListenerMethod: OnQuickMenuOpened
+  ListenerMethod: _OnQuickMenuOpened
 --- !u!114 &8206870213316356490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -450,7 +450,6 @@ MonoBehaviour:
   OnMainMenuClosed: {fileID: 2404404788021377506}
   OnQuickMenuOpened: {fileID: 1785269914990619476}
   OnQuickMenuClosed: {fileID: 788889107912939511}
-  SyncedMenuState: 0
 --- !u!114 &7530751362219285181
 MonoBehaviour:
   m_ObjectHideFlags: 0

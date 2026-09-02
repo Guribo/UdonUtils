@@ -61,7 +61,7 @@ MonoBehaviour:
   Listeners: []
   RaiseOnEnable: 0
   RaiseOnStart: 0
-  ListenerMethod: OnRaised
+  ListenerMethod: _OnRaised
   FastSync: 0
   Calls: 0
   Values: []
@@ -249,7 +249,7 @@ MonoBehaviour:
   Listeners: []
   RaiseOnEnable: 0
   RaiseOnStart: 0
-  ListenerMethod: OnRaised
+  ListenerMethod: _OnRaised
   FastSync: 0
   Calls: 0
   Values: []

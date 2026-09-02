@@ -105,6 +105,16 @@ This is a **breaking change** (major version bump to 15.0.0). All callers and su
 
 **Why:** UdonSharp allows any public, zero-argument method to be invoked remotely via `SendCustomNetworkEvent`. Without the `_` prefix, legacy methods were exploitable by malicious clients. The underscore prefix blocks network dispatch while preserving the existing API contract.
 
+### [15.0.3] - 2026-09-02
+
+#### 🐛 Bug Fixes
+
+- *(UdonUtils)* Prefix all `ListenerMethod` strings with underscores for consistency
+- *(TaskScheduler)* Incorperate menu detector to prevent low fps when player is using menus
+
+#### 🚜 Refactor
+
+- Update `PlayerAudioOverrideList` methods to static and simplify logic
 ### [15.0.2] - 2026-08-29
 
 #### 🚜 Refactor

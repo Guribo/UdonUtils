@@ -429,7 +429,7 @@ MonoBehaviour:
   RaiseOnStart: 0
   NotifyAsync: 1
   UseAsyncEventQueue: 0
-  ListenerMethod: OnNetworkTimeShifted
+  ListenerMethod: _OnNetworkTimeShifted
 --- !u!114 &4326162201190865654
 MonoBehaviour:
   m_ObjectHideFlags: 0

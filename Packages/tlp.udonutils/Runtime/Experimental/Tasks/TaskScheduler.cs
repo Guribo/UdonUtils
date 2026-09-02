@@ -42,6 +42,7 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         private int _lastNotIdle;
         private bool _wasIdle;
         private float _averageIterations;
+        private bool _playerQuickOrMainMenuOpen;
 
         #region "Integral" part of PID
         internal float I = 0.02f;
@@ -100,6 +101,7 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
 
         public override void PostLateUpdate() {
             base.PostLateUpdate();
+            if (!HasStartedOk || !isActiveAndEnabled) return;
 
             if (PendingTasks.Count < 1) {
                 enabled = false;
@@ -149,9 +151,11 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                     if (remainingTime < task.EstimatedStepDuration) {
                         #region TLP_DEBUG
 #if TLP_DEBUG
-                        _DebugLog($"{nameof(PostLateUpdate)}: {nameof(task)}={task._GetScriptPathInScene()} would take too long");
+                        _DebugLog(
+                                $"{nameof(PostLateUpdate)}: {nameof(task)}={task._GetScriptPathInScene()} would take too long");
 #endif
                         #endregion
+
                         ++skipCount;
                         ++totalSkips;
                         if (skipCount >= PendingTasks.Count) {
@@ -180,7 +184,8 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
 #if TLP_DEBUG
                     _DebugLog($"{nameof(PostLateUpdate)}: {nameof(task)}={task._GetScriptPathInScene()} is blocked");
 #endif
-#endregion
+                    #endregion
+
                     ++skipCount;
                     ++totalSkips;
                     if (skipCount >= PendingTasks.Count) {
@@ -226,9 +231,8 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
 
         #region Internal
         private bool _IsPlayerIdle() {
-            var player = Networking.LocalPlayer;
-            if (!Utilities.IsValid(player)) return false;
-            var head = player.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
+            if (_playerQuickOrMainMenuOpen) return false;
+            var head = LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);
 
             float playerIdleMovementSpeed = PlayerIdleMovementSpeed * Time.deltaTime;
             float playerIdleTurnSpeed = PlayerIdleTurnSpeed * Time.deltaTime;
@@ -239,9 +243,9 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             _lastHeadRotation = head.rotation;
             bool isIdle = headsIsNotMoving && headIsNotRotating;
 
-            if (isIdle && player.IsUserInVR()) {
-                var leftHand = player.GetTrackingData(VRCPlayerApi.TrackingDataType.LeftHand);
-                var rightHand = player.GetTrackingData(VRCPlayerApi.TrackingDataType.RightHand);
+            if (isIdle && LocalPlayer.IsUserInVR()) {
+                var leftHand = LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.LeftHand);
+                var rightHand = LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.RightHand);
 
                 bool leftHandIsNotMoving =
                         (leftHand.position - _lastLeftHandPosition).magnitude < playerIdleMovementSpeed;
@@ -330,7 +334,7 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                     #region TLP_DEBUG
 #if TLP_DEBUG
                     _Warn(
-                            $"{nameof(_RemoveTask)}: {nameof(task)}={task._GetScriptPathInScene()} seems to have been re-scheduled by '{instigator._GetScriptPathInScene()}' before cleanup could occur");
+                            $"{nameof(_RemoveTask)}: {nameof(task)}={task._GetScriptPathInScene()} seems to have been re-scheduled by '{instigator._GetScriptPathInScene()}.{FinishedTaskCallbackName}' before cleanup could occur. Skipping {nameof(Task._DeInitTask)}. Use {nameof(Task._DeInitTask)} for restarting the task instead please.");
 #endif
                     #endregion
                 } else if (!task._DeInitTask()) {
@@ -419,15 +423,17 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
                 return false;
             }
 
-            if (!Utilities.IsValid(task.DefaultScheduler)) {
-                task.DefaultScheduler = TlpSingleton._GetInstance<TaskScheduler>(GameObjectName);
-                if (!Utilities.IsValid(task.DefaultScheduler)) {
-                    TlpLogger.StaticError($"{GameObjectName} not found in the scene", null);
-                    return false;
-                }
+            if (Utilities.IsValid(task.DefaultScheduler)) {
+                return task.DefaultScheduler._AddTask(instigator, task);
             }
 
-            return task.DefaultScheduler._AddTask(instigator, task);
+            task.DefaultScheduler = TlpSingleton._GetInstance<TaskScheduler>(GameObjectName);
+            if (Utilities.IsValid(task.DefaultScheduler)) {
+                return task.DefaultScheduler._AddTask(instigator, task);
+            }
+
+            TlpLogger.StaticError($"{GameObjectName} not found in the scene", null);
+            return false;
         }
 
         public void _CancelTask(Task task) {
@@ -439,7 +445,8 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         public float _GetProgress(out Task longestTask) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-            _DebugLog($"{nameof(_GetProgress)}: {nameof(_taskWithMostSteps)}={_taskWithMostSteps._GetScriptPathInScene()}");
+            _DebugLog(
+                    $"{nameof(_GetProgress)}: {nameof(_taskWithMostSteps)}={_taskWithMostSteps._GetScriptPathInScene()}");
 #endif
             #endregion
 
@@ -452,5 +459,91 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             return 0f;
         }
         #endregion
+
+        public override void OnPlayerRestored(VRCPlayerApi player) {
+            base.OnPlayerRestored(player);
+
+            if (!player._IsLocalSafe()) return;
+            if (!player._TryGetPlayerDataComponent<VrcMenuDetector>(out var menuDetector)) {
+                if (DynamicIdleLimit > 1f) {
+                    _Warn(
+                            $"No {nameof(VrcMenuDetector)} found. Opening the player menu can not be detected " +
+                            $"in order to prevent low fps during menu use! Either add a {nameof(VrcMenuDetector)} to " +
+                            $"the player or set {nameof(DynamicIdleLimit)} to 1f to prevent this.");
+                }
+
+                return;
+            }
+
+            if (DynamicIdleLimit > 1f && !menuDetector.isActiveAndEnabled) {
+                _Warn(
+                        $"No {nameof(VrcMenuDetector)} is not active. Opening the player menu can not be detected " +
+                        $"in order to prevent low fps during menu use! Either add a {nameof(VrcMenuDetector)} to " +
+                        $"the player or set {nameof(DynamicIdleLimit)} to 1f to prevent this.");
+                return;
+            }
+
+            if (!menuDetector.HasStartedOk) {
+                _Error($"Failed to add listeners to {nameof(menuDetector)}: detector has failed to start.");
+                return;
+            }
+
+            if (!menuDetector.OnMainMenuOpened._AddListenerVerified(this, nameof(_OnMainMenuOpened))) {
+                _Error($"Failed to add listener for {nameof(menuDetector.OnMainMenuOpened)}");
+                return;
+            }
+
+            if (!menuDetector.OnMainMenuClosed._AddListenerVerified(this, nameof(_OnMainMenuClosed))) {
+                _Error($"Failed to add listener for {nameof(menuDetector.OnMainMenuClosed)}");
+                return;
+            }
+
+            if (!menuDetector.OnQuickMenuOpened._AddListenerVerified(this, nameof(_OnQuickMenuOpened))) {
+                _Error($"Failed to add listener for {nameof(menuDetector.OnQuickMenuOpened)}");
+                return;
+            }
+
+            if (menuDetector.OnQuickMenuClosed._AddListenerVerified(this, nameof(_OnQuickMenuClosed))) {
+                return;
+            }
+
+            _Error($"Failed to add listener for {nameof(menuDetector.OnQuickMenuClosed)}");
+        }
+
+        public override void _OnEvent(string eventName) {
+            switch (eventName) {
+                case nameof(_OnMainMenuOpened):
+                    _OnMainMenuOpened();
+                    break;
+                case nameof(_OnMainMenuClosed):
+                    _OnMainMenuClosed();
+                    break;
+                case nameof(_OnQuickMenuOpened):
+                    _OnQuickMenuOpened();
+                    break;
+                case nameof(_OnQuickMenuClosed):
+                    _OnQuickMenuClosed();
+                    break;
+                default:
+                    base._OnEvent(eventName);
+                    break;
+            }
+        }
+
+        private void _OnMainMenuOpened() {
+            _playerQuickOrMainMenuOpen = true;
+        }
+
+        private void _OnMainMenuClosed() {
+            _playerQuickOrMainMenuOpen = false;
+        }
+
+        private void _OnQuickMenuOpened() {
+            _playerQuickOrMainMenuOpen = true;
+        }
+
+        private void _OnQuickMenuClosed() {
+            _playerQuickOrMainMenuOpen = false;
+        }
     }
 }

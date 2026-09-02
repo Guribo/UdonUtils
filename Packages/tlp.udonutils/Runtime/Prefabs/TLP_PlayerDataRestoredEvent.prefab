@@ -80,7 +80,7 @@ MonoBehaviour:
   RaiseOnStart: 0
   NotifyAsync: 0
   UseAsyncEventQueue: 0
-  ListenerMethod: PlayerDataRestored
+  ListenerMethod: _PlayerDataRestored
 --- !u!114 &4521105429811357472
 MonoBehaviour:
   m_ObjectHideFlags: 0

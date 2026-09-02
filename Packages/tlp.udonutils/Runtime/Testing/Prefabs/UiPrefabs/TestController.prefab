@@ -120,7 +120,7 @@ MonoBehaviour:
   Listeners: []
   RaiseOnEnable: 0
   RaiseOnStart: 0
-  ListenerMethod: OnModelChanged
+  ListenerMethod: _OnModelChanged
 --- !u!114 &995060757064604782
 MonoBehaviour:
   m_ObjectHideFlags: 0

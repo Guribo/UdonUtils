@@ -181,11 +181,6 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         /// Shall return <see cref="TaskResult.Succeeded"/> if task produced the desired result.
         /// </returns>
         protected virtual TaskResult _DoTask(float stepDeltaTime) {
-            return _RunStep();
-        }
-
-        [Obsolete("Use DoTask(stepDeltaTime) instead")]
-        protected virtual TaskResult _RunStep() {
             return TaskResult.Succeeded;
         }
 
@@ -207,6 +202,9 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
             return true;
         }
 
+        /// <summary>
+        /// Do not schedule this task again in this method. Do so in <see cref="_DeInitTask"/> instead.
+        /// </summary>
         protected virtual void _OnTaskFinished() {
         }
         #endregion

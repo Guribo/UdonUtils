@@ -167,7 +167,7 @@ MonoBehaviour:
   Listeners: []
   RaiseOnEnable: 0
   RaiseOnStart: 0
-  ListenerMethod: OnClicked
+  ListenerMethod: _OnClicked
 --- !u!114 &2411431655539375144
 MonoBehaviour:
   m_ObjectHideFlags: 0

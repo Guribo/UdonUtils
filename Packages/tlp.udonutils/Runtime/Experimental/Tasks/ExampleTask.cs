@@ -27,9 +27,10 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         protected override TaskResult _DoTask(float stepDeltaTime) {
             #region TLP_DEBUG
 #if TLP_DEBUG
-        _DebugLog($"{nameof(_DoTask)}: {nameof(stepDeltaTime)}={stepDeltaTime}");
+            _DebugLog($"{nameof(_DoTask)}: {nameof(stepDeltaTime)}={stepDeltaTime}");
 #endif
-#endregion
+            #endregion
+
             if (_steps >= 100) return TaskResult.Succeeded;
 
             var iterations = Random.Range(0, 10);
@@ -64,7 +65,12 @@ namespace TLP.UdonUtils.Runtime.Experimental.Tasks
         }
 
         protected override void _OnTaskFinished() {
-            TaskScheduler._AddTaskToDefaultScheduler(this, this);
+            // here you could process the task result
+        }
+
+        public override bool _DeInitTask() {
+            // here you can cleanup temporary work the task produced, e.g. spawned gameobjects
+            return base._DeInitTask() && TaskScheduler._AddTaskToDefaultScheduler(this, this);
         }
     }
 }
